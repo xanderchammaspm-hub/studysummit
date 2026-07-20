@@ -6,13 +6,19 @@ import {
   Plus,
   X,
   ExternalLink,
+  Pencil,
+  Trash2,
+  Check,
 } from "lucide-react";
 import {
   useSubject,
   uid,
+  renameSubject,
+  deleteSubject,
   type Paper,
   type Topic,
   type TrafficColor,
+  type YearKey,
 } from "@/hooks/useSubjectStore";
 import { DraggableList } from "@/components/DraggableList";
 
@@ -20,7 +26,7 @@ type Props = {
   index: number;
   id: string;
   name: string;
-  year: string;
+  year: YearKey;
   defaultOpen?: boolean;
 };
 
@@ -33,6 +39,8 @@ const EMOJI_CHOICES = [
 export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [nameDraft, setNameDraft] = useState(name);
   const { state, update } = useSubject(id);
   const label = name.trim() || `Subject ${index + 1}`;
 
@@ -56,9 +64,20 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const addTopic = () => {
     const t = topicTitle.trim();
     if (!t) return;
-    const topic: Topic = { id: uid(), title: t, status: "red" };
+    const topic: Topic = { id: uid(), title: t, status: "none" };
     update((s) => ({ ...s, topics: [...s.topics, topic] }));
     setTopicTitle("");
+  };
+
+  const commitRename = () => {
+    renameSubject(year, id, nameDraft.trim());
+    setEditing(false);
+  };
+
+  const removeSubject = () => {
+    if (confirm(`Delete "${label}"? This can't be undone.`)) {
+      deleteSubject(year, id);
+    }
   };
 
   return (
@@ -66,7 +85,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       className="purple-outline purple-glow-hover rounded-xl bg-card/60 backdrop-blur-sm overflow-hidden fade-in-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <div className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left group">
+      <div className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="relative">
             <button
@@ -105,34 +124,88 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               </>
             )}
           </div>
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="min-w-0 text-left flex-1"
-          >
+          <div className="min-w-0 flex-1">
             <div className="text-xs uppercase tracking-widest text-primary/80">
               {year} · Subject {index + 1}
             </div>
-            <div className="truncate text-lg font-medium">
-              {name.trim() ? (
-                <span className="text-foreground">{label}</span>
-              ) : (
-                <span className="text-muted-foreground italic">
-                  Untitled subject
-                </span>
-              )}
-            </div>
-          </button>
+            {editing ? (
+              <div className="flex items-center gap-1 mt-0.5">
+                <input
+                  autoFocus
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commitRename();
+                    if (e.key === "Escape") {
+                      setNameDraft(name);
+                      setEditing(false);
+                    }
+                  }}
+                  placeholder="Subject name"
+                  className="flex-1 rounded-md border border-border bg-background/60 px-2 py-1 text-sm outline-none focus:border-primary"
+                />
+                <button
+                  onClick={commitRename}
+                  className="p-1 text-primary hover:text-foreground"
+                  aria-label="Save name"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setOpen((o) => !o)}
+                className="min-w-0 text-left w-full"
+              >
+                <div className="truncate text-lg font-medium">
+                  {name.trim() ? (
+                    <span className="text-foreground">{label}</span>
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      Untitled subject
+                    </span>
+                  )}
+                </div>
+              </button>
+            )}
+          </div>
         </div>
-        <button
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? "Collapse" : "Expand"}
-        >
-          <ChevronDown
-            className={`h-5 w-5 text-primary transition-transform duration-300 ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          {!editing && (
+            <>
+              <button
+                onClick={() => {
+                  setNameDraft(name);
+                  setEditing(true);
+                }}
+                className="p-1.5 text-muted-foreground hover:text-primary"
+                aria-label="Rename"
+                title="Rename"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={removeSubject}
+                className="p-1.5 text-muted-foreground hover:text-destructive"
+                aria-label="Delete subject"
+                title="Delete subject"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setOpen((o) => !o)}
+                aria-label={open ? "Collapse" : "Expand"}
+                className="p-1"
+              >
+                <ChevronDown
+                  className={`h-5 w-5 text-primary transition-transform duration-300 ${
+                    open ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div
@@ -234,7 +307,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 onReorder={(topics) => update({ topics })}
                 empty={
                   <p className="text-xs text-muted-foreground italic px-1">
-                    No topics yet. Add topics and cycle red → amber → green.
+                    No topics yet. Add one, then set red / amber / green.
                   </p>
                 }
                 renderItem={(t) => (
@@ -250,12 +323,23 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                           ),
                         }))
                       }
-                      title={`Status: ${t.status} — click to change`}
+                      title={`Status: ${t.status} — click to cycle`}
                       className="shrink-0"
                     >
                       <StatusDot status={t.status} />
                     </button>
                     <span className="flex-1 truncate text-sm">{t.title}</span>
+                    <QuickChips
+                      status={t.status}
+                      onSet={(status) =>
+                        update((s) => ({
+                          ...s,
+                          topics: s.topics.map((x) =>
+                            x.id === t.id ? { ...x, status } : x,
+                          ),
+                        }))
+                      }
+                    />
                     <button
                       onClick={() =>
                         update((s) => ({
@@ -264,7 +348,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                         }))
                       }
                       className="text-muted-foreground hover:text-destructive"
-                      aria-label="Remove"
+                      aria-label="Remove topic"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -280,10 +364,17 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 }
 
 function cycle(s: TrafficColor): TrafficColor {
-  return s === "red" ? "amber" : s === "amber" ? "green" : "red";
+  return s === "none"
+    ? "red"
+    : s === "red"
+      ? "amber"
+      : s === "amber"
+        ? "green"
+        : "none";
 }
 
 const STATUS_COLOR: Record<TrafficColor, string> = {
+  none: "oklch(0.5 0.02 285)",
   red: "oklch(0.65 0.24 25)",
   amber: "oklch(0.82 0.17 85)",
   green: "oklch(0.72 0.19 145)",
@@ -291,11 +382,54 @@ const STATUS_COLOR: Record<TrafficColor, string> = {
 
 export function StatusDot({ status }: { status: TrafficColor }) {
   const color = STATUS_COLOR[status];
+  const glow = status === "none" ? "none" : `0 0 8px ${color}`;
   return (
     <span
-      className="inline-block h-3 w-3 rounded-full"
-      style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+      className={`inline-block h-3 w-3 rounded-full ${
+        status === "none" ? "border border-border" : ""
+      }`}
+      style={{
+        background: status === "none" ? "transparent" : color,
+        boxShadow: glow,
+      }}
     />
+  );
+}
+
+function QuickChips({
+  status,
+  onSet,
+}: {
+  status: TrafficColor;
+  onSet: (s: TrafficColor) => void;
+}) {
+  const items: { key: TrafficColor; label: string }[] = [
+    { key: "red", label: "R" },
+    { key: "amber", label: "A" },
+    { key: "green", label: "G" },
+  ];
+  return (
+    <div className="hidden sm:flex items-center gap-1">
+      {items.map((it) => {
+        const active = status === it.key;
+        return (
+          <button
+            key={it.key}
+            onClick={() => onSet(active ? "none" : it.key)}
+            title={active ? "Clear" : `Set ${it.key}`}
+            className="h-5 w-5 rounded-full text-[10px] font-semibold flex items-center justify-center border transition-colors"
+            style={{
+              borderColor: active ? STATUS_COLOR[it.key] : "var(--color-border)",
+              background: active ? STATUS_COLOR[it.key] : "transparent",
+              color: active ? "oklch(0.14 0.02 285)" : "var(--color-muted-foreground)",
+              boxShadow: active ? `0 0 8px ${STATUS_COLOR[it.key]}` : "none",
+            }}
+          >
+            {it.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
