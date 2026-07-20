@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { GraduationCap, Sparkles, Search, X } from "lucide-react";
-import { yearGroups } from "@/data/subjects";
+import { GraduationCap, Sparkles, Search, X, Plus } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
-import { useAllSubjects } from "@/hooks/useSubjectStore";
+import {
+  useSubjects,
+  useAllSubjectStates,
+  addSubject,
+  type YearKey,
+} from "@/hooks/useSubjectStore";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,13 +29,39 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const YEARS: YearKey[] = ["Year 11", "Year 12"];
+
 function Home() {
-  const [activeYear, setActiveYear] = useState<"Year 11" | "Year 12">(
-    "Year 11",
-  );
+  const [activeYear, setActiveYear] = useState<YearKey>("Year 11");
   const [query, setQuery] = useState("");
-  const store = useAllSubjects();
-  const current = yearGroups.find((g) => g.year === activeYear)!;
+  const [newName, setNewName] = useState("");
+  const subjects = useSubjects();
+  const store = useAllSubjectStates();
+  const current = subjects[activeYear] ?? [];
+
+  const stats = useMemo(() => {
+    let subjectCount = 0;
+    let papers = 0;
+    let topics = 0;
+    let red = 0;
+    let amber = 0;
+    let green = 0;
+    for (const y of YEARS) {
+      for (const s of subjects[y]) {
+        subjectCount++;
+        const st = store[s.id];
+        if (!st) continue;
+        papers += st.papers.length;
+        topics += st.topics.length;
+        for (const t of st.topics) {
+          if (t.status === "red") red++;
+          else if (t.status === "amber") amber++;
+          else if (t.status === "green") green++;
+        }
+      }
+    }
+    return { subjectCount, papers, topics, red, amber, green };
+  }, [subjects, store]);
 
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -40,21 +70,30 @@ function Home() {
       subjectId: string;
       subjectLabel: string;
       year: string;
-      kind: "paper" | "topic";
+      kind: "paper" | "topic" | "subject";
       title: string;
-      status?: "red" | "amber" | "green";
+      status?: "none" | "red" | "amber" | "green";
     }[] = [];
-    for (const group of yearGroups) {
-      group.slots.forEach((slot, i) => {
-        const st = store[slot.id];
+    for (const y of YEARS) {
+      subjects[y].forEach((slot, i) => {
         const subjectLabel = slot.name.trim() || `Subject ${i + 1}`;
+        if (subjectLabel.toLowerCase().includes(q)) {
+          results.push({
+            subjectId: slot.id,
+            subjectLabel,
+            year: y,
+            kind: "subject",
+            title: subjectLabel,
+          });
+        }
+        const st = store[slot.id];
         if (!st) return;
         for (const p of st.papers) {
           if (p.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
               subjectLabel,
-              year: group.year,
+              year: y,
               kind: "paper",
               title: p.title,
             });
@@ -65,7 +104,7 @@ function Home() {
             results.push({
               subjectId: slot.id,
               subjectLabel,
-              year: group.year,
+              year: y,
               kind: "topic",
               title: t.title,
               status: t.status,
@@ -75,7 +114,12 @@ function Home() {
       });
     }
     return results;
-  }, [query, store]);
+  }, [query, store, subjects]);
+
+  const handleAddSubject = () => {
+    addSubject(activeYear, newName.trim());
+    setNewName("");
+  };
 
   return (
     <div className="min-h-screen">
@@ -94,17 +138,17 @@ function Home() {
             </div>
           </div>
           <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
-            {yearGroups.map((g) => (
+            {YEARS.map((y) => (
               <button
-                key={g.year}
-                onClick={() => setActiveYear(g.year)}
+                key={y}
+                onClick={() => setActiveYear(y)}
                 className={`px-4 py-1.5 text-sm rounded-full transition-all duration-300 ${
-                  activeYear === g.year
+                  activeYear === y
                     ? "bg-primary/25 text-foreground border border-primary/60"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {g.year}
+                {y}
               </button>
             ))}
           </nav>
@@ -126,6 +170,15 @@ function Home() {
           Every subject in one place. Drop in your past papers and keep track of
           where you're at with a simple traffic light system.
         </p>
+
+        {/* Live stats */}
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-3xl mx-auto">
+          <Stat label="Subjects" value={stats.subjectCount} />
+          <Stat label="Papers" value={stats.papers} />
+          <StatTraffic label="Red" value={stats.red} status="red" />
+          <StatTraffic label="Amber" value={stats.amber} status="amber" />
+          <StatTraffic label="Green" value={stats.green} status="green" />
+        </div>
       </section>
 
       {/* Search */}
@@ -135,7 +188,7 @@ function Home() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search topics and past papers across all subjects…"
+            placeholder="Search subjects, topics and past papers…"
             className="w-full rounded-full purple-outline bg-surface/60 pl-10 pr-10 py-2.5 text-sm outline-none focus:border-primary placeholder:text-muted-foreground/70"
           />
           {query && (
@@ -154,17 +207,17 @@ function Home() {
       {!searchResults && (
         <div className="sm:hidden mx-auto max-w-6xl px-6 mt-6">
           <div className="flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60 w-full">
-            {yearGroups.map((g) => (
+            {YEARS.map((y) => (
               <button
-                key={g.year}
-                onClick={() => setActiveYear(g.year)}
+                key={y}
+                onClick={() => setActiveYear(y)}
                 className={`flex-1 px-4 py-2 text-sm rounded-full transition-all ${
-                  activeYear === g.year
+                  activeYear === y
                     ? "bg-primary/25 text-foreground border border-primary/60"
                     : "text-muted-foreground"
                 }`}
               >
-                {g.year}
+                {y}
               </button>
             ))}
           </div>
@@ -182,24 +235,47 @@ function Home() {
                 {activeYear}
               </h2>
               <span className="text-sm text-muted-foreground">
-                {current.slots.length} subjects
+                {current.length} subject{current.length === 1 ? "" : "s"}
               </span>
             </div>
 
-            <div
-              key={activeYear}
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {current.slots.map((s, i) => (
-                <SubjectCard
-                  key={s.id}
-                  id={s.id}
-                  index={i}
-                  name={s.name}
-                  year={activeYear}
-                />
-              ))}
+            {/* Add subject */}
+            <div className="mb-6 flex gap-2">
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddSubject()}
+                placeholder={`Add a subject to ${activeYear} (name optional)`}
+                className="flex-1 rounded-lg border border-border bg-surface/60 px-4 py-2 text-sm outline-none focus:border-primary"
+              />
+              <button
+                onClick={handleAddSubject}
+                className="flex items-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2 text-sm text-foreground hover:bg-primary/30"
+              >
+                <Plus className="h-4 w-4" /> Add subject
+              </button>
             </div>
+
+            {current.length === 0 ? (
+              <div className="purple-outline rounded-xl bg-card/50 p-10 text-center text-muted-foreground">
+                No subjects yet. Add your first one above.
+              </div>
+            ) : (
+              <div
+                key={activeYear}
+                className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              >
+                {current.map((s, i) => (
+                  <SubjectCard
+                    key={s.id}
+                    id={s.id}
+                    index={i}
+                    name={s.name}
+                    year={activeYear}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Traffic light legend */}
             <div className="mt-16 purple-outline rounded-xl bg-card/50 p-6">
@@ -237,6 +313,43 @@ function Home() {
   );
 }
 
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="purple-outline rounded-lg bg-card/50 px-3 py-2 text-center">
+      <div className="text-xl font-semibold tracking-tight text-foreground">
+        {value}
+      </div>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function StatTraffic({
+  label,
+  value,
+  status,
+}: {
+  label: string;
+  value: number;
+  status: "red" | "amber" | "green";
+}) {
+  return (
+    <div className="purple-outline rounded-lg bg-card/50 px-3 py-2 text-center">
+      <div className="flex items-center justify-center gap-1.5">
+        <StatusDot status={status} />
+        <span className="text-xl font-semibold tracking-tight text-foreground">
+          {value}
+        </span>
+      </div>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 function SearchResults({
   query,
   results,
@@ -246,9 +359,9 @@ function SearchResults({
     subjectId: string;
     subjectLabel: string;
     year: string;
-    kind: "paper" | "topic";
+    kind: "paper" | "topic" | "subject";
     title: string;
-    status?: "red" | "amber" | "green";
+    status?: "none" | "red" | "amber" | "green";
   }[];
 }) {
   return (
@@ -272,11 +385,11 @@ function SearchResults({
               key={`${r.subjectId}-${r.kind}-${i}`}
               className="purple-outline rounded-lg bg-card/60 px-4 py-3 flex items-center gap-3"
             >
-              {r.status ? (
+              {r.kind === "topic" && r.status ? (
                 <StatusDot status={r.status} />
               ) : (
-                <span className="text-xs uppercase tracking-widest text-primary/80">
-                  Paper
+                <span className="text-xs uppercase tracking-widest text-primary/80 w-16">
+                  {r.kind}
                 </span>
               )}
               <div className="flex-1 min-w-0">
