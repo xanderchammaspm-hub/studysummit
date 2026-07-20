@@ -32,6 +32,9 @@
   --color-purple-soft: var(--purple-soft);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-yellow: var(--yellow);
+  --color-yellow-glow: var(--yellow-glow);
+  --color-yellow-soft: var(--yellow-soft);
 }
 
 :root {
@@ -53,6 +56,12 @@
   --primary-foreground: oklch(0.14 0.02 285);
   --purple-glow: oklch(0.75 0.24 305);
   --purple-soft: oklch(0.55 0.18 295 / 0.35);
+
+  /* Yellow gold accent */
+  --yellow: oklch(0.9 0.17 80);
+  --yellow-foreground: oklch(0.14 0.02 285);
+  --yellow-glow: oklch(0.94 0.19 78);
+  --yellow-soft: oklch(0.84 0.15 80 / 0.35);
 
   --secondary: oklch(0.25 0.05 290);
   --secondary-foreground: oklch(0.97 0.01 285);
@@ -79,6 +88,7 @@
     background:
       radial-gradient(1200px 600px at 15% -10%, oklch(0.35 0.14 295 / 0.35), transparent 60%),
       radial-gradient(900px 500px at 100% 10%, oklch(0.3 0.14 320 / 0.28), transparent 60%),
+      radial-gradient(800px 500px at 80% 100%, oklch(0.65 0.16 85 / 0.12), transparent 60%),
       var(--color-background);
     color: var(--color-foreground);
     min-height: 100%;
@@ -131,8 +141,8 @@
   background: linear-gradient(
     135deg,
     oklch(0.85 0.12 300) 0%,
-    oklch(0.75 0.24 305) 50%,
-    oklch(0.7 0.22 320) 100%
+    oklch(0.75 0.24 305) 40%,
+    oklch(0.9 0.18 80) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
