@@ -77,14 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Study Hub — Year 11 & 12" },
+      {
+        name: "description",
+        content:
+          "A dark, focused study hub organising Year 11 and 12 subjects with past papers and a traffic light progress system.",
+      },
+      { property: "og:title", content: "Study Hub — Year 11 & 12" },
+      {
+        property: "og:description",
+        content:
+          "Organised subject library with past papers and traffic light tracking.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
