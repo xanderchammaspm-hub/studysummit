@@ -35,10 +35,10 @@ function Home() {
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg purple-outline pulse-glow">
-              <GraduationCap className="h-5 w-5 text-primary" />
+              <GraduationCap className="h-5 w-5 text-yellow" />
             </div>
             <div>
-              <div className="text-sm text-muted-foreground -mb-1">Study</div>
+              <div className="text-sm text-yellow -mb-1">Study</div>
               <div className="text-lg font-semibold tracking-tight gradient-text">
                 Hub
               </div>
@@ -51,7 +51,7 @@ function Home() {
                 onClick={() => setActiveYear(g.year)}
                 className={`px-4 py-1.5 text-sm rounded-full transition-all duration-300 ${
                   activeYear === g.year
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                    ? "bg-yellow text-yellow-foreground shadow-lg shadow-yellow/30"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
