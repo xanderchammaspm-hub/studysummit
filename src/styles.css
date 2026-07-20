@@ -58,10 +58,10 @@
   --purple-soft: oklch(0.55 0.18 295 / 0.35);
 
   /* Yellow gold accent */
-  --yellow: oklch(0.86 0.16 85);
+  --yellow: oklch(0.9 0.17 80);
   --yellow-foreground: oklch(0.14 0.02 285);
-  --yellow-glow: oklch(0.9 0.18 80);
-  --yellow-soft: oklch(0.8 0.14 85 / 0.35);
+  --yellow-glow: oklch(0.94 0.19 78);
+  --yellow-soft: oklch(0.84 0.15 80 / 0.35);
 
   --secondary: oklch(0.25 0.05 290);
   --secondary-foreground: oklch(0.97 0.01 285);
