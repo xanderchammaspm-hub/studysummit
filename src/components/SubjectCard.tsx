@@ -20,28 +20,28 @@ export function SubjectCard({ index, name, year }: Props) {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left group"
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-elevated">
-            <BookOpen className="h-4 w-4 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">
-              {year} · Subject {index + 1}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-elevated">
+              <BookOpen className="h-4 w-4 text-yellow" />
             </div>
-            <div className="truncate text-lg font-medium">
-              {name.trim() ? (
-                <span className="text-foreground">{label}</span>
-              ) : (
-                <span className="text-muted-foreground italic">Untitled subject</span>
-              )}
+            <div className="min-w-0">
+              <div className="text-xs uppercase tracking-widest text-yellow">
+                {year} · Subject {index + 1}
+              </div>
+              <div className="truncate text-lg font-medium">
+                {name.trim() ? (
+                  <span className="text-foreground">{label}</span>
+                ) : (
+                  <span className="text-muted-foreground italic">Untitled subject</span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <ChevronDown
-          className={`h-5 w-5 text-primary transition-transform duration-300 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
+          <ChevronDown
+            className={`h-5 w-5 text-yellow transition-transform duration-300 ${
+              open ? "rotate-180" : ""
+            }`}
+          />
       </button>
 
       <div
