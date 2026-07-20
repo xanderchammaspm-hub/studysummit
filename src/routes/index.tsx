@@ -64,8 +64,8 @@ function Home() {
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 pt-16 pb-10 text-center fade-in-up">
-        <div className="inline-flex items-center gap-2 rounded-full purple-outline bg-surface/50 px-3 py-1 text-xs text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+        <div className="inline-flex items-center gap-2 rounded-full purple-outline bg-surface/50 px-3 py-1 text-xs text-yellow">
+          <Sparkles className="h-3.5 w-3.5 text-yellow" />
           Your personal study space
         </div>
         <h1 className="mt-6 text-4xl sm:text-6xl font-semibold tracking-tight">
@@ -88,7 +88,7 @@ function Home() {
               onClick={() => setActiveYear(g.year)}
               className={`flex-1 px-4 py-2 text-sm rounded-full transition-all ${
                 activeYear === g.year
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-yellow text-yellow-foreground"
                   : "text-muted-foreground"
               }`}
             >
