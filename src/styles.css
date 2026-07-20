@@ -32,6 +32,9 @@
   --color-purple-soft: var(--purple-soft);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-yellow: var(--yellow);
+  --color-yellow-glow: var(--yellow-glow);
+  --color-yellow-soft: var(--yellow-soft);
 }
 
 :root {
