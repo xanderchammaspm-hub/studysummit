@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Organised subject-by-subject study space with past papers and traffic light tracking.",
+          "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject.",
       },
     ],
   }),
