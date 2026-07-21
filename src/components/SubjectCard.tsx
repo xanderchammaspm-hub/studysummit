@@ -497,6 +497,8 @@ function dueBadge(due?: string): { text: string; bg: string; fg: string } | null
   if (days === 0) return { text: "today", bg: "oklch(0.82 0.17 85)", fg };
   if (days <= 7) return { text: `in ${days}d`, bg: "oklch(0.82 0.17 85)", fg };
   return { text: `in ${days}d`, bg: "oklch(0.72 0.19 145)", fg };
+}
+
 
 const STATUS_COLOR: Record<TrafficColor, string> = {
   none: "oklch(0.5 0.02 285)",
