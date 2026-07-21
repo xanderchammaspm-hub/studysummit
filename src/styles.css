@@ -177,3 +177,47 @@
 @utility pulse-glow {
   animation: pulseGlow 3s ease-in-out infinite;
 }
+
+@keyframes auroraDrift {
+  0% {
+    transform: translate3d(-4%, -2%, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) rotate(180deg);
+  }
+  100% {
+    transform: translate3d(-4%, -2%, 0) rotate(360deg);
+  }
+}
+
+@utility aurora {
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+  opacity: 0.55;
+  background:
+    radial-gradient(40% 60% at 20% 30%, oklch(0.55 0.22 300 / 0.55), transparent 60%),
+    radial-gradient(35% 55% at 80% 20%, oklch(0.5 0.22 320 / 0.45), transparent 60%),
+    radial-gradient(30% 50% at 50% 80%, oklch(0.65 0.12 82 / 0.15), transparent 60%);
+  animation: auroraDrift 22s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@utility shimmer-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.7 0.22 300 / 0.5) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
