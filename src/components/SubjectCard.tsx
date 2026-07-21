@@ -49,6 +49,9 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [paperTitle, setPaperTitle] = useState("");
   const [paperUrl, setPaperUrl] = useState("");
   const [topicTitle, setTopicTitle] = useState("");
+  const [aTitle, setATitle] = useState("");
+  const [aUrl, setAUrl] = useState("");
+  const [aDue, setADue] = useState("");
 
   const addPaper = () => {
     const t = paperTitle.trim();
@@ -69,6 +72,21 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
     const topic: Topic = { id: uid(), title: t, status: "none" };
     update((s) => ({ ...s, topics: [...s.topics, topic] }));
     setTopicTitle("");
+  };
+
+  const addAssessment = () => {
+    const t = aTitle.trim();
+    if (!t) return;
+    const a: Assessment = {
+      id: uid(),
+      title: t,
+      url: aUrl.trim() || undefined,
+      due: aDue || undefined,
+    };
+    update((s) => ({ ...s, assessments: [...s.assessments, a] }));
+    setATitle("");
+    setAUrl("");
+    setADue("");
   };
 
   const commitRename = () => {
