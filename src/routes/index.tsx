@@ -45,6 +45,7 @@ function Home() {
     let subjectCount = 0;
     let papers = 0;
     let topics = 0;
+    let assessments = 0;
     let red = 0;
     let amber = 0;
     let green = 0;
@@ -53,16 +54,19 @@ function Home() {
         subjectCount++;
         const st = store[s.id];
         if (!st) continue;
-        papers += st.papers.length;
-        topics += st.topics.length;
-        for (const t of st.topics) {
+        papers += st.papers?.length ?? 0;
+        topics += st.topics?.length ?? 0;
+        assessments += st.assessments?.length ?? 0;
+        for (const t of st.topics ?? []) {
           if (t.status === "red") red++;
           else if (t.status === "amber") amber++;
           else if (t.status === "green") green++;
         }
       }
     }
-    return { subjectCount, papers, topics, red, amber, green };
+    const totalStatus = red + amber + green;
+    const progress = totalStatus === 0 ? 0 : Math.round((green / totalStatus) * 100);
+    return { subjectCount, papers, topics, assessments, red, amber, green, progress };
   }, [subjects, store]);
 
   const searchResults = useMemo(() => {
