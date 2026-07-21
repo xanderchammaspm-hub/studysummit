@@ -102,7 +102,7 @@ function setSubjectsStore(
   subjectListeners.forEach((l) => l());
 }
 
-const defaultState: SubjectState = { emoji: "📘", papers: [], topics: [] };
+const defaultState: SubjectState = { emoji: "📘", papers: [], topics: [], assessments: [] };
 
 export function useAllSubjectStates() {
   const [, setTick] = useState(0);
