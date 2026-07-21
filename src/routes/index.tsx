@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import {
