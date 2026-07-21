@@ -183,3 +183,65 @@ export function deleteSubject(year: YearKey, id: string) {
 export function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
+
+/* --------------------- Quick links (Sudoku, Atomi, custom) --------------------- */
+
+export type QuickLink = { id: string; label: string; url: string; emoji?: string };
+
+const LINKS_KEY = "study-hub-links-v1";
+const defaultLinks: QuickLink[] = [
+  { id: "sudoku", label: "Sudoku", url: "", emoji: "🧩" },
+  { id: "atomi", label: "Atomi", url: "", emoji: "⚛️" },
+];
+
+function loadLinks(): QuickLink[] {
+  if (typeof window === "undefined") return defaultLinks;
+  try {
+    const raw = localStorage.getItem(LINKS_KEY);
+    if (!raw) return defaultLinks;
+    const parsed = JSON.parse(raw) as QuickLink[];
+    return Array.isArray(parsed) && parsed.length ? parsed : defaultLinks;
+  } catch {
+    return defaultLinks;
+  }
+}
+
+let linksCache: QuickLink[] | null = null;
+const linkListeners = new Set<() => void>();
+
+function getLinks(): QuickLink[] {
+  if (linksCache === null) linksCache = loadLinks();
+  return linksCache;
+}
+
+function setLinks(updater: (prev: QuickLink[]) => QuickLink[]) {
+  const next = updater(getLinks());
+  linksCache = next;
+  save(LINKS_KEY, next);
+  linkListeners.forEach((l) => l());
+}
+
+export function useQuickLinks() {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const l = () => setTick((n) => n + 1);
+    linkListeners.add(l);
+    return () => {
+      linkListeners.delete(l);
+    };
+  }, []);
+  return getLinks();
+}
+
+export function updateQuickLink(id: string, patch: Partial<QuickLink>) {
+  setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+}
+
+export function addQuickLink(label: string, url: string, emoji?: string) {
+  setLinks((prev) => [...prev, { id: uid(), label, url, emoji }]);
+}
+
+export function removeQuickLink(id: string) {
+  setLinks((prev) => prev.filter((l) => l.id !== id));
+}
+
