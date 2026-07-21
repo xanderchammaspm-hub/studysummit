@@ -190,15 +190,37 @@ function Home() {
           where you're at with a simple traffic light system.
         </p>
 
-        {/* Live stats */}
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-3xl mx-auto">
-          <Stat label="Subjects" value={stats.subjectCount} />
-          <Stat label="Papers" value={stats.papers} />
-          <StatTraffic label="Red" value={stats.red} status="red" />
-          <StatTraffic label="Amber" value={stats.amber} status="amber" />
-          <StatTraffic label="Green" value={stats.green} status="green" />
+        {/* Live stats + progress */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center gap-6 justify-center">
+          <ProgressRing value={stats.progress} />
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 flex-1 max-w-md">
+            <Stat label="Subjects" value={stats.subjectCount} />
+            <Stat label="Papers" value={stats.papers} />
+            <Stat label="Assessments" value={stats.assessments} />
+            <StatTraffic label="Red" value={stats.red} status="red" />
+            <StatTraffic label="Amber" value={stats.amber} status="amber" />
+            <StatTraffic label="Green" value={stats.green} status="green" />
+          </div>
         </div>
       </section>
+
+      {/* Quick links */}
+      <div className="mx-auto max-w-3xl px-6 mb-6">
+        <div className="purple-outline rounded-xl bg-card/50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Link2 className="h-4 w-4 text-primary" />
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Quick Links
+            </h3>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {quickLinks.map((l) => (
+              <QuickLinkTile key={l.id} link={l} />
+            ))}
+          </div>
+        </div>
+      </div>
+
 
       {/* Search */}
       <div className="mx-auto max-w-3xl px-6">
