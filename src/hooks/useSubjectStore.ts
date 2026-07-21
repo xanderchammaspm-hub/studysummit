@@ -3,11 +3,18 @@ import { useCallback, useEffect, useState } from "react";
 export type Paper = { id: string; title: string; url?: string };
 export type TrafficColor = "none" | "red" | "amber" | "green";
 export type Topic = { id: string; title: string; status: TrafficColor };
+export type Assessment = {
+  id: string;
+  title: string;
+  url?: string;
+  due?: string; // ISO date (yyyy-mm-dd)
+};
 
 export type SubjectState = {
   emoji: string;
   papers: Paper[];
   topics: Topic[];
+  assessments: Assessment[];
 };
 
 export type YearKey = "Year 11" | "Year 12";
