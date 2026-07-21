@@ -256,6 +256,62 @@ function Home() {
         </div>
       </div>
 
+      {/* Upcoming assessments */}
+      {upcoming.length > 0 && (
+        <div className="mx-auto max-w-3xl px-6 mb-6 fade-in-up">
+          <div className="purple-outline rounded-xl bg-card/50 p-4 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-yellow">⏰</span>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Upcoming
+              </h3>
+            </div>
+            <ul className="space-y-1.5">
+              {upcoming.map((u) => {
+                const label =
+                  u.days < 0
+                    ? `${-u.days}d overdue`
+                    : u.days === 0
+                      ? "Today"
+                      : u.days === 1
+                        ? "Tomorrow"
+                        : `In ${u.days} days`;
+                const color =
+                  u.days < 0
+                    ? "oklch(0.65 0.24 25)"
+                    : u.days <= 7
+                      ? "oklch(0.82 0.17 85)"
+                      : "oklch(0.72 0.19 145)";
+                return (
+                  <li
+                    key={u.id}
+                    className="flex items-center gap-3 rounded-md border border-border/40 bg-surface/40 px-3 py-2 text-sm"
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full shrink-0"
+                      style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+                    />
+                    <span className="flex-1 truncate">{u.title}</span>
+                    <span className="text-xs text-muted-foreground truncate hidden sm:block">
+                      {u.subject} · {u.year}
+                    </span>
+                    <span
+                      className="text-[10px] uppercase tracking-wider font-semibold"
+                      style={{ color }}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
+
+
+
 
       {/* Search */}
       <div className="mx-auto max-w-3xl px-6">
