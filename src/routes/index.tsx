@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { GraduationCap, Sparkles, Search, X, Plus } from "lucide-react";
+import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import {
   useSubjects,
   useAllSubjectStates,
   addSubject,
+  useQuickLinks,
+  updateQuickLink,
   type YearKey,
 } from "@/hooks/useSubjectStore";
 
@@ -37,12 +39,15 @@ function Home() {
   const [newName, setNewName] = useState("");
   const subjects = useSubjects();
   const store = useAllSubjectStates();
+  const quickLinks = useQuickLinks();
   const current = subjects[activeYear] ?? [];
+
 
   const stats = useMemo(() => {
     let subjectCount = 0;
     let papers = 0;
     let topics = 0;
+    let assessments = 0;
     let red = 0;
     let amber = 0;
     let green = 0;
@@ -51,16 +56,19 @@ function Home() {
         subjectCount++;
         const st = store[s.id];
         if (!st) continue;
-        papers += st.papers.length;
-        topics += st.topics.length;
-        for (const t of st.topics) {
+        papers += st.papers?.length ?? 0;
+        topics += st.topics?.length ?? 0;
+        assessments += st.assessments?.length ?? 0;
+        for (const t of st.topics ?? []) {
           if (t.status === "red") red++;
           else if (t.status === "amber") amber++;
           else if (t.status === "green") green++;
         }
       }
     }
-    return { subjectCount, papers, topics, red, amber, green };
+    const totalStatus = red + amber + green;
+    const progress = totalStatus === 0 ? 0 : Math.round((green / totalStatus) * 100);
+    return { subjectCount, papers, topics, assessments, red, amber, green, progress };
   }, [subjects, store]);
 
   const searchResults = useMemo(() => {
@@ -70,7 +78,7 @@ function Home() {
       subjectId: string;
       subjectLabel: string;
       year: string;
-      kind: "paper" | "topic" | "subject";
+      kind: "paper" | "topic" | "subject" | "assessment";
       title: string;
       status?: "none" | "red" | "amber" | "green";
     }[] = [];
@@ -88,7 +96,7 @@ function Home() {
         }
         const st = store[slot.id];
         if (!st) return;
-        for (const p of st.papers) {
+        for (const p of st.papers ?? []) {
           if (p.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -99,7 +107,18 @@ function Home() {
             });
           }
         }
-        for (const t of st.topics) {
+        for (const a of st.assessments ?? []) {
+          if (a.title.toLowerCase().includes(q)) {
+            results.push({
+              subjectId: slot.id,
+              subjectLabel,
+              year: y,
+              kind: "assessment",
+              title: a.title,
+            });
+          }
+        }
+        for (const t of st.topics ?? []) {
           if (t.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -171,15 +190,37 @@ function Home() {
           where you're at with a simple traffic light system.
         </p>
 
-        {/* Live stats */}
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-3xl mx-auto">
-          <Stat label="Subjects" value={stats.subjectCount} />
-          <Stat label="Papers" value={stats.papers} />
-          <StatTraffic label="Red" value={stats.red} status="red" />
-          <StatTraffic label="Amber" value={stats.amber} status="amber" />
-          <StatTraffic label="Green" value={stats.green} status="green" />
+        {/* Live stats + progress */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center gap-6 justify-center">
+          <ProgressRing value={stats.progress} />
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 flex-1 max-w-md">
+            <Stat label="Subjects" value={stats.subjectCount} />
+            <Stat label="Papers" value={stats.papers} />
+            <Stat label="Assessments" value={stats.assessments} />
+            <StatTraffic label="Red" value={stats.red} status="red" />
+            <StatTraffic label="Amber" value={stats.amber} status="amber" />
+            <StatTraffic label="Green" value={stats.green} status="green" />
+          </div>
         </div>
       </section>
+
+      {/* Quick links */}
+      <div className="mx-auto max-w-3xl px-6 mb-6">
+        <div className="purple-outline rounded-xl bg-card/50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Link2 className="h-4 w-4 text-primary" />
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Quick Links
+            </h3>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {quickLinks.map((l) => (
+              <QuickLinkTile key={l.id} link={l} />
+            ))}
+          </div>
+        </div>
+      </div>
+
 
       {/* Search */}
       <div className="mx-auto max-w-3xl px-6">
@@ -359,7 +400,7 @@ function SearchResults({
     subjectId: string;
     subjectLabel: string;
     year: string;
-    kind: "paper" | "topic" | "subject";
+    kind: "paper" | "topic" | "subject" | "assessment";
     title: string;
     status?: "none" | "red" | "amber" | "green";
   }[];
@@ -430,3 +471,110 @@ function Legend({
     </div>
   );
 }
+
+function ProgressRing({ value }: { value: number }) {
+  const size = 96;
+  const stroke = 8;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.3 0.05 285 / 0.4)"
+          strokeWidth={stroke}
+          fill="none"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.7 0.2 300)"
+          strokeWidth={stroke}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+          style={{
+            transition: "stroke-dashoffset 600ms ease",
+            filter: "drop-shadow(0 0 6px oklch(0.7 0.2 300 / 0.6))",
+          }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-xl font-semibold gradient-text">{value}%</div>
+        <div className="text-[9px] uppercase tracking-widest text-muted-foreground">
+          Mastered
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickLinkTile({
+  link,
+}: {
+  link: { id: string; label: string; url: string; emoji?: string };
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(link.url);
+  const save = () => {
+    updateQuickLink(link.id, { url: draft.trim() });
+    setEditing(false);
+  };
+  return (
+    <div className="group flex items-center gap-3 rounded-lg border border-border/60 bg-surface/60 px-3 py-2 hover:border-primary/60 transition-colors">
+      <span className="text-lg">{link.emoji ?? "🔗"}</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-foreground">{link.label}</div>
+        {editing ? (
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && save()}
+            onBlur={save}
+            placeholder="Paste link…"
+            className="w-full bg-transparent text-xs text-muted-foreground outline-none border-b border-primary/40 focus:border-primary"
+          />
+        ) : link.url ? (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-muted-foreground hover:text-primary truncate block"
+          >
+            {link.url}
+          </a>
+        ) : (
+          <div className="text-xs text-muted-foreground/60 italic">
+            No link yet — click edit to add
+          </div>
+        )}
+      </div>
+      {link.url && !editing && (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Open"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      )}
+      <button
+        onClick={() => (editing ? save() : setEditing(true))}
+        className="text-muted-foreground hover:text-primary"
+        aria-label={editing ? "Save" : "Edit"}
+      >
+        {editing ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
+
