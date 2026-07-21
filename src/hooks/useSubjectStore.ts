@@ -118,7 +118,13 @@ export function useAllSubjectStates() {
 
 export function useSubject(id: string) {
   const store = useAllSubjectStates();
-  const state = store[id] ?? defaultState;
+  const raw = store[id] ?? defaultState;
+  const state: SubjectState = {
+    emoji: raw.emoji ?? "📘",
+    papers: raw.papers ?? [],
+    topics: raw.topics ?? [],
+    assessments: raw.assessments ?? [],
+  };
 
   const update = useCallback(
     (patch: Partial<SubjectState> | ((s: SubjectState) => SubjectState)) => {
