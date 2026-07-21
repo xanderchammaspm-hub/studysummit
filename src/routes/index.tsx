@@ -262,11 +262,15 @@ function Home() {
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
+            ref={searchRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search subjects, topics and past papers…"
-            className="w-full rounded-full purple-outline bg-surface/60 pl-10 pr-10 py-2.5 text-sm outline-none focus:border-primary placeholder:text-muted-foreground/70"
+            placeholder="Search subjects, topics, papers… (press /)"
+            className="w-full rounded-full purple-outline bg-surface/60 pl-10 pr-16 py-2.5 text-sm outline-none focus:border-primary placeholder:text-muted-foreground/70"
           />
+          <kbd className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 hidden sm:block rounded border border-border/60 bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
+            /
+          </kbd>
           {query && (
             <button
               onClick={() => setQuery("")}
