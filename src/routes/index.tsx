@@ -78,7 +78,7 @@ function Home() {
       subjectId: string;
       subjectLabel: string;
       year: string;
-      kind: "paper" | "topic" | "subject";
+      kind: "paper" | "topic" | "subject" | "assessment";
       title: string;
       status?: "none" | "red" | "amber" | "green";
     }[] = [];
@@ -96,7 +96,7 @@ function Home() {
         }
         const st = store[slot.id];
         if (!st) return;
-        for (const p of st.papers) {
+        for (const p of st.papers ?? []) {
           if (p.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -107,7 +107,18 @@ function Home() {
             });
           }
         }
-        for (const t of st.topics) {
+        for (const a of st.assessments ?? []) {
+          if (a.title.toLowerCase().includes(q)) {
+            results.push({
+              subjectId: slot.id,
+              subjectLabel,
+              year: y,
+              kind: "assessment",
+              title: a.title,
+            });
+          }
+        }
+        for (const t of st.topics ?? []) {
           if (t.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
