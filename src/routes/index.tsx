@@ -378,7 +378,7 @@ function SearchResults({
     subjectId: string;
     subjectLabel: string;
     year: string;
-    kind: "paper" | "topic" | "subject";
+    kind: "paper" | "topic" | "subject" | "assessment";
     title: string;
     status?: "none" | "red" | "amber" | "green";
   }[];
