@@ -301,7 +301,98 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               />
             </Section>
 
+            {/* Assessment notifications */}
+            <Section
+              icon={<BellRing className="h-4 w-4" />}
+              title="Assessment Notifications"
+            >
+              <div className="grid gap-2 mb-3 sm:grid-cols-[1fr_1fr_auto_auto]">
+                <input
+                  value={aTitle}
+                  onChange={(e) => setATitle(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addAssessment()}
+                  placeholder="Assessment (e.g. Trial Exam)"
+                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                />
+                <input
+                  value={aUrl}
+                  onChange={(e) => setAUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addAssessment()}
+                  placeholder="Notification link"
+                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                />
+                <input
+                  type="date"
+                  value={aDue}
+                  onChange={(e) => setADue(e.target.value)}
+                  className="rounded-md border border-border bg-background/60 px-2 py-1.5 text-sm outline-none focus:border-primary text-muted-foreground"
+                />
+                <button
+                  onClick={addAssessment}
+                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                >
+                  <Plus className="h-4 w-4" /> Add
+                </button>
+              </div>
+              <DraggableList
+                items={state.assessments}
+                onReorder={(assessments) => update({ assessments })}
+                empty={
+                  <p className="text-xs text-muted-foreground italic px-1">
+                    No assessments yet. Paste a link when your teacher posts one.
+                  </p>
+                }
+                renderItem={(a) => {
+                  const badge = dueBadge(a.due);
+                  return (
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1 truncate text-sm">{a.title}</span>
+                      {badge && (
+                        <span
+                          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                          style={{
+                            background: badge.bg,
+                            color: badge.fg,
+                            boxShadow: `0 0 10px ${badge.bg}`,
+                          }}
+                          title={a.due}
+                        >
+                          {badge.text}
+                        </span>
+                      )}
+                      {a.url && (
+                        <a
+                          href={a.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary/80 hover:text-primary"
+                          title="Open notification"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() =>
+                          update((s) => ({
+                            ...s,
+                            assessments: s.assessments.filter(
+                              (x) => x.id !== a.id,
+                            ),
+                          }))
+                        }
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label="Remove assessment"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                }}
+              />
+            </Section>
+
             {/* Topics / traffic light */}
+
             <Section
               icon={<TrafficCone className="h-4 w-4" />}
               title="Traffic Light System"
