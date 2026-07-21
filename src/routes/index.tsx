@@ -140,8 +140,43 @@ function Home() {
     setNewName("");
   };
 
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const upcoming = useMemo(() => {
+    const items: { id: string; title: string; subject: string; year: string; due: string; days: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (const y of YEARS) {
+      subjects[y].forEach((slot, i) => {
+        const subjectLabel = slot.name.trim() || `Subject ${i + 1}`;
+        const st = store[slot.id];
+        for (const a of st?.assessments ?? []) {
+          if (!a.due) continue;
+          const target = new Date(a.due + "T00:00:00");
+          if (Number.isNaN(target.getTime())) continue;
+          const days = Math.round((target.getTime() - today.getTime()) / 86400000);
+          if (days < -1) continue;
+          items.push({ id: a.id, title: a.title, subject: subjectLabel, year: y, due: a.due, days });
+        }
+      });
+    }
+    return items.sort((a, b) => a.days - b.days).slice(0, 4);
+  }, [subjects, store]);
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <div className="aurora" aria-hidden />
+
       {/* Header */}
       <header className="border-b border-border/60 backdrop-blur-md sticky top-0 z-30 bg-background/70">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-4">
