@@ -484,6 +484,20 @@ function cycle(s: TrafficColor): TrafficColor {
         : "none";
 }
 
+function dueBadge(due?: string): { text: string; bg: string; fg: string } | null {
+  if (!due) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(due + "T00:00:00");
+  if (Number.isNaN(target.getTime())) return null;
+  const days = Math.round((target.getTime() - today.getTime()) / 86400000);
+  const fg = "oklch(0.14 0.02 285)";
+  if (days < 0)
+    return { text: `${-days}d overdue`, bg: "oklch(0.65 0.24 25)", fg };
+  if (days === 0) return { text: "today", bg: "oklch(0.82 0.17 85)", fg };
+  if (days <= 7) return { text: `in ${days}d`, bg: "oklch(0.82 0.17 85)", fg };
+  return { text: `in ${days}d`, bg: "oklch(0.72 0.19 145)", fg };
+
 const STATUS_COLOR: Record<TrafficColor, string> = {
   none: "oklch(0.5 0.02 285)",
   red: "oklch(0.65 0.24 25)",
