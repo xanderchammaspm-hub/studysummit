@@ -471,3 +471,110 @@ function Legend({
     </div>
   );
 }
+
+function ProgressRing({ value }: { value: number }) {
+  const size = 96;
+  const stroke = 8;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.3 0.05 285 / 0.4)"
+          strokeWidth={stroke}
+          fill="none"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.7 0.2 300)"
+          strokeWidth={stroke}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+          style={{
+            transition: "stroke-dashoffset 600ms ease",
+            filter: "drop-shadow(0 0 6px oklch(0.7 0.2 300 / 0.6))",
+          }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-xl font-semibold gradient-text">{value}%</div>
+        <div className="text-[9px] uppercase tracking-widest text-muted-foreground">
+          Mastered
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickLinkTile({
+  link,
+}: {
+  link: { id: string; label: string; url: string; emoji?: string };
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(link.url);
+  const save = () => {
+    updateQuickLink(link.id, { url: draft.trim() });
+    setEditing(false);
+  };
+  return (
+    <div className="group flex items-center gap-3 rounded-lg border border-border/60 bg-surface/60 px-3 py-2 hover:border-primary/60 transition-colors">
+      <span className="text-lg">{link.emoji ?? "🔗"}</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-foreground">{link.label}</div>
+        {editing ? (
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && save()}
+            onBlur={save}
+            placeholder="Paste link…"
+            className="w-full bg-transparent text-xs text-muted-foreground outline-none border-b border-primary/40 focus:border-primary"
+          />
+        ) : link.url ? (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-muted-foreground hover:text-primary truncate block"
+          >
+            {link.url}
+          </a>
+        ) : (
+          <div className="text-xs text-muted-foreground/60 italic">
+            No link yet — click edit to add
+          </div>
+        )}
+      </div>
+      {link.url && !editing && (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Open"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      )}
+      <button
+        onClick={() => (editing ? save() : setEditing(true))}
+        className="text-muted-foreground hover:text-primary"
+        aria-label={editing ? "Save" : "Edit"}
+      >
+        {editing ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
+
