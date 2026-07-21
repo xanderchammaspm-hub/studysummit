@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import {
@@ -140,8 +140,43 @@ function Home() {
     setNewName("");
   };
 
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const upcoming = useMemo(() => {
+    const items: { id: string; title: string; subject: string; year: string; due: string; days: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (const y of YEARS) {
+      subjects[y].forEach((slot, i) => {
+        const subjectLabel = slot.name.trim() || `Subject ${i + 1}`;
+        const st = store[slot.id];
+        for (const a of st?.assessments ?? []) {
+          if (!a.due) continue;
+          const target = new Date(a.due + "T00:00:00");
+          if (Number.isNaN(target.getTime())) continue;
+          const days = Math.round((target.getTime() - today.getTime()) / 86400000);
+          if (days < -1) continue;
+          items.push({ id: a.id, title: a.title, subject: subjectLabel, year: y, due: a.due, days });
+        }
+      });
+    }
+    return items.sort((a, b) => a.days - b.days).slice(0, 4);
+  }, [subjects, store]);
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <div className="aurora" aria-hidden />
+
       {/* Header */}
       <header className="border-b border-border/60 backdrop-blur-md sticky top-0 z-30 bg-background/70">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-4">
@@ -221,17 +256,77 @@ function Home() {
         </div>
       </div>
 
+      {/* Upcoming assessments */}
+      {upcoming.length > 0 && (
+        <div className="mx-auto max-w-3xl px-6 mb-6 fade-in-up">
+          <div className="purple-outline rounded-xl bg-card/50 p-4 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-yellow">⏰</span>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Upcoming
+              </h3>
+            </div>
+            <ul className="space-y-1.5">
+              {upcoming.map((u) => {
+                const label =
+                  u.days < 0
+                    ? `${-u.days}d overdue`
+                    : u.days === 0
+                      ? "Today"
+                      : u.days === 1
+                        ? "Tomorrow"
+                        : `In ${u.days} days`;
+                const color =
+                  u.days < 0
+                    ? "oklch(0.65 0.24 25)"
+                    : u.days <= 7
+                      ? "oklch(0.82 0.17 85)"
+                      : "oklch(0.72 0.19 145)";
+                return (
+                  <li
+                    key={u.id}
+                    className="flex items-center gap-3 rounded-md border border-border/40 bg-surface/40 px-3 py-2 text-sm"
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full shrink-0"
+                      style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+                    />
+                    <span className="flex-1 truncate">{u.title}</span>
+                    <span className="text-xs text-muted-foreground truncate hidden sm:block">
+                      {u.subject} · {u.year}
+                    </span>
+                    <span
+                      className="text-[10px] uppercase tracking-wider font-semibold"
+                      style={{ color }}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
+
+
+
 
       {/* Search */}
       <div className="mx-auto max-w-3xl px-6">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
+            ref={searchRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search subjects, topics and past papers…"
-            className="w-full rounded-full purple-outline bg-surface/60 pl-10 pr-10 py-2.5 text-sm outline-none focus:border-primary placeholder:text-muted-foreground/70"
+            placeholder="Search subjects, topics, papers… (press /)"
+            className="w-full rounded-full purple-outline bg-surface/60 pl-10 pr-16 py-2.5 text-sm outline-none focus:border-primary placeholder:text-muted-foreground/70"
           />
+          <kbd className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 hidden sm:block rounded border border-border/60 bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
+            /
+          </kbd>
           {query && (
             <button
               onClick={() => setQuery("")}
