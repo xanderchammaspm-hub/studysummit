@@ -39,7 +39,9 @@ function Home() {
   const [newName, setNewName] = useState("");
   const subjects = useSubjects();
   const store = useAllSubjectStates();
+  const quickLinks = useQuickLinks();
   const current = subjects[activeYear] ?? [];
+
 
   const stats = useMemo(() => {
     let subjectCount = 0;
