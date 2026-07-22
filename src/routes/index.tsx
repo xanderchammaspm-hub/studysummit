@@ -426,7 +426,7 @@ function Home() {
                 />
                 <Legend
                   color="oklch(0.82 0.17 85)"
-                  title="Amber"
+                  title="Yellow"
                   desc="Getting there. Needs review."
                 />
                 <Legend
