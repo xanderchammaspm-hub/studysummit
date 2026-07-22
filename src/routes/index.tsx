@@ -726,3 +726,208 @@ function QuickLinkTile({
   );
 }
 
+const GRADIENT_KEY = "study-hub-gradient-intensity-v1";
+
+function SettingsButton() {
+  const [open, setOpen] = useState(false);
+  const [intensity, setIntensity] = useState<number>(() => {
+    if (typeof window === "undefined") return 100;
+    const raw = localStorage.getItem(GRADIENT_KEY);
+    const n = raw ? Number(raw) : 100;
+    return Number.isFinite(n) ? n : 100;
+  });
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--gradient-intensity",
+      String(intensity / 100),
+    );
+    try {
+      localStorage.setItem(GRADIENT_KEY, String(intensity));
+    } catch {
+      // ignore
+    }
+  }, [intensity]);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex h-9 w-9 items-center justify-center rounded-full purple-outline bg-surface/60 text-muted-foreground hover:text-primary transition-colors"
+        aria-label="Settings"
+        title="Settings"
+      >
+        <Settings className={`h-4 w-4 transition-transform duration-500 ${open ? "rotate-90" : ""}`} />
+      </button>
+      {open && (
+        <>
+          <button
+            className="fixed inset-0 z-40 cursor-default"
+            onClick={() => setOpen(false)}
+            tabIndex={-1}
+            aria-label="Close settings"
+          />
+          <div className="absolute right-0 z-50 mt-2 w-72 rounded-xl border border-border bg-popover p-4 shadow-2xl">
+            <div className="flex items-center gap-2 mb-3">
+              <Settings className="h-4 w-4 text-primary" />
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Appearance
+              </h3>
+            </div>
+            <label className="block text-sm text-foreground mb-1">
+              Gradient intensity
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={0}
+                max={150}
+                step={1}
+                value={intensity}
+                onChange={(e) => setIntensity(Number(e.target.value))}
+                className="flex-1 accent-primary"
+              />
+              <span className="text-xs w-10 text-right text-muted-foreground tabular-nums">
+                {intensity}%
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground">
+              <button
+                onClick={() => setIntensity(0)}
+                className="hover:text-primary"
+              >
+                Off
+              </button>
+              <button
+                onClick={() => setIntensity(60)}
+                className="hover:text-primary"
+              >
+                Subtle
+              </button>
+              <button
+                onClick={() => setIntensity(100)}
+                className="hover:text-primary"
+              >
+                Default
+              </button>
+              <button
+                onClick={() => setIntensity(150)}
+                className="hover:text-primary"
+              >
+                Vivid
+              </button>
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground/70">
+              Saved on this device.
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function StatsPanel({
+  stats,
+}: {
+  stats: {
+    subjectCount: number;
+    papers: number;
+    topics: number;
+    assessments: number;
+    red: number;
+    amber: number;
+    green: number;
+    progress: number;
+  };
+}) {
+  const total = stats.red + stats.amber + stats.green;
+  const pct = (n: number) => (total === 0 ? 0 : (n / total) * 100);
+  const bars = [
+    { key: "green", value: stats.green, color: "oklch(0.72 0.19 145)", label: "Green" },
+    { key: "amber", value: stats.amber, color: "oklch(0.82 0.17 85)", label: "Yellow" },
+    { key: "red", value: stats.red, color: "oklch(0.65 0.24 25)", label: "Red" },
+  ];
+
+  return (
+    <div className="mt-10 mx-auto max-w-3xl purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <ProgressRing value={stats.progress} />
+        <div className="flex-1 w-full">
+          <div className="grid grid-cols-3 gap-2">
+            <MetricTile icon={<BookOpen className="h-3.5 w-3.5" />} label="Subjects" value={stats.subjectCount} />
+            <MetricTile icon={<FileText className="h-3.5 w-3.5" />} label="Papers" value={stats.papers} />
+            <MetricTile icon={<BellRing className="h-3.5 w-3.5" />} label="Assessments" value={stats.assessments} />
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Topic mix
+              </span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {total} topic{total === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="flex h-2.5 w-full overflow-hidden rounded-full border border-border/60 bg-surface">
+              {total === 0 ? (
+                <div className="flex-1 bg-muted/40" />
+              ) : (
+                bars.map((b) => (
+                  <div
+                    key={b.key}
+                    style={{
+                      width: `${pct(b.value)}%`,
+                      background: b.color,
+                      boxShadow: `0 0 8px ${b.color}`,
+                    }}
+                    className="transition-[width] duration-500"
+                  />
+                ))
+              )}
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-left">
+              {bars.map((b) => (
+                <div key={b.key} className="flex items-center gap-2 text-xs">
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ background: b.color, boxShadow: `0 0 6px ${b.color}` }}
+                  />
+                  <span className="text-muted-foreground">{b.label}</span>
+                  <span className="ml-auto font-semibold text-foreground tabular-nums">
+                    {b.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MetricTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-surface/60 px-3 py-2.5 text-left hover:border-primary/60 transition-colors">
+      <div className="flex items-center gap-1.5 text-primary/80">
+        {icon}
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      <div className="mt-0.5 text-2xl font-semibold tracking-tight gradient-text">
+        {value}
+      </div>
+    </div>
+  );
+}
+
