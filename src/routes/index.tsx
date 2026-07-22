@@ -229,17 +229,7 @@ function Home() {
         </p>
 
         {/* Live stats + progress */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center gap-6 justify-center">
-          <ProgressRing value={stats.progress} />
-          <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 flex-1 max-w-md">
-            <Stat label="Subjects" value={stats.subjectCount} />
-            <Stat label="Papers" value={stats.papers} />
-            <Stat label="Assessments" value={stats.assessments} />
-            <StatTraffic label="Red" value={stats.red} status="red" />
-            <StatTraffic label="Yellow" value={stats.amber} status="amber" />
-            <StatTraffic label="Green" value={stats.green} status="green" />
-          </div>
-        </div>
+        <StatsPanel stats={stats} />
       </section>
 
       {/* Quick links */}
