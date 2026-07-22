@@ -191,21 +191,24 @@ function Home() {
               </div>
             </div>
           </div>
-          <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
-            {YEARS.map((y) => (
-              <button
-                key={y}
-                onClick={() => setActiveYear(y)}
-                className={`px-4 py-1.5 text-sm rounded-full transition-all duration-300 ${
-                  activeYear === y
-                    ? "bg-primary/25 text-foreground border border-primary/60"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {y}
-              </button>
-            ))}
-          </nav>
+          <div className="flex items-center gap-2">
+            <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
+              {YEARS.map((y) => (
+                <button
+                  key={y}
+                  onClick={() => setActiveYear(y)}
+                  className={`px-4 py-1.5 text-sm rounded-full transition-all duration-300 ${
+                    activeYear === y
+                      ? "bg-primary/25 text-foreground border border-primary/60"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {y}
+                </button>
+              ))}
+            </nav>
+            <SettingsButton />
+          </div>
         </div>
       </header>
 
