@@ -233,7 +233,7 @@ function Home() {
             <Stat label="Papers" value={stats.papers} />
             <Stat label="Assessments" value={stats.assessments} />
             <StatTraffic label="Red" value={stats.red} status="red" />
-            <StatTraffic label="Amber" value={stats.amber} status="amber" />
+            <StatTraffic label="Yellow" value={stats.amber} status="amber" />
             <StatTraffic label="Green" value={stats.green} status="green" />
           </div>
         </div>
@@ -426,7 +426,7 @@ function Home() {
                 />
                 <Legend
                   color="oklch(0.82 0.17 85)"
-                  title="Amber"
+                  title="Yellow"
                   desc="Getting there. Needs review."
                 />
                 <Legend
@@ -613,19 +613,79 @@ function ProgressRing({ value }: { value: number }) {
 function QuickLinkTile({
   link,
 }: {
-  link: { id: string; label: string; url: string; emoji?: string };
+  link: { id: string; label: string; url: string; emoji?: string; iconUrl?: string };
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(link.url);
+  const [dragOver, setDragOver] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const save = () => {
     updateQuickLink(link.id, { url: draft.trim() });
     setEditing(false);
   };
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateQuickLink(link.id, { iconUrl: String(reader.result) });
+    };
+    reader.readAsDataURL(file);
+  };
   return (
-    <div className="group flex items-center gap-3 rounded-lg border border-border/60 bg-surface/60 px-3 py-2 hover:border-primary/60 transition-colors">
-      <span className="text-lg">{link.emoji ?? "🔗"}</span>
+    <div
+      className={`group flex items-center gap-3 rounded-lg border bg-surface/60 px-3 py-2 transition-all ${
+        dragOver
+          ? "border-primary bg-primary/10 shadow-[0_0_0_2px_var(--color-primary)]"
+          : "border-border/60 hover:border-primary/60"
+      }`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const f = e.dataTransfer.files?.[0];
+        if (f) handleFile(f);
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className="relative h-10 w-10 shrink-0 rounded-lg border border-border bg-surface-elevated flex items-center justify-center overflow-hidden hover:border-primary/70 transition-colors"
+        title={link.iconUrl ? "Replace icon" : "Drop an image here or click to upload"}
+      >
+        {link.iconUrl ? (
+          <img src={link.iconUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-lg">{link.emoji ?? "🔗"}</span>
+        )}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleFile(f);
+          e.target.value = "";
+        }}
+      />
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-foreground">{link.label}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium text-foreground truncate">{link.label}</div>
+          {link.iconUrl && (
+            <button
+              onClick={() => updateQuickLink(link.id, { iconUrl: undefined })}
+              className="text-[10px] text-muted-foreground hover:text-destructive"
+              title="Reset icon"
+            >
+              reset
+            </button>
+          )}
+        </div>
         {editing ? (
           <input
             autoFocus

@@ -36,6 +36,8 @@ const EMOJI_CHOICES = [
   "📘", "📗", "📕", "📙", "📓", "🧪", "🧮", "🔬", "⚗️", "🧬",
   "🖥️", "💻", "📐", "📏", "🧠", "🌍", "🗺️", "🏛️", "🎨", "🎼",
   "🎭", "⚙️", "🔧", "🧾", "📊", "📈", "✒️", "📝", "🔭", "🧲",
+  "⚽", "🏀", "🎾", "🏈", "🎯", "♟️", "🎲", "🎹", "🎸", "🥁",
+  "💡", "🚀", "🛰️", "🌱", "🍎", "🐛", "🦴", "❤️", "⭐", "🔥",
 ];
 
 export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
@@ -127,19 +129,37 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   tabIndex={-1}
                   aria-label="Close emoji picker"
                 />
-                <div className="absolute z-50 mt-2 grid w-64 grid-cols-6 gap-1 rounded-lg border border-border bg-popover p-2 shadow-xl">
-                  {EMOJI_CHOICES.map((em) => (
-                    <button
-                      key={em}
-                      onClick={() => {
-                        update({ emoji: em });
-                        setPickerOpen(false);
-                      }}
-                      className="flex h-9 w-9 items-center justify-center rounded hover:bg-primary/20 text-lg"
-                    >
-                      {em}
-                    </button>
-                  ))}
+                <div className="absolute z-50 mt-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-xl">
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Type or paste any emoji…"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const v = (e.target as HTMLInputElement).value.trim();
+                        if (v) {
+                          update({ emoji: [...v][0] ?? v });
+                          setPickerOpen(false);
+                        }
+                      }
+                      if (e.key === "Escape") setPickerOpen(false);
+                    }}
+                    className="w-full mb-2 rounded-md border border-border bg-background/60 px-2 py-1.5 text-sm outline-none focus:border-primary"
+                  />
+                  <div className="grid grid-cols-6 gap-1 max-h-56 overflow-y-auto">
+                    {EMOJI_CHOICES.map((em) => (
+                      <button
+                        key={em}
+                        onClick={() => {
+                          update({ emoji: em });
+                          setPickerOpen(false);
+                        }}
+                        className="flex h-9 w-9 items-center justify-center rounded hover:bg-primary/20 text-lg"
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
@@ -532,7 +552,7 @@ function QuickChips({
 }) {
   const items: { key: TrafficColor; label: string }[] = [
     { key: "red", label: "R" },
-    { key: "amber", label: "A" },
+    { key: "amber", label: "Y" },
     { key: "green", label: "G" },
   ];
   return (

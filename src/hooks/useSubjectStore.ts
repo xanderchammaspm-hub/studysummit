@@ -186,7 +186,7 @@ export function uid() {
 
 /* --------------------- Quick links (Sudoku, Atomi, custom) --------------------- */
 
-export type QuickLink = { id: string; label: string; url: string; emoji?: string };
+export type QuickLink = { id: string; label: string; url: string; emoji?: string; iconUrl?: string };
 
 const LINKS_KEY = "study-hub-links-v1";
 const defaultLinks: QuickLink[] = [
