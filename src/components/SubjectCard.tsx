@@ -552,7 +552,7 @@ function QuickChips({
 }) {
   const items: { key: TrafficColor; label: string }[] = [
     { key: "red", label: "R" },
-    { key: "amber", label: "A" },
+    { key: "amber", label: "Y" },
     { key: "green", label: "G" },
   ];
   return (
