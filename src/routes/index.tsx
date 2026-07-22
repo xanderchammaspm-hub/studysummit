@@ -233,7 +233,7 @@ function Home() {
             <Stat label="Papers" value={stats.papers} />
             <Stat label="Assessments" value={stats.assessments} />
             <StatTraffic label="Red" value={stats.red} status="red" />
-            <StatTraffic label="Amber" value={stats.amber} status="amber" />
+            <StatTraffic label="Yellow" value={stats.amber} status="amber" />
             <StatTraffic label="Green" value={stats.green} status="green" />
           </div>
         </div>
