@@ -83,17 +83,31 @@
     border-color: var(--color-border);
   }
 
+  :root {
+    --gradient-intensity: 1;
+  }
+
   html,
   body {
+    background: linear-gradient(180deg, oklch(0.15 0.03 285) 0%, oklch(0.17 0.035 290) 50%, oklch(0.14 0.03 285) 100%);
+    background-attachment: fixed;
+    color: var(--color-foreground);
+    min-height: 100%;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: var(--gradient-intensity, 1);
+    transition: opacity 400ms ease;
     background:
       radial-gradient(1400px 900px at 8% -15%, oklch(0.42 0.18 295 / 0.28), transparent 55%),
       radial-gradient(1100px 800px at 100% 5%, oklch(0.36 0.19 320 / 0.22), transparent 60%),
       radial-gradient(900px 700px at 50% 115%, oklch(0.4 0.16 275 / 0.22), transparent 60%),
-      radial-gradient(700px 500px at 90% 85%, oklch(0.7 0.11 85 / 0.05), transparent 60%),
-      linear-gradient(180deg, oklch(0.15 0.03 285) 0%, oklch(0.18 0.04 290) 45%, oklch(0.14 0.03 285) 100%);
-    background-attachment: fixed;
-    color: var(--color-foreground);
-    min-height: 100%;
+      radial-gradient(700px 500px at 90% 85%, oklch(0.7 0.11 85 / 0.05), transparent 60%);
   }
 
   ::selection {
