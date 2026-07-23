@@ -904,6 +904,7 @@ function StatsPanel({
           </div>
         </div>
       </div>
+      <AICoach />
     </div>
   );
 }
