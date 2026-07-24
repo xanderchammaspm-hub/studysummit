@@ -237,3 +237,19 @@
   animation: shimmer 3s linear infinite;
 }
 
+@keyframes atlas-typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.atlas-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  display: inline-block;
+  animation: atlas-typing 1s infinite ease-in-out;
+  box-shadow: 0 0 6px var(--color-primary);
+}
+
+
