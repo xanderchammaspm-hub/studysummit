@@ -1,27 +1,443 @@
-import { useRef, useState } from "react";
-import { Sparkles, Upload, Send, Loader2, X, FileText, Brain, ListChecks, Network, BookOpen } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Sparkles,
+  Send,
+  Loader2,
+  X,
+  FileText,
+  Brain,
+  ListChecks,
+  Network,
+  BookOpen,
+  Plus,
+  StopCircle,
+  Upload,
+  Copy,
+  Check,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useServerFn } from "@tanstack/react-start";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { askCoach, studyKit } from "@/lib/ai.functions";
+import { studyKit } from "@/lib/ai.functions";
 
-type Mode = "explain" | "generate" | "mark" | "quiz" | "mistake" | "chat";
-type Output = "summary" | "flashcards" | "quiz" | "mindmap";
+/* --------------------------------- Chat --------------------------------- */
 
-const MODES: { id: Mode; label: string; hint: string }[] = [
-  { id: "chat", label: "Ask", hint: "Ask anything about your studies" },
-  { id: "explain", label: "Explain", hint: "Paste a syllabus dot point" },
-  { id: "generate", label: "HSC Qs", hint: "Topic to generate exam questions on" },
-  { id: "mark", label: "Mark", hint: "Question — then paste your answer below" },
-  { id: "mistake", label: "Mistake", hint: "Your wrong answer + the question" },
-  { id: "quiz", label: "Quiz", hint: "Paste notes to quiz yourself on" },
+type Role = "user" | "assistant";
+type Message = { id: string; role: Role; content: string; ts: number };
+
+const CHAT_KEY = "atlas-ai-chat-v1";
+const SYSTEM_PROMPT =
+  "You are Atlas — an expert HSC (NSW, Australia) study coach for Year 11 and Year 12 students. Be concise, clear, and encouraging. Use markdown (headings, bullets, bold) when it helps. Adapt to syllabus dot-point style, cite marks and rubrics for HSC-style questions, and offer worked examples where useful.";
+
+const SUGGESTIONS: { label: string; prompt: string }[] = [
+  {
+    label: "Explain a syllabus dot point",
+    prompt: "Explain this HSC syllabus dot point clearly with a worked example:\n\n",
+  },
+  {
+    label: "Generate 3 HSC-style questions",
+    prompt:
+      "Generate 3 HSC-style exam questions with marks and a marking rubric on the topic:\n\n",
+  },
+  {
+    label: "Mark my answer",
+    prompt:
+      "Mark my HSC answer against the criteria — estimate marks, what I did well, what's missing, and a model answer.\n\nQuestion:\n\n\nMy answer:\n",
+  },
+  {
+    label: "Explain my mistake",
+    prompt:
+      "Here's a question I got wrong. Explain the misconception and teach me the correct concept.\n\nQuestion:\n\nMy answer:\n",
+  },
 ];
+
+function makeId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return Math.random().toString(36).slice(2);
+}
+
+export function AICoach() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button
+          aria-label="Open Atlas AI"
+          className="group fixed z-50 flex items-center gap-2 rounded-full border border-primary/50 bg-gradient-to-br from-primary/90 to-primary/70 px-4 py-3 text-primary-foreground shadow-[0_10px_40px_-8px_oklch(0.7_0.22_300_/_0.8)] backdrop-blur transition-all hover:scale-105 hover:shadow-[0_14px_50px_-8px_oklch(0.75_0.24_305_/_0.95)]"
+          style={{
+            right: "max(1rem, env(safe-area-inset-right))",
+            bottom: "max(1rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          <span className="relative flex h-5 w-5 items-center justify-center">
+            <span className="absolute inset-0 rounded-full bg-white/20 blur-sm" />
+            <Sparkles className="h-4 w-4 relative" />
+          </span>
+          <span className="text-sm font-semibold hidden sm:inline">Atlas AI</span>
+        </button>
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        className="flex w-full sm:max-w-lg md:max-w-2xl flex-col gap-0 border-l border-primary/30 bg-background/95 p-0 backdrop-blur-xl"
+      >
+        <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
+          <SheetHeader className="border-b border-border/60 px-4 py-3 space-y-0">
+            <div className="flex items-center justify-between gap-3">
+              <SheetTitle className="flex items-center gap-2 text-base">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 shadow-[0_0_12px_oklch(0.7_0.22_300_/_0.6)]">
+                  <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+                </div>
+                <span>Atlas AI</span>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-normal">
+                  Study coach
+                </span>
+              </SheetTitle>
+              <TabsList className="h-8 grid-cols-2 grid">
+                <TabsTrigger value="chat" className="text-xs px-3">
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="kit" className="text-xs px-3">
+                  Study Kit
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </SheetHeader>
+          <TabsContent value="chat" className="min-h-0 flex-1 overflow-hidden m-0">
+            <ChatPanel />
+          </TabsContent>
+          <TabsContent value="kit" className="min-h-0 flex-1 overflow-hidden m-0">
+            <StudyKitPanel />
+          </TabsContent>
+        </Tabs>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function ChatPanel() {
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(CHAT_KEY);
+      const parsed = raw ? (JSON.parse(raw) as Message[]) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Persist thread
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
+    } catch {
+      // ignore quota errors
+    }
+  }, [messages]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages, busy]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [input]);
+
+  const send = async (override?: string) => {
+    const text = (override ?? input).trim();
+    if (!text || busy) return;
+    const userMsg: Message = { id: makeId(), role: "user", content: text, ts: Date.now() };
+    const asstMsg: Message = { id: makeId(), role: "assistant", content: "", ts: Date.now() };
+    const nextHistory = [...messages, userMsg];
+    setMessages([...nextHistory, asstMsg]);
+    setInput("");
+    setBusy(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...nextHistory.map((m) => ({ role: m.role, content: m.content })),
+          ],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => "");
+        throw new Error(errText || `Error ${res.status}`);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let acc = "";
+      outer: while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n");
+        buffer = parts.pop() ?? "";
+        for (const raw of parts) {
+          const line = raw.trim();
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (!data) continue;
+          if (data === "[DONE]") break outer;
+          try {
+            const json = JSON.parse(data) as {
+              choices?: { delta?: { content?: string } }[];
+            };
+            const delta = json.choices?.[0]?.delta?.content;
+            if (typeof delta === "string" && delta) {
+              acc += delta;
+              setMessages((m) =>
+                m.map((msg) =>
+                  msg.id === asstMsg.id ? { ...msg, content: acc } : msg,
+                ),
+              );
+            }
+          } catch {
+            // skip malformed partial line
+          }
+        }
+      }
+      // If nothing streamed back, drop the empty bubble
+      if (!acc) {
+        setMessages((m) => m.filter((x) => x.id !== asstMsg.id));
+        toast.error("No response from Atlas — try again.");
+      }
+    } catch (e) {
+      const err = e as { name?: string; message?: string };
+      if (err.name === "AbortError") {
+        // keep whatever partial content was accumulated
+        setMessages((m) =>
+          m
+            .map((msg) =>
+              msg.id === asstMsg.id && !msg.content
+                ? { ...msg, content: "_Stopped._" }
+                : msg,
+            )
+            .filter((msg) => msg.content !== ""),
+        );
+      } else {
+        toast.error(err.message || "Something went wrong");
+        setMessages((m) => m.filter((x) => x.id !== asstMsg.id));
+      }
+    } finally {
+      setBusy(false);
+      abortRef.current = null;
+      setTimeout(() => textareaRef.current?.focus(), 0);
+    }
+  };
+
+  const stop = () => abortRef.current?.abort();
+  const newChat = () => {
+    if (busy) return;
+    setMessages([]);
+    setInput("");
+  };
+
+  const empty = messages.length === 0;
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-background/40">
+        <span className="text-[11px] text-muted-foreground">
+          {empty
+            ? "Start a conversation"
+            : `${messages.filter((m) => m.role === "user").length} message${
+                messages.filter((m) => m.role === "user").length === 1 ? "" : "s"
+              } · saved on this device`}
+        </span>
+        <button
+          onClick={newChat}
+          disabled={busy || empty}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary disabled:opacity-40 transition-colors"
+        >
+          <Plus className="h-3 w-3" /> New chat
+        </button>
+      </div>
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        {empty ? (
+          <div className="flex h-full flex-col items-center justify-center text-center gap-5 py-6">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/40 to-primary/5 shadow-[0_0_30px_-4px_oklch(0.7_0.22_300_/_0.6)]">
+              <Sparkles className="h-7 w-7 text-primary" />
+            </div>
+            <div>
+              <div className="text-lg font-semibold gradient-text">
+                How can I help you study?
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                Ask anything — syllabus dot points, HSC-style questions, marking,
+                mistakes, or quizzes from your notes.
+              </p>
+            </div>
+            <div className="grid gap-2 w-full max-w-sm">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => {
+                    setInput(s.prompt);
+                    setTimeout(() => textareaRef.current?.focus(), 0);
+                  }}
+                  className="text-left rounded-lg border border-border/60 bg-surface/60 hover:border-primary/60 hover:bg-primary/10 px-3 py-2 text-xs transition-colors"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((m) => (
+            <Bubble
+              key={m.id}
+              msg={m}
+              thinking={busy && m.role === "assistant" && !m.content}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="border-t border-border/60 p-3 bg-background/70">
+        <div className="relative rounded-2xl border border-border/70 bg-surface/70 focus-within:border-primary/70 focus-within:shadow-[0_0_0_3px_oklch(0.7_0.22_300_/_0.15)] transition-all">
+          <Textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+            placeholder="Ask Atlas anything about your studies…"
+            rows={1}
+            disabled={busy}
+            className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent focus-visible:ring-0 pr-12 py-3 leading-relaxed"
+          />
+          <div className="absolute right-2 bottom-2">
+            {busy ? (
+              <button
+                onClick={stop}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/80 text-white hover:bg-destructive transition-colors"
+                aria-label="Stop generation"
+                title="Stop"
+              >
+                <StopCircle className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => send()}
+                disabled={!input.trim()}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors"
+                aria-label="Send"
+                title="Send (Enter)"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="mt-1.5 text-[10px] text-muted-foreground/70 text-center">
+          Enter to send · Shift+Enter for new line · Atlas can be wrong — verify
+          important facts.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Bubble({ msg, thinking }: { msg: Message; thinking: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(msg.content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    });
+  };
+  if (msg.role === "user") {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[85%] rounded-2xl rounded-tr-sm border border-primary/40 bg-primary/20 px-4 py-2.5 text-sm whitespace-pre-wrap text-foreground">
+          {msg.content}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex gap-3 group">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 mt-0.5 shadow-[0_0_10px_oklch(0.7_0.22_300_/_0.5)]">
+        <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        {thinking ? (
+          <div className="flex items-center gap-1.5 h-7">
+            <span className="atlas-dot" />
+            <span className="atlas-dot" style={{ animationDelay: "0.15s" }} />
+            <span className="atlas-dot" style={{ animationDelay: "0.3s" }} />
+          </div>
+        ) : (
+          <>
+            <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary prose-p:my-2 prose-headings:my-3 prose-ul:my-2 prose-ol:my-2">
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            </div>
+            {msg.content && (
+              <button
+                onClick={copy}
+                className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Copy message"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3 w-3" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3" /> Copy
+                  </>
+                )}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------- Study Kit ------------------------------ */
+
+type Output = "summary" | "flashcards" | "quiz" | "mindmap";
 
 const OUTPUTS: { id: Output; label: string; icon: typeof BookOpen }[] = [
   { id: "summary", label: "Summary", icon: BookOpen },
@@ -40,124 +456,6 @@ async function fileToBase64(file: File): Promise<string> {
     r.onerror = reject;
     r.readAsDataURL(file);
   });
-}
-
-export function AICoach() {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button
-          aria-label="Open Atlas AI"
-          className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full border border-primary/40 bg-gradient-to-br from-primary/90 to-primary/70 px-4 py-3 text-primary-foreground shadow-[0_8px_30px_-8px_hsl(var(--primary)/0.7)] backdrop-blur transition hover:scale-105 hover:shadow-[0_10px_40px_-8px_hsl(var(--primary)/0.9)]"
-        >
-          <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-semibold">Atlas AI</span>
-        </button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-xl flex-col gap-0 border-l border-primary/30 bg-background/95 p-0 backdrop-blur">
-        <SheetHeader className="border-b border-border/60 px-5 py-4">
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="h-4 w-4 text-primary" />
-            Atlas AI
-          </SheetTitle>
-        </SheetHeader>
-        <Tabs defaultValue="coach" className="flex min-h-0 flex-1 flex-col">
-          <TabsList className="mx-4 mt-3 grid grid-cols-2">
-            <TabsTrigger value="coach">Tutor</TabsTrigger>
-            <TabsTrigger value="kit">Study Kit</TabsTrigger>
-          </TabsList>
-          <TabsContent value="coach" className="min-h-0 flex-1 overflow-hidden">
-            <CoachPanel />
-          </TabsContent>
-          <TabsContent value="kit" className="min-h-0 flex-1 overflow-hidden">
-            <StudyKitPanel />
-          </TabsContent>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function CoachPanel() {
-  const ask = useServerFn(askCoach);
-  const [mode, setMode] = useState<Mode>("chat");
-  const [input, setInput] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [subject, setSubject] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState("");
-
-  const activeMode = MODES.find((m) => m.id === mode)!;
-
-  async function run() {
-    if (!input.trim()) return;
-    setBusy(true);
-    setResult("");
-    try {
-      const res = await ask({
-        data: {
-          mode,
-          input: input.trim(),
-          subject: subject.trim() || undefined,
-          studentAnswer: mode === "mark" || mode === "mistake" ? answer.trim() || undefined : undefined,
-        },
-      });
-      setResult(res.text);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Something went wrong");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="flex h-full flex-col gap-3 px-4 pb-4 pt-3">
-      <div className="flex flex-wrap gap-1.5">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setMode(m.id)}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              mode === m.id
-                ? "border-primary/60 bg-primary/20 text-foreground"
-                : "border-border/60 bg-muted/30 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-      <Input
-        value={subject}
-        onChange={(e) => setSubject(e.target.value)}
-        placeholder="Subject (optional) — e.g. Physics"
-        className="h-9"
-      />
-      <Textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder={activeMode.hint}
-        rows={3}
-        className="resize-none"
-      />
-      {(mode === "mark" || mode === "mistake") && (
-        <Textarea
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          placeholder="Your answer…"
-          rows={4}
-          className="resize-none"
-        />
-      )}
-      <Button onClick={run} disabled={busy || !input.trim()} className="gap-2">
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        {busy ? "Thinking…" : "Ask coach"}
-      </Button>
-      <ResultView text={result} busy={busy} />
-    </div>
-  );
 }
 
 function StudyKitPanel() {
@@ -186,7 +484,12 @@ function StudyKitPanel() {
       } = { output };
       if (file) {
         const b64 = await fileToBase64(file);
-        payload = { ...payload, filename: file.name, mime: file.type || "application/pdf", fileBase64: b64 };
+        payload = {
+          ...payload,
+          filename: file.name,
+          mime: file.type || "application/pdf",
+          fileBase64: b64,
+        };
       }
       if (text.trim()) payload.text = text.trim();
       const res = await process({ data: payload });
@@ -199,16 +502,17 @@ function StudyKitPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-4 pb-4 pt-3">
+    <div className="flex h-full flex-col gap-3 px-4 pb-4 pt-3 overflow-y-auto">
       <div className="grid grid-cols-4 gap-1.5">
         {OUTPUTS.map((o) => {
           const Icon = o.icon;
+          const active = output === o.id;
           return (
             <button
               key={o.id}
               onClick={() => setOutput(o.id)}
               className={`flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition ${
-                output === o.id
+                active
                   ? "border-primary/60 bg-primary/20 text-foreground"
                   : "border-border/60 bg-muted/30 text-muted-foreground hover:border-primary/40 hover:text-foreground"
               }`}
@@ -268,29 +572,28 @@ function StudyKitPanel() {
         rows={4}
         className="resize-none"
       />
-      <Button onClick={run} disabled={busy || (!file && !text.trim())} className="gap-2">
+      <button
+        onClick={run}
+        disabled={busy || (!file && !text.trim())}
+        className="flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium disabled:opacity-40 hover:bg-primary/90 transition-colors"
+      >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
         {busy ? "Generating…" : `Generate ${output}`}
-      </Button>
-      <ResultView text={result} busy={busy} />
-    </div>
-  );
-}
-
-function ResultView({ text, busy }: { text: string; busy: boolean }) {
-  if (!text && !busy) return null;
-  return (
-    <ScrollArea className="min-h-0 flex-1 rounded-lg border border-border/60 bg-muted/20 p-4">
-      {busy && !text ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Working through it…
-        </div>
-      ) : (
-        <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary">
-          <ReactMarkdown>{text}</ReactMarkdown>
+      </button>
+      {(result || busy) && (
+        <div className="rounded-lg border border-border/60 bg-muted/20 p-4 max-h-[50vh] overflow-y-auto">
+          {busy && !result ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Working through it…
+            </div>
+          ) : (
+            <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary">
+              <ReactMarkdown>{result}</ReactMarkdown>
+            </div>
+          )}
         </div>
       )}
-    </ScrollArea>
+    </div>
   );
 }

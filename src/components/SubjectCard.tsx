@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ChevronDown,
   FileText,
-  TrafficCone,
   Plus,
   X,
   ExternalLink,
@@ -11,6 +10,7 @@ import {
   Check,
   BellRing,
 } from "lucide-react";
+import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
   useSubject,
   uid,
@@ -414,7 +414,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
             {/* Topics / traffic light */}
 
             <Section
-              icon={<TrafficCone className="h-4 w-4" />}
+              icon={<TrafficLightIcon size={14} />}
               title="Traffic Light System"
               accent
             >
