@@ -436,7 +436,7 @@ function Home() {
 
       <footer className="border-t border-border/60 mt-8">
         <div className="mx-auto max-w-6xl px-6 py-6 text-center text-xs text-muted-foreground">
-          Study Hub · Built for focused revision
+          Summit · Built for focused revision
         </div>
       </footer>
     </div>
