@@ -49,18 +49,18 @@ export function AICoach() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
-          aria-label="Open AI Study Coach"
+          aria-label="Open Atlas AI"
           className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full border border-primary/40 bg-gradient-to-br from-primary/90 to-primary/70 px-4 py-3 text-primary-foreground shadow-[0_8px_30px_-8px_hsl(var(--primary)/0.7)] backdrop-blur transition hover:scale-105 hover:shadow-[0_10px_40px_-8px_hsl(var(--primary)/0.9)]"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-semibold">AI Coach</span>
+          <span className="text-sm font-semibold">Atlas AI</span>
         </button>
       </SheetTrigger>
       <SheetContent side="right" className="flex w-full max-w-xl flex-col gap-0 border-l border-primary/30 bg-background/95 p-0 backdrop-blur">
         <SheetHeader className="border-b border-border/60 px-5 py-4">
           <SheetTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" />
-            AI Study Coach
+            Atlas AI
           </SheetTitle>
         </SheetHeader>
         <Tabs defaultValue="coach" className="flex min-h-0 flex-1 flex-col">
