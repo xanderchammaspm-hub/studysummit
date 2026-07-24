@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Settings, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import { AICoach } from "@/components/AICoach";
+import { MountainProgress } from "@/components/MountainProgress";
+import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
   useSubjects,
   useAllSubjectStates,
@@ -229,6 +231,11 @@ function Home() {
           where you're at with a simple traffic light system.
         </p>
 
+        {/* Mountain progression — the core experience */}
+        <div className="mt-10">
+          <MountainProgress />
+        </div>
+
         {/* Live stats + progress */}
         <StatsPanel stats={stats} />
       </section>
@@ -409,7 +416,8 @@ function Home() {
 
             {/* Traffic light legend */}
             <div className="mt-16 purple-outline rounded-xl bg-card/50 p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                <TrafficLightIcon size={14} className="text-primary" />
                 Traffic Light Legend
               </h3>
               <div className="grid gap-4 sm:grid-cols-3">
@@ -417,16 +425,19 @@ function Home() {
                   color="oklch(0.72 0.19 145)"
                   title="Green"
                   desc="Confident. Ready for the exam."
+                  active="green"
                 />
                 <Legend
                   color="oklch(0.82 0.17 85)"
                   title="Yellow"
                   desc="Getting there. Needs review."
+                  active="amber"
                 />
                 <Legend
                   color="oklch(0.65 0.24 25)"
                   title="Red"
                   desc="Weak spot. Prioritise study."
+                  active="red"
                 />
               </div>
             </div>
