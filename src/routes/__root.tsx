@@ -77,22 +77,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Study Hub — Year 11 & 12 Subjects" },
+      { title: "Summit — Year 11 & 12 Study Hub" },
       {
         name: "description",
         content:
-          "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject.",
+          "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject.",
       },
-      { property: "og:title", content: "Study Hub — Year 11 & 12 Subjects" },
+      { property: "og:title", content: "Summit — Year 11 & 12 Study Hub" },
       {
         property: "og:description",
         content:
-          "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject.",
+          "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Study Hub — Year 11 & 12 Subjects" },
-      { name: "twitter:description", content: "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject." },
+      { name: "twitter:title", content: "Summit — Year 11 & 12 Study Hub" },
+      { name: "twitter:description", content: "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5f4e82f7-d990-476e-a715-bd57670c5514/id-preview-fde599f6--89e715cb-c46a-44a5-b643-ba90c5fae66d.lovable.app-1784672489376.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5f4e82f7-d990-476e-a715-bd57670c5514/id-preview-fde599f6--89e715cb-c46a-44a5-b643-ba90c5fae66d.lovable.app-1784672489376.png" },
     ],
