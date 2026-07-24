@@ -450,6 +450,7 @@ function Home() {
           Summit · Built for focused revision
         </div>
       </footer>
+      <AICoach />
     </div>
   );
 }
@@ -918,7 +919,6 @@ function StatsPanel({
           </div>
         </div>
       </div>
-      <AICoach />
     </div>
   );
 }
