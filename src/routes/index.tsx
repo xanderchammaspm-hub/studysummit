@@ -553,13 +553,16 @@ function Legend({
   color,
   title,
   desc,
+  active,
 }: {
   color: string;
   title: string;
   desc: string;
+  active: "red" | "amber" | "green";
 }) {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-surface/60 p-4">
+      <TrafficLightIcon size={18} active={active} className="text-muted-foreground mt-0.5 shrink-0" />
       <span
         className="mt-1 h-3 w-3 shrink-0 rounded-full"
         style={{ background: color, boxShadow: `0 0 10px ${color}` }}
