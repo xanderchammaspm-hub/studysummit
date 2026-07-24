@@ -15,17 +15,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Study Hub — Year 11 & 12 Subjects" },
+      { title: "Summit — Year 11 & 12 Study Hub" },
       {
         name: "description",
         content:
-          "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject.",
+          "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject.",
       },
-      { property: "og:title", content: "Study Hub — Year 11 & 12 Subjects" },
+      { property: "og:title", content: "Summit — Year 11 & 12 Study Hub" },
       {
         property: "og:description",
         content:
-          "A personal study hub for Year 11 and Year 12 — past papers and a traffic light progress system for every subject.",
+          "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject.",
       },
     ],
   }),
