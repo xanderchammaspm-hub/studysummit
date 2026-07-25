@@ -125,6 +125,7 @@ export function useSubject(id: string) {
     papers: raw.papers ?? [],
     topics: raw.topics ?? [],
     assessments: raw.assessments ?? [],
+    notesUrl: raw.notesUrl,
   };
 
   const update = useCallback(
