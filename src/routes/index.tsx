@@ -4,6 +4,7 @@ import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, 
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import { AICoach } from "@/components/AICoach";
 import { MountainProgress } from "@/components/MountainProgress";
+import { StudyCalendar } from "@/components/StudyCalendar";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
   useSubjects,
