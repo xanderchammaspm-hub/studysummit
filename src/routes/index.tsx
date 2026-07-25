@@ -312,6 +312,10 @@ function Home() {
         </div>
       )}
 
+      {/* Study calendar */}
+      <StudyCalendar />
+
+
 
 
 
