@@ -15,6 +15,7 @@ export type SubjectState = {
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
+  notesUrl?: string;
 };
 
 export type YearKey = "Year 11" | "Year 12";
