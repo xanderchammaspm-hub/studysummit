@@ -322,6 +322,18 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               />
             </Section>
 
+            {/* Notes doc */}
+            <Section
+              icon={<NotebookPen className="h-4 w-4" />}
+              title="Notes Doc"
+            >
+              <NotesDocInput
+                url={state.notesUrl}
+                onChange={(notesUrl) => update({ notesUrl })}
+              />
+            </Section>
+
+
             {/* Assessment notifications */}
             <Section
               icon={<BellRing className="h-4 w-4" />}
