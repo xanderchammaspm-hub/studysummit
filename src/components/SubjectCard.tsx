@@ -9,6 +9,7 @@ import {
   Trash2,
   Check,
   BellRing,
+  NotebookPen,
 } from "lucide-react";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
