@@ -81,29 +81,97 @@ export function MountainProgress() {
       >
         <defs>
           <linearGradient id="mtn-body" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.45 0.16 295 / 0.55)" />
-            <stop offset="100%" stopColor="oklch(0.18 0.05 285 / 0.9)" />
+            <stop offset="0%" stopColor="oklch(0.55 0.2 300 / 0.85)" />
+            <stop offset="60%" stopColor="oklch(0.3 0.1 290 / 0.9)" />
+            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0.95)" />
+          </linearGradient>
+          <linearGradient id="mtn-back" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="oklch(0.35 0.14 300 / 0.55)" />
+            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
           </linearGradient>
           <linearGradient id="mtn-done" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0%" stopColor="oklch(0.75 0.22 300)" />
-            <stop offset="100%" stopColor="oklch(0.88 0.13 82)" />
+            <stop offset="100%" stopColor="oklch(0.9 0.14 82)" />
           </linearGradient>
           <linearGradient id="mtn-sky" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.3 0.1 300 / 0.15)" />
+            <stop offset="0%" stopColor="oklch(0.3 0.1 300 / 0.22)" />
             <stop offset="100%" stopColor="oklch(0.2 0.06 285 / 0)" />
           </linearGradient>
+          <radialGradient id="summit-glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stopColor="oklch(0.95 0.14 82 / 0.9)" />
+            <stop offset="100%" stopColor="oklch(0.9 0.13 82 / 0)" />
+          </radialGradient>
         </defs>
 
-        {/* faint sky wash */}
+        {/* Sky wash */}
         <rect x="0" y="0" width={W} height={H} fill="url(#mtn-sky)" />
+
+        {/* Twinkling stars */}
+        {[
+          [80, 40], [160, 70], [260, 30], [340, 90], [480, 45],
+          [560, 75], [640, 35], [700, 100], [140, 110], [420, 20],
+        ].map(([x, y], i) => (
+          <circle
+            key={`s${i}`}
+            cx={x}
+            cy={y}
+            r={i % 3 === 0 ? 1.6 : 1}
+            fill="oklch(0.95 0.05 285)"
+            style={{
+              animation: `twinkle ${2.4 + (i % 5) * 0.4}s ease-in-out ${i * 0.3}s infinite`,
+            }}
+          />
+        ))}
+
+        {/* Summit glow when near/at top */}
+        {progress >= 75 && (
+          <circle
+            cx={pts[4][0]}
+            cy={pts[4][1]}
+            r={60}
+            fill="url(#summit-glow)"
+            style={{ opacity: (progress - 60) / 40, transition: "opacity 900ms ease" }}
+          />
+        )}
+
+        {/* Drifting clouds */}
+        <g style={{ opacity: 0.35 }}>
+          <ellipse cx="0" cy="140" rx="55" ry="9" fill="oklch(0.9 0.03 285)"
+            style={{ animation: "cloudDrift 38s linear infinite" }} />
+          <ellipse cx="0" cy="210" rx="70" ry="11" fill="oklch(0.85 0.04 285)"
+            style={{ animation: "cloudDrift 55s linear -18s infinite" }} />
+          <ellipse cx="0" cy="90" rx="40" ry="7" fill="oklch(0.92 0.03 285)"
+            style={{ animation: "cloudDrift 46s linear -30s infinite" }} />
+        </g>
+
+        {/* Back mountain (parallax) */}
+        <path
+          d={`M-50,${H} L120,180 L280,120 L440,175 L620,90 L820,200 L${W + 50},${H} Z`}
+          fill="url(#mtn-back)"
+        />
 
         {/* Mountain body */}
         <path
           d={mountainPath}
           fill="url(#mtn-body)"
-          stroke="oklch(0.55 0.18 295 / 0.5)"
+          stroke="oklch(0.6 0.2 300 / 0.55)"
           strokeWidth="1.2"
         />
+
+        {/* Snow caps on peaks — grow with progress */}
+        {pts.map(([x, y], i) => {
+          const reached = progress >= CAMPS[i].pct;
+          const size = reached ? 14 + i * 2 : 6;
+          return (
+            <path
+              key={`snow${i}`}
+              d={`M${x - size},${y + size * 0.6} Q${x - size / 2},${y + 2} ${x},${y + size * 0.2} Q${x + size / 2},${y + 2} ${x + size},${y + size * 0.6} Z`}
+              fill="oklch(0.98 0.01 285)"
+              opacity={reached ? 0.9 : 0.25}
+              style={{ transition: "all 700ms ease" }}
+            />
+          );
+        })}
 
         {/* Ridge base */}
         <path d={ridgePath} fill="none" stroke="oklch(0.4 0.1 285)" strokeWidth="2" />
@@ -113,14 +181,14 @@ export function MountainProgress() {
           d={ridgePath}
           fill="none"
           stroke="url(#mtn-done)"
-          strokeWidth="3.5"
+          strokeWidth="4"
           strokeLinecap="round"
           pathLength={100}
           strokeDasharray="100"
           strokeDashoffset={100 - progress}
           style={{
-            transition: "stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1)",
-            filter: "drop-shadow(0 0 6px oklch(0.7 0.22 300 / 0.6))",
+            transition: "stroke-dashoffset 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+            filter: "drop-shadow(0 0 8px oklch(0.75 0.22 300 / 0.75))",
           }}
         />
 
@@ -135,14 +203,14 @@ export function MountainProgress() {
                 cx={x}
                 cy={y}
                 r={reached ? 7 : 5}
-                fill={reached ? "oklch(0.88 0.13 82)" : "oklch(0.25 0.05 285)"}
-                stroke={reached ? "oklch(0.95 0.05 82)" : "oklch(0.55 0.18 295 / 0.7)"}
+                fill={reached ? "oklch(0.9 0.14 82)" : "oklch(0.25 0.05 285)"}
+                stroke={reached ? "oklch(0.96 0.06 82)" : "oklch(0.55 0.18 295 / 0.7)"}
                 strokeWidth="2"
                 style={{
                   filter: reached
-                    ? "drop-shadow(0 0 8px oklch(0.88 0.13 82 / 0.75))"
+                    ? "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.85))"
                     : "none",
-                  transition: "all 500ms ease",
+                  transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               />
               <text
@@ -169,25 +237,38 @@ export function MountainProgress() {
           );
         })}
 
-        {/* Hiker marker */}
+        {/* Hiker marker with pulsing ring */}
         <g
           style={{
             transform: `translate(${mx}px, ${my - 18}px)`,
-            transition: "transform 900ms cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
           <circle
             r="11"
-            fill="oklch(0.7 0.22 300)"
-            stroke="oklch(0.98 0.02 285)"
+            fill="none"
+            stroke="oklch(0.85 0.15 300)"
             strokeWidth="2"
-            style={{ filter: "drop-shadow(0 0 12px oklch(0.7 0.22 300 / 0.9))" }}
+            style={{
+              animation: "ringPulse 1.8s ease-out infinite",
+              transformOrigin: "center",
+            }}
           />
-          <text y="4" textAnchor="middle" fontSize="12" style={{ pointerEvents: "none" }}>
-            🚩
-          </text>
+          <g style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}>
+            <circle
+              r="11"
+              fill="oklch(0.72 0.22 300)"
+              stroke="oklch(0.98 0.02 285)"
+              strokeWidth="2"
+              style={{ filter: "drop-shadow(0 0 14px oklch(0.75 0.24 305 / 0.95))" }}
+            />
+            <text y="4" textAnchor="middle" fontSize="12" style={{ pointerEvents: "none" }}>
+              🚩
+            </text>
+          </g>
         </g>
       </svg>
+
 
       {/* Progress bar to next camp */}
       <div className="mt-4">
