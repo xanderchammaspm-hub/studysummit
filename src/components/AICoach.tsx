@@ -28,6 +28,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { studyKit } from "@/lib/ai.functions";
+import { SummitLogo } from "@/components/SummitLogo";
 
 /* --------------------------------- Chat --------------------------------- */
 
