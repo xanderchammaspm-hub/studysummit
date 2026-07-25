@@ -94,9 +94,7 @@ export function AICoach() {
           <SheetHeader className="border-b border-border/60 px-4 py-3 space-y-0">
             <div className="flex items-center justify-between gap-3">
               <SheetTitle className="flex items-center gap-2 text-base">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 shadow-[0_0_12px_oklch(0.7_0.22_300_/_0.6)]">
-                  <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
-                </div>
+                <SummitLogo size={26} />
                 <span>Atlas AI</span>
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-normal">
                   Study coach

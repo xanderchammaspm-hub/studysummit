@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GraduationCap, Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Settings, BookOpen, FileText, BellRing } from "lucide-react";
+import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Settings, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import { AICoach } from "@/components/AICoach";
 import { MountainProgress } from "@/components/MountainProgress";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
+import { SummitLogo } from "@/components/SummitLogo";
 import {
   useSubjects,
   useAllSubjectStates,
@@ -185,13 +186,13 @@ function Home() {
       <header className="border-b border-border/60 backdrop-blur-md sticky top-0 z-30 bg-background/70">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg purple-outline pulse-glow">
-              <GraduationCap className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground -mb-1">Study</div>
+            <SummitLogo size={38} />
+            <div className="leading-tight">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                HSC Study
+              </div>
               <div className="text-lg font-semibold tracking-tight gradient-text">
-                Hub
+                Summit
               </div>
             </div>
           </div>
@@ -451,8 +452,9 @@ function Home() {
       </main>
 
       <footer className="border-t border-border/60 mt-8">
-        <div className="mx-auto max-w-6xl px-6 py-6 text-center text-xs text-muted-foreground">
-          Summit · Built for focused revision
+        <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <SummitLogo size={18} glow={false} />
+          <span>Summit · Built for focused revision</span>
         </div>
       </footer>
       <AICoach />

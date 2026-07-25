@@ -252,4 +252,41 @@
   box-shadow: 0 0 6px var(--color-primary);
 }
 
+@utility summit-logo-glow {
+  filter: drop-shadow(0 0 10px oklch(0.7 0.22 300 / 0.55))
+          drop-shadow(0 0 18px oklch(0.85 0.14 82 / 0.18));
+  transition: filter 400ms ease, transform 400ms ease;
+}
+.summit-logo-glow:hover {
+  filter: drop-shadow(0 0 14px oklch(0.75 0.24 305 / 0.75))
+          drop-shadow(0 0 22px oklch(0.88 0.14 82 / 0.28));
+  transform: translateY(-1px) scale(1.03);
+}
+
+@keyframes hikerFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}
+@keyframes cloudDrift {
+  from { transform: translateX(-10%); }
+  to { transform: translateX(110%); }
+}
+@keyframes ringPulse {
+  0% { r: 11; opacity: 0.7; }
+  100% { r: 26; opacity: 0; }
+}
+@keyframes barFill {
+  from { width: 0%; }
+}
+
+@utility bar-fill-anim {
+  animation: barFill 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+
 
