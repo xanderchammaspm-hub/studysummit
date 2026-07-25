@@ -623,3 +623,96 @@ function Section({
     </div>
   );
 }
+
+function NotesDocInput({
+  url,
+  onChange,
+}: {
+  url: string | undefined;
+  onChange: (v: string | undefined) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(url ?? "");
+  const save = () => {
+    const v = draft.trim();
+    onChange(v || undefined);
+    setEditing(false);
+  };
+  if (!url && !editing) {
+    return (
+      <button
+        onClick={() => {
+          setDraft("");
+          setEditing(true);
+        }}
+        className="w-full rounded-md border border-dashed border-border/70 bg-surface/40 px-3 py-2 text-left text-xs text-muted-foreground hover:border-primary/60 hover:text-primary transition-colors"
+      >
+        <Plus className="inline h-3.5 w-3.5 mr-1" />
+        Paste a Google Docs link for your summary notes
+      </button>
+    );
+  }
+  if (editing) {
+    return (
+      <div className="flex gap-2">
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          placeholder="https://docs.google.com/document/…"
+          className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+        />
+        <button
+          onClick={save}
+          className="flex items-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+        >
+          <Check className="h-4 w-4" /> Save
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-border/60 bg-surface/60 px-3 py-2">
+      <NotebookPen className="h-4 w-4 text-primary shrink-0" />
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="flex-1 truncate text-sm text-foreground hover:text-primary"
+      >
+        {url!.replace(/^https?:\/\//, "")}
+      </a>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="text-primary/80 hover:text-primary"
+        title="Open notes"
+      >
+        <ExternalLink className="h-3.5 w-3.5" />
+      </a>
+      <button
+        onClick={() => {
+          setDraft(url ?? "");
+          setEditing(true);
+        }}
+        className="text-muted-foreground hover:text-primary"
+        aria-label="Edit notes link"
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </button>
+      <button
+        onClick={() => onChange(undefined)}
+        className="text-muted-foreground hover:text-destructive"
+        aria-label="Remove notes link"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
