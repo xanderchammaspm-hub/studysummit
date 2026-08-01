@@ -192,8 +192,11 @@ export type QuickLink = { id: string; label: string; url: string; emoji?: string
 
 const LINKS_KEY = "study-hub-links-v1";
 const defaultLinks: QuickLink[] = [
-  { id: "sudoku", label: "Sudoku", url: "", emoji: "🧩" },
+  { id: "studoco", label: "Studoco", url: "", emoji: "📚" },
   { id: "atomi", label: "Atomi", url: "", emoji: "⚛️" },
+  { id: "thsc", label: "THSC", url: "", emoji: "📝" },
+  { id: "nesa", label: "NESA", url: "", emoji: "🏛️" },
+  { id: "oakhill", label: "Oakhill Past Papers", url: "", emoji: "🗂️" },
 ];
 
 function loadLinks(): QuickLink[] {
@@ -202,11 +205,22 @@ function loadLinks(): QuickLink[] {
     const raw = localStorage.getItem(LINKS_KEY);
     if (!raw) return defaultLinks;
     const parsed = JSON.parse(raw) as QuickLink[];
-    return Array.isArray(parsed) && parsed.length ? parsed : defaultLinks;
+    if (!Array.isArray(parsed) || !parsed.length) return defaultLinks;
+    // migrate: sudoku -> studoco, and ensure new default tiles exist
+    const migrated = parsed.map((l) =>
+      l.id === "sudoku"
+        ? { ...l, id: "studoco", label: "Studoco", emoji: l.iconUrl ? l.emoji : "📚" }
+        : l,
+    );
+    for (const d of defaultLinks) {
+      if (!migrated.some((l) => l.id === d.id)) migrated.push(d);
+    }
+    return migrated;
   } catch {
     return defaultLinks;
   }
 }
+
 
 let linksCache: QuickLink[] | null = null;
 const linkListeners = new Set<() => void>();
