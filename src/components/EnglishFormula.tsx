@@ -68,14 +68,14 @@ export function EnglishFormula() {
   const part = PARTS.find((p) => p.id === activePart) ?? null;
 
   const transform = useMemo(() => {
-    if (!part) return "translate(0px,0px) scale(1)";
+    if (!part) return "translate(0,0) scale(1)";
     const { x, y, w, h } = part.focus;
     const scale = Math.min(VB.w / w, VB.h / h, 3.2);
     const cx = x + w / 2;
     const cy = y + h / 2;
     const tx = VB.w / 2 - cx * scale;
     const ty = VB.h / 2 - cy * scale;
-    return `translate(${tx}px,${ty}px) scale(${scale})`;
+    return `translate(${tx},${ty}) scale(${scale})`;
   }, [part]);
 
   const reveal = () => {
@@ -164,10 +164,8 @@ export function EnglishFormula() {
                   </defs>
 
                   <g
+                    transform={transform}
                     style={{
-                      transform,
-                      transformBox: "view-box",
-                      transformOrigin: "0 0",
                       transition:
                         "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
                     }}
