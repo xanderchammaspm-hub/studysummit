@@ -7,6 +7,8 @@ import { MountainProgress } from "@/components/MountainProgress";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo } from "@/components/SummitLogo";
+import { EnglishFormula } from "@/components/EnglishFormula";
+
 import {
   useSubjects,
   useAllSubjectStates,
