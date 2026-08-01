@@ -7,6 +7,8 @@ import { MountainProgress } from "@/components/MountainProgress";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo } from "@/components/SummitLogo";
+import { EnglishFormula } from "@/components/EnglishFormula";
+
 import {
   useSubjects,
   useAllSubjectStates,
@@ -447,9 +449,13 @@ function Home() {
                 />
               </div>
             </div>
+
+            {/* English Formula */}
+            <EnglishFormula />
           </>
         )}
       </main>
+
 
       <footer className="border-t border-border/60 mt-8">
         <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
