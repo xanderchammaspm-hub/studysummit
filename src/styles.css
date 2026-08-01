@@ -290,3 +290,41 @@
 
 
 
+
+/* ---------- English Formula ---------- */
+.ef-prompt {
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 300ms ease, border-color 300ms ease, transform 300ms ease;
+}
+.ef-prompt:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent),
+    0 12px 40px -12px color-mix(in oklab, var(--primary) 55%, transparent),
+    0 0 24px -8px color-mix(in oklab, var(--yellow) 30%, transparent);
+}
+
+.ef-editor:empty::before {
+  content: "";
+}
+.ef-editor ul { list-style: disc; padding-left: 1.25rem; }
+.ef-editor ol { list-style: decimal; padding-left: 1.25rem; }
+.ef-editor a { color: var(--primary); text-decoration: underline; }
+.ef-editor table,
+.ef-editor .ef-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+}
+.ef-editor th,
+.ef-editor td {
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+  min-width: 4rem;
+}
+.ef-editor th {
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  text-align: left;
+  font-weight: 600;
+}
