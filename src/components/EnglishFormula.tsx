@@ -1,14 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Maximize2, PenLine, Sparkles } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
+import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 
-type Part = {
-  id: string;
-  title: string;
-  sub: string;
-  hint: string;
-  focus: { x: number; y: number; w: number; h: number };
-};
+type Part = { id: string; title: string; sub: string; hint: string };
 
 const PARTS: Part[] = [
   {
@@ -16,35 +11,30 @@ const PARTS: Part[] = [
     title: "Skull",
     sub: "Introduction",
     hint: "The thinking head — context, text, thesis.",
-    focus: { x: 60, y: 8, w: 80, h: 80 },
   },
   {
     id: "spine",
     title: "Spine",
     sub: "Thesis Statement",
     hint: "The line that holds every paragraph upright.",
-    focus: { x: 62, y: 78, w: 76, h: 76 },
   },
   {
     id: "vertebrae",
     title: "Vertebrae",
     sub: "Sub-Theses / Topic Sentences",
     hint: "Each disc is one argument, stacked in order.",
-    focus: { x: 62, y: 140, w: 76, h: 76 },
   },
   {
     id: "limbs",
     title: "Arms & Legs",
     sub: "Body Paragraphs & Evidence",
     hint: "Where the essay does its work — technique, quote, effect.",
-    focus: { x: 18, y: 96, w: 164, h: 170 },
   },
   {
     id: "feet",
     title: "Feet",
     sub: "Conclusion",
     hint: "Where the argument lands and holds its ground.",
-    focus: { x: 42, y: 300, w: 116, h: 90 },
   },
 ];
 
@@ -55,30 +45,70 @@ const DOC_SECTIONS = [
   { id: "flowing-phrases", label: "Flowing Phrases" },
   { id: "structure", label: "Structure" },
   { id: "comparative", label: "Comparative Structure" },
+  { id: "memorisation", label: "Memorisation Technique" },
 ] as const;
 
-const VB = { w: 200, h: 400 };
+const VB = { w: 200, h: 420 };
+const PAD = 18;
 
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
   const [activePart, setActivePart] = useState<string | null>(null);
   const [section, setSection] = useState<string>("skeleton");
+  const [transform, setTransform] = useState("translate(0,0) scale(1)");
+  const [pop, setPop] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const groupsRef = useRef<Record<string, SVGGElement | null>>({});
 
   const part = PARTS.find((p) => p.id === activePart) ?? null;
 
-  const transform = useMemo(() => {
-    if (!part) return "translate(0,0) scale(1)";
-    const { x, y, w, h } = part.focus;
-    const scale = Math.min(VB.w / w, VB.h / h, 3.2);
-    const cx = x + w / 2;
-    const cy = y + h / 2;
-    const tx = VB.w / 2 - cx * scale;
-    const ty = VB.h / 2 - cy * scale;
-    return `translate(${tx},${ty}) scale(${scale})`;
-  }, [part]);
+  const reduced = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
 
-  const reveal = () => {
+  const focus = useCallback((id: string | null) => {
+    if (!id) {
+      setTransform("translate(0,0) scale(1)");
+      return;
+    }
+    const el = groupsRef.current[id];
+    if (!el) return;
+    let box: DOMRect;
+    try {
+      box = el.getBBox() as DOMRect;
+    } catch {
+      return;
+    }
+    if (!box.width || !box.height) return;
+    const w = box.width + PAD * 2;
+    const h = box.height + PAD * 2;
+    const scale = Math.max(1, Math.min(VB.w / w, VB.h / h, 3.4));
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    setTransform(
+      `translate(${VB.w / 2 - cx * scale},${VB.h / 2 - cy * scale}) scale(${scale})`,
+    );
+  }, []);
+
+  const pick = (id: string | null) => {
+    setActivePart(id);
+    setPop((n) => n + 1);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => focus(activePart), 20);
+    return () => window.clearTimeout(t);
+  }, [activePart, open, focus]);
+
+  const toggle = () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
     setOpen(true);
     window.setTimeout(
       () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
@@ -92,7 +122,8 @@ export function EnglishFormula() {
     <div className="mx-auto max-w-6xl px-6 mt-16">
       {/* Prompt card */}
       <button
-        onClick={reveal}
+        onClick={toggle}
+        aria-expanded={open}
         className="ef-prompt group w-full rounded-2xl border border-border/60 bg-card/50 px-6 py-7 text-left transition-all duration-300 hover:border-primary/70"
       >
         <div className="flex items-center gap-4">
@@ -104,8 +135,9 @@ export function EnglishFormula() {
               English Formula
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              The skeleton of a band 6 essay — click through each bone to build
-              your own notes.
+              {open
+                ? "Click to close the Skeleton Essay Explorer."
+                : "The skeleton of a band 6 essay — click through each bone to build your own notes."}
             </p>
           </div>
           <ChevronDown
@@ -141,53 +173,79 @@ export function EnglishFormula() {
           {section === "skeleton" ? (
             <div className="grid gap-4 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)]">
               {/* Skeleton viewer */}
-              <div className="relative purple-outline rounded-2xl bg-card/50 p-3 overflow-hidden">
+              <div className="ef-stage relative purple-outline rounded-2xl p-3 overflow-hidden">
                 <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+                <div
+                  className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
+                    part ? "opacity-100" : "opacity-0"
+                  }`}
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 45%, transparent 30%, color-mix(in oklab, var(--background) 78%, transparent) 100%)",
+                  }}
+                />
                 <svg
                   viewBox={`0 0 ${VB.w} ${VB.h}`}
-                  className="h-[420px] w-full sm:h-[520px]"
+                  className="relative h-[420px] w-full sm:h-[540px]"
                   role="img"
-                  aria-label="Interactive essay skeleton"
+                  aria-label="Interactive anatomical essay skeleton"
                 >
                   <defs>
                     <linearGradient id="ef-bone" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.9 0.02 285)" />
-                      <stop offset="100%" stopColor="oklch(0.7 0.04 290)" />
+                      <stop offset="0%" stopColor="oklch(0.93 0.02 285)" />
+                      <stop offset="100%" stopColor="oklch(0.72 0.05 292)" />
                     </linearGradient>
-                    <filter id="ef-glow" x="-60%" y="-60%" width="220%" height="220%">
-                      <feGaussianBlur stdDeviation="2.4" result="b" />
-                      <feMerge>
-                        <feMergeNode in="b" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
+                    <filter id="ef-glow" x="-70%" y="-70%" width="240%" height="240%">
+                      <feDropShadow
+                        dx="0"
+                        dy="0"
+                        stdDeviation="2.6"
+                        floodColor="var(--primary)"
+                        floodOpacity="0.95"
+                      />
+                      <feDropShadow
+                        dx="0"
+                        dy="0"
+                        stdDeviation="6"
+                        floodColor="var(--primary)"
+                        floodOpacity="0.55"
+                      />
                     </filter>
                   </defs>
 
                   <g
+                    key={pop}
                     transform={transform}
                     style={{
-                      transition:
-                        "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+                      transition: reduced
+                        ? "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)"
+                        : "transform 620ms cubic-bezier(0.34, 1.56, 0.64, 1)",
                     }}
                   >
-                    <Skeleton active={activePart} onPick={setActivePart} />
+                    <Skeleton
+                      active={activePart}
+                      onPick={pick}
+                      register={(id, el) => {
+                        groupsRef.current[id] = el;
+                      }}
+                    />
                   </g>
                 </svg>
 
                 {part && (
                   <button
-                    onClick={() => setActivePart(null)}
+                    onClick={() => pick(null)}
                     className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-border/60 bg-surface/80 px-2.5 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur hover:border-primary/60 hover:text-foreground transition-colors"
                   >
                     <Maximize2 className="h-3 w-3" /> Reset view
                   </button>
                 )}
 
-                <div className="mt-1 flex flex-wrap gap-1.5">
+                <div className="relative mt-1 flex flex-wrap gap-1.5">
                   {PARTS.map((p) => (
                     <button
                       key={p.id}
-                      onClick={() => setActivePart(p.id)}
+                      onClick={() => pick(p.id)}
                       className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                         activePart === p.id
                           ? "border-primary bg-primary/20 text-foreground"
@@ -243,6 +301,14 @@ export function EnglishFormula() {
               <h4 className="mt-1 mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                 English Formula
               </h4>
+              {section === "memorisation" && (
+                <div className="mb-4">
+                  <MemoriseLinkBox
+                    storageKey="memorise-by-heart"
+                    label="Memorise By Heart"
+                  />
+                </div>
+              )}
               <RichEditor
                 storageKey={`doc-${section}`}
                 placeholder="Add a table, list or notes — formatting is saved automatically…"
@@ -279,74 +345,127 @@ function TabChip({
   );
 }
 
+/* ---------- Anatomical skeleton ---------- */
+
+const RIBS = Array.from({ length: 9 }).map((_, i) => {
+  const y = 104 + i * 6.4;
+  const spread = 30 - Math.abs(i - 3) * 1.6 - (i > 5 ? (i - 5) * 3.6 : 0);
+  const drop = 14 + i * 0.8;
+  return { y, spread, drop };
+});
+
+function Mirror({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {children}
+      <g transform="translate(200,0) scale(-1,1)">{children}</g>
+    </>
+  );
+}
+
 function Skeleton({
   active,
   onPick,
+  register,
 }: {
   active: string | null;
   onPick: (id: string) => void;
+  register: (id: string, el: SVGGElement | null) => void;
 }) {
   const props = (id: string) => ({
+    ref: (el: SVGGElement | null) => register(id, el),
     onClick: () => onPick(id),
     className: "ef-part",
     style: {
       cursor: "pointer",
       filter: active === id ? "url(#ef-glow)" : undefined,
-      stroke: active === id ? "var(--primary)" : "url(#ef-bone)",
-      fill: active === id ? "color-mix(in oklab, var(--primary) 22%, transparent)" : "oklch(0.9 0.02 285 / 0.12)",
-      strokeWidth: active === id ? 2 : 1.4,
-      opacity: active && active !== id ? 0.35 : 1,
-      transition: "all 400ms ease",
+      stroke: active === id ? "var(--primary)" : "color-mix(in oklab, var(--primary) 30%, oklch(0.85 0.02 285))",
+      fill:
+        active === id
+          ? "color-mix(in oklab, var(--primary) 20%, transparent)"
+          : "oklch(0.9 0.02 285 / 0.10)",
+      strokeWidth: active === id ? 1.6 : 1.1,
+      opacity: active && active !== id ? 0.24 : 1,
+      transition: "opacity 450ms ease, stroke 450ms ease, fill 450ms ease, stroke-width 450ms ease",
     } as React.CSSProperties,
   });
 
   return (
     <g strokeLinecap="round" strokeLinejoin="round">
-      {/* Skull */}
+      {/* SKULL */}
       <g {...props("skull")}>
-        <ellipse cx="100" cy="40" rx="22" ry="24" />
-        <path d="M84 58 h32 v10 a16 8 0 0 1 -32 0 z" />
-        <circle cx="92" cy="38" r="4" fill="var(--background)" />
-        <circle cx="108" cy="38" r="4" fill="var(--background)" />
+        <path d="M100 10c-19 0-31 14-31 31 0 11 3 17 6 21l2 9c1 5 7 8 13 8h20c6 0 12-3 13-8l2-9c3-4 6-10 6-21 0-17-12-31-31-31z" />
+        <path d="M78 34c4-7 12-11 22-11s18 4 22 11" fill="none" />
+        <ellipse cx="89" cy="44" rx="7.5" ry="7" fill="var(--background)" />
+        <ellipse cx="111" cy="44" rx="7.5" ry="7" fill="var(--background)" />
+        <path d="M100 52l-4.5 10h9z" fill="var(--background)" />
+        <path d="M86 68h28" fill="none" />
+        <path d="M86 68q14 14 28 0 0 12-14 12t-14-12z" />
+        <path d="M92 68v6M100 68v6M108 68v6" fill="none" />
       </g>
 
-      {/* Spine — upper column + ribs */}
+      {/* SPINE — cervical, clavicles, scapulae, sternum, ribcage */}
       <g {...props("spine")}>
-        <rect x="96" y="72" width="8" height="12" rx="3" />
-        <rect x="96" y="86" width="8" height="12" rx="3" />
-        <rect x="96" y="100" width="8" height="12" rx="3" />
-        <rect x="70" y="96" width="60" height="6" rx="3" />
-        <path d="M100 112 q-26 6 -30 20" />
-        <path d="M100 112 q26 6 30 20" />
-        <path d="M100 124 q-24 6 -27 18" />
-        <path d="M100 124 q24 6 27 18" />
+        <rect x="96" y="82" width="8" height="6" rx="2.4" />
+        <rect x="96" y="90" width="8" height="6" rx="2.4" />
+        <path d="M98 98h4v58h-4z" />
+        <Mirror>
+          <path d="M99 100C90 96 80 95 74 98" fill="none" />
+          <path d="M76 102c-6 6-6 16-1 22" fill="none" />
+        </Mirror>
+        <rect x="96.5" y="100" width="7" height="26" rx="3" />
+        {RIBS.map((r, i) => (
+          <Mirror key={i}>
+            <path
+              d={`M98 ${r.y}C${98 - r.spread} ${r.y - 2},${98 - r.spread - 6} ${r.y + r.drop * 0.5},${98 - r.spread * 0.65} ${r.y + r.drop}`}
+              fill="none"
+            />
+          </Mirror>
+        ))}
       </g>
 
-      {/* Vertebrae — lumbar stack + pelvis */}
+      {/* VERTEBRAE — lumbar, sacrum, pelvis */}
       <g {...props("vertebrae")}>
-        <rect x="95" y="146" width="10" height="12" rx="3" />
-        <rect x="95" y="160" width="10" height="12" rx="3" />
-        <rect x="95" y="174" width="10" height="12" rx="3" />
-        <rect x="95" y="188" width="10" height="12" rx="3" />
-        <path d="M76 206 q24 22 48 0 q6 18 -10 24 h-28 q-16 -6 -10 -24 z" />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <g key={i}>
+            <rect x="94" y={160 + i * 9} width="12" height="7" rx="2.6" />
+            <path d={`M94 ${163.5 + i * 9}h-7M106 ${163.5 + i * 9}h7`} fill="none" />
+          </g>
+        ))}
+        <path d="M92 205h16l-4 16h-8z" />
+        <Mirror>
+          <path d="M100 206c-9-8-20-11-27-8-3 12-1 24 6 31 6 6 9 8 10 15h11" fill="none" />
+          <path d="M86 226c-6-1-9 4-8 9 1 5 6 8 10 6 4-2 4-11-2-15z" />
+        </Mirror>
       </g>
 
-      {/* Arms & legs */}
+      {/* ARMS & LEGS */}
       <g {...props("limbs")}>
-        <path d="M74 100 L52 148 L40 196" />
-        <path d="M126 100 L148 148 L160 196" />
-        <circle cx="38" cy="202" r="5" />
-        <circle cx="162" cy="202" r="5" />
-        <path d="M88 230 L80 286 L76 320" />
-        <path d="M112 230 L120 286 L124 320" />
-        <circle cx="80" cy="286" r="5" />
-        <circle cx="120" cy="286" r="5" />
+        <Mirror>
+          {/* humerus */}
+          <path d="M77 104c-6 18-8 34-6 48" fill="none" strokeWidth={2.2} />
+          {/* radius + ulna */}
+          <path d="M71 154c-4 16-8 30-9 40" fill="none" />
+          <path d="M75 155c-2 16-5 29-6 39" fill="none" />
+          {/* hand */}
+          <path d="M62 196c-3 3-4 8-1 10l6 4 4-2" fill="none" />
+          <path d="M60 204l-4 8M63 207l-3 9M67 209l-2 9M70 210l-1 8" fill="none" />
+          {/* femur */}
+          <path d="M90 244c-4 22-5 42-4 58" fill="none" strokeWidth={2.4} />
+          {/* patella */}
+          <circle cx="86" cy="306" r="4" />
+          {/* tibia + fibula */}
+          <path d="M86 312c-1 22-2 42-2 56" fill="none" strokeWidth={2} />
+          <path d="M91 312c1 20 1 38 0 54" fill="none" />
+        </Mirror>
       </g>
 
-      {/* Feet */}
+      {/* FEET */}
       <g {...props("feet")}>
-        <path d="M76 320 q-2 12 -14 14 q-4 6 6 8 h20 q6 -4 2 -12 z" />
-        <path d="M124 320 q2 12 14 14 q4 6 -6 8 h-20 q-6 -4 -2 -12 z" />
+        <Mirror>
+          <path d="M80 370c-1 8-1 12-6 15-6 4-12 6-11 11 1 4 8 4 14 4h17c4 0 6-3 6-7l-1-23z" />
+          <path d="M63 394l6 2M67 390l6 2M71 386l6 2" fill="none" />
+        </Mirror>
       </g>
     </g>
   );
