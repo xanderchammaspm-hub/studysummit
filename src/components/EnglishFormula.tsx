@@ -50,61 +50,16 @@ const DOC_SECTIONS = [
   { id: "memorisation", label: "Memorisation Technique" },
 ] as const;
 
-const VB = { w: 200, h: 420 };
-const PAD = 18;
-
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
   const [activePart, setActivePart] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [section, setSection] = useState<string>("skeleton");
-  const [transform, setTransform] = useState("translate(0,0) scale(1)");
-  const [pop, setPop] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const groupsRef = useRef<Record<string, SVGGElement | null>>({});
 
   const part = PARTS.find((p) => p.id === activePart) ?? null;
 
-  const reduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
-
-  const focus = useCallback((id: string | null) => {
-    if (!id) {
-      setTransform("translate(0,0) scale(1)");
-      return;
-    }
-    const el = groupsRef.current[id];
-    if (!el) return;
-    let box: DOMRect;
-    try {
-      box = el.getBBox() as DOMRect;
-    } catch {
-      return;
-    }
-    if (!box.width || !box.height) return;
-    const w = box.width + PAD * 2;
-    const h = box.height + PAD * 2;
-    const scale = Math.max(1, Math.min(VB.w / w, VB.h / h, 3.4));
-    const cx = box.x + box.width / 2;
-    const cy = box.y + box.height / 2;
-    setTransform(
-      `translate(${VB.w / 2 - cx * scale},${VB.h / 2 - cy * scale}) scale(${scale})`,
-    );
-  }, []);
-
-  const pick = (id: string | null) => {
-    setActivePart(id);
-    setPop((n) => n + 1);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    const t = window.setTimeout(() => focus(activePart), 20);
-    return () => window.clearTimeout(t);
-  }, [activePart, open, focus]);
+  const pick = (id: string | null) => setActivePart(id);
 
   const toggle = () => {
     if (open) {
@@ -119,6 +74,7 @@ export function EnglishFormula() {
   };
 
   const docSection = DOC_SECTIONS.find((s) => s.id === section);
+
 
   return (
     <div className="mx-auto max-w-6xl px-6 mt-16">
