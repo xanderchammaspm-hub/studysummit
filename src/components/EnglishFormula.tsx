@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronDown, Maximize2, PenLine, Sparkles } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
+import { SkeletonFigure } from "@/components/SkeletonFigure";
+
 
 type Part = { id: string; title: string; sub: string; hint: string };
 
