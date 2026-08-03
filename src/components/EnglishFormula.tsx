@@ -142,53 +142,14 @@ export function EnglishFormula() {
                       "radial-gradient(circle at 50% 45%, transparent 30%, color-mix(in oklab, var(--background) 78%, transparent) 100%)",
                   }}
                 />
-                <svg
-                  viewBox={`0 0 ${VB.w} ${VB.h}`}
-                  className="relative h-[420px] w-full sm:h-[540px]"
-                  role="img"
-                  aria-label="Interactive anatomical essay skeleton"
-                >
-                  <defs>
-                    <linearGradient id="ef-bone" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.93 0.02 285)" />
-                      <stop offset="100%" stopColor="oklch(0.72 0.05 292)" />
-                    </linearGradient>
-                    <filter id="ef-glow" x="-70%" y="-70%" width="240%" height="240%">
-                      <feDropShadow
-                        dx="0"
-                        dy="0"
-                        stdDeviation="2.6"
-                        floodColor="var(--primary)"
-                        floodOpacity="0.95"
-                      />
-                      <feDropShadow
-                        dx="0"
-                        dy="0"
-                        stdDeviation="6"
-                        floodColor="var(--primary)"
-                        floodOpacity="0.55"
-                      />
-                    </filter>
-                  </defs>
+                <SkeletonFigure
+                  className="relative h-[440px] w-full sm:h-[560px]"
+                  active={activePart}
+                  hovered={hovered}
+                  onPick={pick}
+                  onHover={setHovered}
+                />
 
-                  <g
-                    key={pop}
-                    transform={transform}
-                    style={{
-                      transition: reduced
-                        ? "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)"
-                        : "transform 620ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-                    }}
-                  >
-                    <Skeleton
-                      active={activePart}
-                      onPick={pick}
-                      register={(id, el) => {
-                        groupsRef.current[id] = el;
-                      }}
-                    />
-                  </g>
-                </svg>
 
                 {part && (
                   <button
