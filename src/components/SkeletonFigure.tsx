@@ -107,7 +107,13 @@ export function SkeletonFigure({
 
         {/* Lit region, clipped from the same vector */}
         {lit && (
-          <g filter="url(#ef-neon)">
+          <g
+            style={{
+              filter:
+                "drop-shadow(0 0 5px var(--primary)) drop-shadow(0 0 14px var(--primary))",
+            }}
+          >
+
             <g clipPath={`url(#ef-clip-${lit})`}>
               <g transform={SKELETON_TRANSFORM}>
                 <path
