@@ -76,22 +76,7 @@ export function SkeletonFigure({
       aria-label="Interactive anatomical essay skeleton"
     >
       <defs>
-        <filter id="ef-neon" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="5"
-            floodColor="var(--primary)"
-            floodOpacity="0.95"
-          />
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="16"
-            floodColor="var(--primary)"
-            floodOpacity="0.5"
-          />
-        </filter>
+
         {ZONES.map((z) => (
           <clipPath key={z.id} id={`ef-clip-${z.id}`}>
             {z.rects.map((r, i) => (
