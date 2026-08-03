@@ -106,8 +106,8 @@ export function SkeletonFigure({
         animate={{ x: t.x, y: t.y, scale: t.scale }}
         transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
       >
+        {/* Base figure */}
         <g transform={SKELETON_TRANSFORM}>
-          {/* Base figure */}
           <path
             d={SKELETON_PATH}
             fill="color-mix(in oklab, var(--primary) 62%, oklch(0.9 0.02 285))"
@@ -118,20 +118,24 @@ export function SkeletonFigure({
               transition: "opacity 450ms ease",
             }}
           />
-
-          {/* Lit region, clipped from the same vector */}
-          {lit && (
-            <g clipPath={`url(#ef-clip-${lit})`}>
-              <path
-                d={SKELETON_PATH}
-                fill="oklch(0.97 0.02 290)"
-                stroke="var(--primary)"
-                strokeWidth={1.5}
-                filter="url(#ef-neon)"
-              />
-            </g>
-          )}
         </g>
+
+        {/* Lit region, clipped from the same vector */}
+        {lit && (
+          <g filter="url(#ef-neon)">
+            <g clipPath={`url(#ef-clip-${lit})`}>
+              <g transform={SKELETON_TRANSFORM}>
+                <path
+                  d={SKELETON_PATH}
+                  fill="oklch(0.97 0.02 290)"
+                  stroke="var(--primary)"
+                  strokeWidth={1.5}
+                />
+              </g>
+            </g>
+          </g>
+        )}
+
 
         {/* Click targets */}
         {ZONES.map((z) => (
