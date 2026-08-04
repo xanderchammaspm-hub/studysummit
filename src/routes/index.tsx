@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Settings, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
@@ -199,7 +199,15 @@ function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              to="/exam"
+              className="hidden md:inline-flex items-center gap-2 rounded-full purple-outline purple-glow-hover bg-surface/60 px-4 py-1.5 text-sm"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-yellow" />
+              Exam Engine
+            </Link>
             <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
+
               {YEARS.map((y) => (
                 <button
                   key={y}

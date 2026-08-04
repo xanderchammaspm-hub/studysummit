@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
+  ClientOnly,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -11,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SummitSplash } from "@/components/SummitSplash";
+
 
 function NotFoundComponent() {
   return (
@@ -129,8 +132,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ClientOnly fallback={null}>
+        <SummitSplash />
+      </ClientOnly>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
 }
+
