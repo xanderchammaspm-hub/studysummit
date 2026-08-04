@@ -14,7 +14,235 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attempt_answers: {
+        Row: {
+          attempt_id: string
+          awarded: number
+          created_at: string
+          exemplar: string | null
+          feedback: string | null
+          id: string
+          is_mistake: boolean
+          max_marks: number
+          missing_keywords: Json
+          qtype: string
+          question_id: string | null
+          question_prompt: string
+          resolved: boolean
+          response: string
+          subject: string | null
+          topic: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id: string
+          awarded?: number
+          created_at?: string
+          exemplar?: string | null
+          feedback?: string | null
+          id?: string
+          is_mistake?: boolean
+          max_marks?: number
+          missing_keywords?: Json
+          qtype?: string
+          question_id?: string | null
+          question_prompt?: string
+          resolved?: boolean
+          response?: string
+          subject?: string | null
+          topic?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string
+          awarded?: number
+          created_at?: string
+          exemplar?: string | null
+          feedback?: string | null
+          id?: string
+          is_mistake?: boolean
+          max_marks?: number
+          missing_keywords?: Json
+          qtype?: string
+          question_id?: string | null
+          question_prompt?: string
+          resolved?: boolean
+          response?: string
+          subject?: string | null
+          topic?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempt_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempt_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "exam_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_attempts: {
+        Row: {
+          awarded_marks: number
+          completed_at: string | null
+          id: string
+          paper_id: string
+          paper_title: string
+          started_at: string
+          subject: string
+          total_marks: number
+          user_id: string
+        }
+        Insert: {
+          awarded_marks?: number
+          completed_at?: string | null
+          id?: string
+          paper_id: string
+          paper_title?: string
+          started_at?: string
+          subject?: string
+          total_marks?: number
+          user_id: string
+        }
+        Update: {
+          awarded_marks?: number
+          completed_at?: string | null
+          id?: string
+          paper_id?: string
+          paper_title?: string
+          started_at?: string
+          subject?: string
+          total_marks?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "exam_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_papers: {
+        Row: {
+          created_at: string
+          description: string | null
+          exam_type: string
+          id: string
+          is_library: boolean
+          owner_id: string | null
+          subject: string
+          title: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          exam_type?: string
+          id?: string
+          is_library?: boolean
+          owner_id?: string | null
+          subject: string
+          title: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          exam_type?: string
+          id?: string
+          is_library?: boolean
+          owner_id?: string | null
+          subject?: string
+          title?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      exam_questions: {
+        Row: {
+          correct_option: number | null
+          created_at: string
+          criteria: string | null
+          exemplar: string | null
+          id: string
+          marks: number
+          options: Json
+          paper_id: string
+          position: number
+          prompt: string
+          qtype: string
+          topic: string | null
+        }
+        Insert: {
+          correct_option?: number | null
+          created_at?: string
+          criteria?: string | null
+          exemplar?: string | null
+          id?: string
+          marks?: number
+          options?: Json
+          paper_id: string
+          position?: number
+          prompt: string
+          qtype?: string
+          topic?: string | null
+        }
+        Update: {
+          correct_option?: number | null
+          created_at?: string
+          criteria?: string | null
+          exemplar?: string | null
+          id?: string
+          marks?: number
+          options?: Json
+          paper_id?: string
+          position?: number
+          prompt?: string
+          qtype?: string
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_questions_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "exam_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
