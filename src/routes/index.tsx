@@ -201,11 +201,12 @@ function Home() {
           <div className="flex items-center gap-2">
             <Link
               to="/exam"
-              className="hidden md:inline-flex items-center gap-2 rounded-full purple-outline purple-glow-hover bg-surface/60 px-4 py-1.5 text-sm"
+              className="hidden md:inline-flex items-center gap-2 rounded-full purple-outline purple-glow-hover bg-surface/60 py-1 pl-1.5 pr-4 text-sm transition-transform hover:scale-[1.03]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-yellow" />
+              <ExamEngineLogo size={26} />
               Exam Engine
             </Link>
+
             <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
 
               {YEARS.map((y) => (
@@ -325,6 +326,10 @@ function Home() {
 
       {/* Study calendar */}
       <StudyCalendar />
+
+      {/* Spaced repetition + active recall */}
+      <RecallScheduler />
+
 
 
 
