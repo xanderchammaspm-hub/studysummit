@@ -16,6 +16,7 @@ import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 import {
   useSubjects,
   useAllSubjectStates,
+  flattenSubject,
   addSubject,
   useQuickLinks,
   updateQuickLink,
@@ -106,9 +107,8 @@ function Home() {
             title: subjectLabel,
           });
         }
-        const st = store[slot.id];
-        if (!st) return;
-        for (const p of st.papers ?? []) {
+        const st = flattenSubject(store[slot.id]);
+        for (const p of st.papers) {
           if (p.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -119,7 +119,7 @@ function Home() {
             });
           }
         }
-        for (const a of st.assessments ?? []) {
+        for (const a of st.assessments) {
           if (a.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -130,7 +130,7 @@ function Home() {
             });
           }
         }
-        for (const t of st.topics ?? []) {
+        for (const t of st.topics) {
           if (t.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -171,8 +171,8 @@ function Home() {
     for (const y of YEARS) {
       subjects[y].forEach((slot, i) => {
         const subjectLabel = slot.name.trim() || `Subject ${i + 1}`;
-        const st = store[slot.id];
-        for (const a of st?.assessments ?? []) {
+        const st = flattenSubject(store[slot.id]);
+        for (const a of st.assessments) {
           if (!a.due) continue;
           const target = new Date(a.due + "T00:00:00");
           if (Number.isNaN(target.getTime())) continue;
