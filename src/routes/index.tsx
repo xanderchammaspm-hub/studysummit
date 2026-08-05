@@ -10,6 +10,7 @@ import { SummitLogo } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 import { EnglishFormula } from "@/components/EnglishFormula";
 import { UpcomingExams } from "@/components/UpcomingExams";
+import { DailyPlan } from "@/components/DailyPlan";
 import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
 
@@ -335,6 +336,9 @@ function Home() {
 
       {/* Upcoming exams countdown */}
       <UpcomingExams />
+
+      {/* Today's plan */}
+      <DailyPlan />
 
 
 

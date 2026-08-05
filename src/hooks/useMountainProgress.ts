@@ -120,6 +120,8 @@ export function useMountainProgress() {
     let papers = 0;
     let assessments = 0;
     let subjectCount = 0;
+    let dots = 0;
+    let dotsDone = 0;
     for (const y of YEARS) {
       for (const s of subjects[y]) {
         subjectCount++;
@@ -128,6 +130,10 @@ export function useMountainProgress() {
         const flat = flattenSubject(st);
         papers += flat.papers.length;
         assessments += flat.assessments.length;
+        for (const p of flat.syllabus) {
+          dots++;
+          if (p.done) dotsDone++;
+        }
         for (const t of flat.topics) {
           topics++;
           if (t.status === "green") green++;
@@ -135,9 +141,12 @@ export function useMountainProgress() {
       }
     }
     const greenRatio = topics === 0 ? 0 : green / topics;
+    const dotRatio = dots === 0 ? 0 : dotsDone / dots;
     const papersScore = Math.min(papers / 20, 1);
     const assessScore = Math.min(assessments / 10, 1);
-    const mastery = Math.round((greenRatio * 0.7 + papersScore * 0.15 + assessScore * 0.15) * 100);
+    const mastery = Math.round(
+      (greenRatio * 0.5 + dotRatio * 0.2 + papersScore * 0.15 + assessScore * 0.15) * 100,
+    );
 
     // The climb is driven by the exam calendar; mastery nudges you slightly ahead.
     const timeline = timelineProgress(dates);

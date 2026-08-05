@@ -9,6 +9,7 @@ import {
   Trash2,
   Check,
   BellRing,
+  ListChecks,
   NotebookPen,
 } from "lucide-react";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
@@ -66,6 +67,19 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [aTitle, setATitle] = useState("");
   const [aUrl, setAUrl] = useState("");
   const [aDue, setADue] = useState("");
+  const [dotText, setDotText] = useState("");
+
+  const dotPct =
+    state.syllabus.length === 0
+      ? 0
+      : Math.round((state.syllabus.filter((p) => p.done).length / state.syllabus.length) * 100);
+
+  const addDot = () => {
+    const t = dotText.trim();
+    if (!t) return;
+    update((s) => ({ ...s, syllabus: [...s.syllabus, { id: uid(), text: t, done: false }] }));
+    setDotText("");
+  };
 
   const addPaper = () => {
     const t = paperTitle.trim();
@@ -530,6 +544,89 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       }
                       className="text-muted-foreground hover:text-destructive"
                       aria-label="Remove topic"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              />
+            </Section>
+
+            {/* Syllabus dot points */}
+            <Section icon={<ListChecks className="h-4 w-4" />} title="Syllabus Dot Points">
+              <div className="flex gap-2 mb-3">
+                <input
+                  value={dotText}
+                  onChange={(e) => setDotText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addDot()}
+                  placeholder="Paste a NESA dot point"
+                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                />
+                <button
+                  onClick={addDot}
+                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                >
+                  <Plus className="h-4 w-4" /> Add
+                </button>
+              </div>
+              {state.syllabus.length > 0 && (
+                <div className="mb-3">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-border/60">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-500"
+                      style={{ width: `${dotPct}%` }}
+                    />
+                  </div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    {state.syllabus.filter((p) => p.done).length}/{state.syllabus.length} covered · {dotPct}%
+                  </div>
+                </div>
+              )}
+              <DraggableList
+                items={state.syllabus}
+                onReorder={(syllabus) => update({ syllabus })}
+                empty={
+                  <p className="text-xs text-muted-foreground italic px-1">
+                    No dot points yet. Paste them from the syllabus and tick them off as you master each one.
+                  </p>
+                }
+                renderItem={(p) => (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (!p.done) void awardXp("syllabusPoint");
+                        update((s) => ({
+                          ...s,
+                          syllabus: s.syllabus.map((x) =>
+                            x.id === p.id ? { ...x, done: !x.done } : x,
+                          ),
+                        }));
+                      }}
+                      aria-label={p.done ? "Mark as not covered" : "Mark as covered"}
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                        p.done
+                          ? "border-primary bg-primary/70 text-background"
+                          : "border-border hover:border-primary/70"
+                      }`}
+                    >
+                      {p.done && <Check className="h-3 w-3" />}
+                    </button>
+                    <span
+                      className={`flex-1 truncate text-sm ${
+                        p.done ? "text-muted-foreground line-through" : ""
+                      }`}
+                    >
+                      {p.text}
+                    </span>
+                    <button
+                      onClick={() =>
+                        update((s) => ({
+                          ...s,
+                          syllabus: s.syllabus.filter((x) => x.id !== p.id),
+                        }))
+                      }
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label="Remove dot point"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

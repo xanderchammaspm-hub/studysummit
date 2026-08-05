@@ -10,12 +10,15 @@ export type Assessment = {
   due?: string; // ISO date (yyyy-mm-dd)
 };
 
+export type SyllabusPoint = { id: string; text: string; done: boolean };
+
 export type TermKey = "T1" | "T2" | "T3" | "T4";
 
 export type TermState = {
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
+  syllabus: SyllabusPoint[];
   notesUrl?: string;
 };
 
@@ -44,7 +47,7 @@ export const TERM_LABEL: Record<TermKey, string> = {
   T4: "Term 4",
 };
 
-const emptyTerm: TermState = { papers: [], topics: [], assessments: [] };
+const emptyTerm: TermState = { papers: [], topics: [], assessments: [], syllabus: [] };
 
 /** Terms for a subject, migrating any legacy top-level content into Term 1. */
 export function subjectTerms(raw?: SubjectState): Record<TermKey, TermState> {
@@ -63,6 +66,7 @@ export function subjectTerms(raw?: SubjectState): Record<TermKey, TermState> {
           papers: t.papers ?? [],
           topics: t.topics ?? [],
           assessments: t.assessments ?? [],
+          syllabus: t.syllabus ?? [],
           notesUrl: t.notesUrl,
         };
       }
@@ -73,6 +77,7 @@ export function subjectTerms(raw?: SubjectState): Record<TermKey, TermState> {
     papers: raw.papers ?? [],
     topics: raw.topics ?? [],
     assessments: raw.assessments ?? [],
+    syllabus: [],
     notesUrl: raw.notesUrl,
   };
   return base;
@@ -86,8 +91,10 @@ export function flattenSubject(raw?: SubjectState) {
     papers: keys.flatMap((k) => t[k].papers),
     topics: keys.flatMap((k) => t[k].topics),
     assessments: keys.flatMap((k) => t[k].assessments),
+    syllabus: keys.flatMap((k) => t[k].syllabus),
   };
 }
+
 
 
 const STATE_KEY = "study-hub-state-v1";

@@ -91,7 +91,11 @@ export function UpcomingExams() {
 
   async function add(exam: Omit<Exam, "id">) {
     if (user) {
-      await supabase.from("user_exams").insert({ ...exam, user_id: user.id });
+      const { error } = await supabase.from("user_exams").insert({ ...exam, user_id: user.id });
+      if (error) {
+        toast.error("Couldn't save that exam", { description: error.message });
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ["user-exams", user.id] });
     } else {
       const next = [...local, { ...exam, id: Math.random().toString(36).slice(2) }];
@@ -101,22 +105,43 @@ export function UpcomingExams() {
     setOpen(false);
   }
 
-  async function remove(id: string) {
+  async function remove(id: string, silent = false) {
+    const target = exams.find((e) => e.id === id);
     if (user) {
-      await supabase.from("user_exams").delete().eq("id", id);
+      const { error } = await supabase.from("user_exams").delete().eq("id", id);
+      if (error) {
+        toast.error("Couldn't remove that exam", { description: error.message });
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ["user-exams", user.id] });
     } else {
       const next = local.filter((e) => e.id !== id);
       setLocal(next);
       writeLocal(next);
     }
+    if (!silent && target) {
+      toast.success(`${target.subject} removed`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void add({
+              subject: target.subject,
+              note: target.note,
+              exam_at: target.exam_at,
+              color: target.color,
+            });
+          },
+        },
+      });
+    }
   }
 
   async function complete(exam: Exam) {
-    await remove(exam.id);
+    await remove(exam.id, true);
     await awardXp("examCompleted", 1, { subject: exam.subject });
     toast.success(`${exam.subject} completed`, { description: "+120 XP added to your climb." });
   }
+
 
   const nudge = (dir: 1 | -1) => {
     const el = railRef.current;
@@ -223,6 +248,7 @@ function ExamCard({
   onDelete: () => void;
   onComplete: () => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const d = daysAway(exam.exam_at);
   const past = d < 0;
   return (
@@ -238,11 +264,27 @@ function ExamCard({
         className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-full"
         style={{ background: exam.color, boxShadow: `0 0 12px ${exam.color}` }}
       />
+      <button
+        onClick={() => {
+          if (confirmDelete) onDelete();
+          else setConfirmDelete(true);
+        }}
+        onBlur={() => setConfirmDelete(false)}
+        className={`absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] transition-colors ${
+          confirmDelete
+            ? "border-destructive/70 bg-destructive/20 text-destructive"
+            : "border-border/70 bg-background/60 text-muted-foreground hover:text-destructive"
+        }`}
+        aria-label={`Remove ${exam.subject}`}
+      >
+        <X className="h-3 w-3" />
+        {confirmDelete && "Remove?"}
+      </button>
       <div className="pl-3">
         <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
           {new Date(exam.exam_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
         </div>
-        <div className="mt-1 truncate text-lg font-medium">{exam.subject}</div>
+        <div className="mt-1 truncate pr-10 text-lg font-medium">{exam.subject}</div>
         {exam.note && <div className="truncate text-xs text-muted-foreground">{exam.note}</div>}
 
         <div className="mt-5 flex items-end gap-2">
@@ -255,7 +297,7 @@ function ExamCard({
         </div>
         <div className="mt-2 text-[11px] text-muted-foreground">{fmtDate(exam.exam_at)}</div>
 
-        <div className="mt-4 flex items-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-within:opacity-100">
+        <div className="mt-4 flex items-center gap-2 opacity-100 transition-opacity duration-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
           <button
             onClick={onComplete}
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-3 py-1.5 text-[11px] transition-colors hover:bg-primary/30"
@@ -271,6 +313,7 @@ function ExamCard({
           </button>
         </div>
       </div>
+
     </article>
   );
 }
