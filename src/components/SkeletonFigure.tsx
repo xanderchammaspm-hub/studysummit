@@ -71,7 +71,7 @@ export function SkeletonFigure({
   onHover: (id: string | null) => void;
   className?: string;
 }) {
-  const [pressed, setPressed] = React.useState<string | null>(null);
+  const [pressed, setPressed] = useState<string | null>(null);
   const t = zoneTransform(active);
   const lit = (active ?? hovered) as BoneZone | null;
   const glow = lit ? (GLOW_RECTS[lit] ?? []) : [];
