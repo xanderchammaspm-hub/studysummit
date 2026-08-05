@@ -11,6 +11,19 @@ import {
 
 export const ZONE_IDS: BoneZone[] = ["skull", "spine", "vertebrae", "limbs", "feet"];
 
+/** Pointer hit areas (kept disjoint so overlapping zoom boxes don't steal clicks). */
+const HIT_RECTS: Record<BoneZone, [number, number, number, number][]> = {
+  skull: [[132, 8, 136, 180]],
+  spine: [[148, 188, 104, 300]],
+  vertebrae: [[100, 488, 200, 250]],
+  limbs: [
+    [40, 240, 108, 470],
+    [252, 240, 108, 470],
+    [104, 740, 192, 258],
+  ],
+  feet: [[110, 998, 180, 78]],
+};
+
 const PAD = 40;
 
 export function zoneTransform(id: string | null) {
