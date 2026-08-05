@@ -46,94 +46,15 @@ export function zoneTransform(id: string | null) {
   return { x: VB.w / 2 - cx * scale, y: VB.h / 2 - cy * scale, scale };
 }
 
-/** Iron-Man style ambient interface behind the figure. Purely decorative. */
-function HudField() {
-  const ticks = Array.from({ length: 48 }, (_, i) => i);
+/** Very faint radial bloom directly behind the figure. Purely decorative. */
+function AmbientGlow() {
   return (
     <g aria-hidden pointerEvents="none">
       <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#skel-aura)" />
-      <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#hud-grid)" opacity="0.5" />
-
-      {/* Concentric scan rings */}
-      <g stroke="var(--primary)" fill="none" opacity="0.28">
-        <circle cx={VB.w / 2} cy={VB.h / 2} r="150" strokeWidth="0.6" strokeDasharray="3 9" />
-        <circle cx={VB.w / 2} cy={VB.h / 2} r="196" strokeWidth="0.5" strokeDasharray="18 12" />
-      </g>
-
-      {/* Slow rotating reticle */}
-      <g
-        style={{ transformOrigin: `${VB.w / 2}px ${VB.h / 2}px`, animation: "hudSpin 48s linear infinite" }}
-        opacity="0.4"
-      >
-        <circle
-          cx={VB.w / 2}
-          cy={VB.h / 2}
-          r="172"
-          fill="none"
-          stroke="var(--primary)"
-          strokeWidth="0.7"
-          strokeDasharray="60 26 12 26"
-        />
-        {ticks.map((i) => {
-          const a = (i / ticks.length) * Math.PI * 2;
-          const r1 = 172;
-          const r2 = i % 6 === 0 ? 182 : 177;
-          return (
-            <line
-              key={i}
-              x1={VB.w / 2 + Math.cos(a) * r1}
-              y1={VB.h / 2 + Math.sin(a) * r1}
-              x2={VB.w / 2 + Math.cos(a) * r2}
-              y2={VB.h / 2 + Math.sin(a) * r2}
-              stroke={i % 6 === 0 ? "var(--yellow)" : "var(--primary)"}
-              strokeWidth="0.7"
-            />
-          );
-        })}
-      </g>
-
-      {/* Counter-rotating inner arc */}
-      <g
-        style={{ transformOrigin: `${VB.w / 2}px ${VB.h / 2}px`, animation: "hudSpinRev 30s linear infinite" }}
-        opacity="0.35"
-      >
-        <circle
-          cx={VB.w / 2}
-          cy={VB.h / 2}
-          r="118"
-          fill="none"
-          stroke="var(--yellow)"
-          strokeWidth="0.6"
-          strokeDasharray="40 200"
-        />
-      </g>
-
-      {/* Corner brackets */}
-      <g stroke="var(--primary)" strokeWidth="1.1" fill="none" opacity="0.55">
-        <path d="M 14,44 v -30 h 30" />
-        <path d="M 386,44 v -30 h -30" />
-        <path d="M 14,1036 v 30 h 30" />
-        <path d="M 386,1036 v 30 h -30" />
-      </g>
-      <g fill="var(--yellow)" opacity="0.7">
-        <circle cx="14" cy="14" r="2" />
-        <circle cx="386" cy="14" r="2" />
-        <circle cx="14" cy="1066" r="2" />
-        <circle cx="386" cy="1066" r="2" />
-      </g>
-
-      {/* Edge data ticks */}
-      <g stroke="var(--primary)" strokeWidth="0.8" opacity="0.35">
-        {Array.from({ length: 22 }, (_, i) => (
-          <line key={i} x1="8" y1={120 + i * 38} x2={i % 4 === 0 ? 28 : 18} y2={120 + i * 38} />
-        ))}
-        {Array.from({ length: 22 }, (_, i) => (
-          <line key={`r${i}`} x1="392" y1={120 + i * 38} x2={i % 4 === 0 ? 372 : 382} y2={120 + i * 38} />
-        ))}
-      </g>
     </g>
   );
 }
+
 
 export function SkeletonFigure({
   active,
