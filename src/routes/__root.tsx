@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SummitSplash } from "@/components/SummitSplash";
 import { Toaster } from "@/components/ui/sonner";
 import { initCloudSync } from "@/lib/cloudSync";
+import { applyPrefs } from "@/hooks/usePrefs";
 
 
 function NotFoundComponent() {
@@ -136,6 +137,7 @@ function RootComponent() {
 
   useEffect(() => {
     initCloudSync();
+    applyPrefs();
     const gradient = localStorage.getItem("study-hub-gradient-intensity-v1");
     if (gradient) document.documentElement.style.setProperty("--gradient-intensity", String(Number(gradient) / 100));
     if (localStorage.getItem("summit-reduce-motion-v1") === "1") {
