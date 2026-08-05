@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Send, Sparkles, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 
-const SYSTEM =
-  "You are Atlas — an expert HSC English (NSW) tutor. Help the student answer short-answer questions (1–6 marks). Be concise, use the mark allocation, model the structure (technique + example + effect + link to question), and mark the student's attempts against the criteria. Use markdown.";
+const SYSTEM = `${ATLAS_SYSTEM_PROMPT}
+
+FOCUS: HSC English short answers (1–6 marks). Always show the mark allocation, model the structure (technique → example → effect → link to question), and mark the student's attempts against NESA criteria.`;
+
 
 function id() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();

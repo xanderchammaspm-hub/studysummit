@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { SummitLogo } from "@/components/SummitLogo";
+import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 import { ExamLibrary } from "@/components/exam/ExamLibrary";
 import { PaperRunner } from "@/components/exam/PaperRunner";
 import { MistakeVault } from "@/components/exam/MistakeVault";
@@ -65,14 +65,17 @@ function ExamEnginePage() {
       <div className="relative mx-auto max-w-6xl space-y-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <SummitLogo size={40} />
-            <div>
+            <div className="rounded-2xl border border-primary/35 bg-card/60 p-1.5 backdrop-blur-md shadow-[0_0_24px_-6px_var(--primary)]">
+              <ExamEngineLogo size={44} />
+            </div>
+            <div style={{ animation: "engineRise 700ms cubic-bezier(0.22,1,0.36,1) 120ms both" }}>
               <h1 className="text-xl font-semibold tracking-tight gradient-text">Summit Exam Engine</h1>
               <p className="text-xs text-muted-foreground">
                 Interactive past papers · AI marking · mistake tracking
               </p>
             </div>
           </div>
+
           <div className="flex items-center gap-2">
             <Link to="/">
               <Button variant="ghost" size="sm" className="gap-2">

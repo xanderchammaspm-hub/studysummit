@@ -1,3 +1,4 @@
+import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -43,8 +44,8 @@ const CoachInput = z.object({
     .optional(),
 });
 
-const SYSTEM_BASE =
-  "You are an expert HSC (NSW, Australia) study coach for Year 11 and Year 12 students. Be concise, clear, and use markdown (headings, bullet points, bold). Encourage the student and adapt to syllabus dot-point style.";
+const SYSTEM_BASE = ATLAS_SYSTEM_PROMPT;
+
 
 const modePrompt: Record<z.infer<typeof CoachInput>["mode"], string> = {
   explain:

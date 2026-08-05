@@ -1,3 +1,4 @@
+import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 import { useEffect, useRef, useState } from "react";
 import {
   Sparkles,
@@ -36,8 +37,8 @@ type Role = "user" | "assistant";
 type Message = { id: string; role: Role; content: string; ts: number };
 
 const CHAT_KEY = "atlas-ai-chat-v1";
-const SYSTEM_PROMPT =
-  "You are Atlas — an expert HSC (NSW, Australia) study coach for Year 11 and Year 12 students. Be concise, clear, and encouraging. Use markdown (headings, bullets, bold) when it helps. Adapt to syllabus dot-point style, cite marks and rubrics for HSC-style questions, and offer worked examples where useful.";
+const SYSTEM_PROMPT = ATLAS_SYSTEM_PROMPT;
+
 
 const SUGGESTIONS: { label: string; prompt: string }[] = [
   {
