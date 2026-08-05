@@ -51,16 +51,24 @@ const vert = (cy: number, w: number, h: number) =>
 /* ---------------- Centre-line bones (drawn once) ---------------- */
 
 export const CENTER_BONES: Bone[] = [
-  // Cranium + face
-  { zone: "skull", d: ell(200, 88, 60, 68) },
-  { zone: "skull", d: ell(176, 92, 15, 12) },
-  { zone: "skull", d: ell(224, 92, 15, 12) },
-  { zone: "skull", d: "M 200,108 L 189,132 h 22 Z" },
+  // Cranium (tapered calvaria + facial skeleton)
   {
     zone: "skull",
-    d: "M 158,138 c 6,26 24,40 42,40 c 18,0 36,-14 42,-40 c -14,10 -28,14 -42,14 c -14,0 -28,-4 -42,-14 Z",
+    d: "M 200,20 C 236,20 262,48 262,86 C 262,110 253,128 240,142 C 236,158 222,172 200,174 C 178,172 164,158 160,142 C 147,128 138,110 138,86 C 138,48 164,20 200,20 Z",
   },
-  { zone: "skull", d: "M 170,152 h 60 M 200,152 v 24" },
+  // Orbits
+  { zone: "skull", d: ell(179, 94, 15, 13) },
+  { zone: "skull", d: ell(221, 94, 15, 13) },
+  // Nasal aperture
+  { zone: "skull", d: "M 200,112 L 191,133 h 18 Z" },
+  // Maxilla + mandible
+  { zone: "skull", d: "M 174,140 h 52 v 8 h -52 Z" },
+  {
+    zone: "skull",
+    d: "M 172,148 c 3,17 13,27 28,27 c 15,0 25,-10 28,-27 l -8,0 c -2,12 -9,19 -20,19 c -11,0 -18,-7 -20,-19 Z",
+  },
+
+
 
   // Cervical spine
   ...[0, 1, 2, 3, 4].map((i) => ({
