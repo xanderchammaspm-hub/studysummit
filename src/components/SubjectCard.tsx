@@ -484,9 +484,10 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                           topics: s.topics.map((x) =>
                             x.id === t.id ? { ...x, status } : x,
                           ),
-                        }))
-                      }
+                        }));
+                      }}
                     />
+
                     <button
                       onClick={() =>
                         update((s) => ({
