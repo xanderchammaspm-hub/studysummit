@@ -267,7 +267,31 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       >
         <div className="overflow-hidden">
           <div className="border-t border-border/60 px-5 py-6 space-y-6">
+            {/* Term switcher */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
+                Term
+              </span>
+              {terms.map((t) => {
+                const active = t === term;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => setTerm(t)}
+                    className={`rounded-full border px-3.5 py-1.5 text-xs transition-all duration-300 ${
+                      active
+                        ? "border-primary/70 bg-primary/25 text-foreground shadow-[0_0_14px_oklch(0.7_0.22_300/0.35)]"
+                        : "border-border/70 bg-surface/50 text-muted-foreground hover:text-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {TERM_LABEL[t]}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Papers */}
+
             <Section
               icon={<FileText className="h-4 w-4" />}
               title="Past Paper Resources"
