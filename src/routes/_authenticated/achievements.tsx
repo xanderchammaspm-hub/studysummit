@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AccountShell, Panel } from "@/components/account/AccountShell";
-import { ACHIEVEMENTS } from "@/lib/progression";
+import {
+  ACHIEVEMENTS,
+  ACHIEVEMENT_CATEGORIES,
+  RARITY_STYLE,
+  type AchievementCategory,
+} from "@/lib/progression";
 import { useAchievements, useProfile } from "@/hooks/useProfile";
 import { useSummitStats } from "@/hooks/useSummitStats";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/achievements")({
   head: () => ({
@@ -19,31 +26,85 @@ export const Route = createFileRoute("/_authenticated/achievements")({
   component: AchievementsPage,
 });
 
+type Filter = "all" | "unlocked" | "locked";
+
 function AchievementsPage() {
-  const { profile, progression } = useProfile();
+  const { profile, progression, user } = useProfile();
   const stats = useSummitStats();
   const { unlocked, unlock } = useAchievements();
+  const [category, setCategory] = useState<AchievementCategory | "All">("All");
+  const [filter, setFilter] = useState<Filter>("all");
+  const rewarded = useRef<Set<string>>(new Set());
 
-  const metrics: Record<string, number> = {
-    streakDays: profile?.streak_days ?? 0,
-    studyHours: stats.totalHours,
-    greenTopics: stats.green,
-    quizScores90: stats.quizScores90,
-    allTopicsGreen: stats.allTopicsGreen ? 1 : 0,
-    papersDone: stats.papersDone,
-    level: progression.level,
-  };
+  const metrics: Record<string, number> = useMemo(
+    () => ({
+      streakDays: profile?.streak_days ?? 0,
+      studyHours: stats.totalHours,
+      bestDayHours: stats.bestDayHours,
+      bestWeekHours: stats.bestWeekHours,
+      weekendStudy: stats.weekendStudy,
+      activeWeeks: stats.activeWeeks,
+      studyDays: stats.studyDays,
+      greenTopics: stats.green,
+      termsCleared: stats.termsCleared,
+      subjectsCleared: stats.subjectsCleared,
+      allTopicsGreen: stats.allTopicsGreen ? 1 : 0,
+      noRedTopics: stats.noRedTopics,
+      syllabusDone: stats.syllabusDone,
+      quizScores90: stats.quizScores90,
+      papersDone: stats.papersDone,
+      avgScore: stats.avgScore,
+      examsCompleted: stats.examsCompleted,
+      papersAdded: stats.papersAdded,
+      notesDocs: stats.notesDocs,
+      quickLinks: stats.quickLinks,
+      subjectsNamed: stats.subjectsNamed,
+      level: progression.level,
+    }),
+    [profile, stats, progression.level],
+  );
 
-  const unlockedIds = new Set(unlocked.map((u) => u.achievement_id));
+  const unlockedIds = useMemo(() => new Set(unlocked.map((u) => u.achievement_id)), [unlocked]);
 
   useEffect(() => {
     for (const a of ACHIEVEMENTS) {
-      if (!unlockedIds.has(a.id) && metrics[a.metric] >= a.goal) void unlock(a.id);
+      if (unlockedIds.has(a.id)) continue;
+      if ((metrics[a.metric] ?? 0) < a.goal) continue;
+      if (rewarded.current.has(a.id)) continue;
+      rewarded.current.add(a.id);
+      void (async () => {
+        await unlock(a.id);
+        if (user) {
+          await supabase.from("xp_events").insert({
+            user_id: user.id,
+            kind: "achievement",
+            amount: a.xpReward,
+            meta: { achievement: a.id } as never,
+          });
+        }
+        toast.success(`${a.emoji}  ${a.name} unlocked`, {
+          description: `${a.desc} · +${a.xpReward} XP · +${a.coinReward} coins`,
+        });
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stats, profile, unlocked.length]);
+  }, [metrics, unlockedIds]);
 
   const earned = ACHIEVEMENTS.filter((a) => unlockedIds.has(a.id)).length;
+  const pctAll = Math.round((earned / ACHIEVEMENTS.length) * 100);
+  const xpEarned = ACHIEVEMENTS.filter((a) => unlockedIds.has(a.id)).reduce((s, a) => s + a.xpReward, 0);
+
+  const visible = ACHIEVEMENTS.filter((a) => {
+    if (category !== "All" && a.category !== category) return false;
+    const done = unlockedIds.has(a.id);
+    if (filter === "unlocked") return done;
+    if (filter === "locked") return !done;
+    return true;
+  }).sort((a, b) => {
+    const av = Math.min(1, (metrics[a.metric] ?? 0) / a.goal);
+    const bv = Math.min(1, (metrics[b.metric] ?? 0) / b.goal);
+    return bv - av;
+  });
 
   return (
     <AccountShell
@@ -51,18 +112,60 @@ function AchievementsPage() {
       subtitle={`${earned} of ${ACHIEVEMENTS.length} unlocked — every badge is a marker on the mountain.`}
     >
       <Panel>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {ACHIEVEMENTS.map((a) => {
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Stat label="Unlocked" value={`${earned}/${ACHIEVEMENTS.length}`} />
+          <Stat label="Completion" value={`${pctAll}%`} />
+          <Stat label="Bonus XP earned" value={`${xpEarned}`} />
+        </div>
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-yellow transition-all duration-1000"
+            style={{ width: `${pctAll}%` }}
+          />
+        </div>
+      </Panel>
+
+      <Panel>
+        <div className="flex flex-wrap items-center gap-2">
+          {(["All", ...ACHIEVEMENT_CATEGORIES] as const).map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c as AchievementCategory | "All")}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                category === c
+                  ? "border-primary/70 bg-primary/20 text-foreground"
+                  : "border-border/60 bg-surface/40 text-muted-foreground hover:border-primary/40"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+          <span className="ml-auto flex gap-1 rounded-full border border-border/60 bg-surface/40 p-1">
+            {(["all", "unlocked", "locked"] as Filter[]).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full px-3 py-0.5 text-[11px] capitalize transition-colors ${
+                  filter === f ? "bg-primary/25 text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {visible.map((a) => {
             const value = metrics[a.metric] ?? 0;
             const pct = Math.min(100, Math.round((value / a.goal) * 100));
             const done = unlockedIds.has(a.id) || pct >= 100;
+            const style = RARITY_STYLE[a.rarity];
             return (
               <div
                 key={a.id}
                 className={`rounded-xl border p-4 transition-all duration-500 ${
-                  done
-                    ? "border-primary/60 bg-primary/10 purple-glow"
-                    : "border-border/50 bg-surface/40"
+                  done ? `${style.ring} bg-primary/10 ${style.glow}` : "border-border/50 bg-surface/40"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -70,7 +173,9 @@ function AchievementsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-medium">{a.name}</span>
-                      {done && <span className="text-[10px] uppercase tracking-widest text-yellow">Unlocked</span>}
+                      <span className={`shrink-0 text-[10px] uppercase tracking-widest ${done ? style.text : "text-muted-foreground/60"}`}>
+                        {done ? "Unlocked" : style.label}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">{a.desc}</p>
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface">
@@ -79,16 +184,33 @@ function AchievementsPage() {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <div className="mt-1 text-[10px] text-muted-foreground">
-                      {Math.min(value, a.goal).toFixed(a.metric === "studyHours" ? 1 : 0)} / {a.goal}
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span>
+                        {Math.min(value, a.goal).toFixed(a.metric === "studyHours" || a.metric.includes("Hours") ? 1 : 0)} / {a.goal}
+                      </span>
+                      <span>
+                        +{a.xpReward} XP · +{a.coinReward} coins
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
+          {visible.length === 0 && (
+            <p className="text-sm text-muted-foreground">Nothing here yet — try another filter.</p>
+          )}
         </div>
       </Panel>
     </AccountShell>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border/50 bg-surface/40 p-4">
+      <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-semibold">{value}</div>
+    </div>
   );
 }
