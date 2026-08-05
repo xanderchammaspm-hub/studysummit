@@ -120,7 +120,7 @@ export function SkeletonFigure({
           </g>
         </mask>
         <filter id="zone-feather" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="46" />
+          <feGaussianBlur stdDeviation="64" />
         </filter>
 
         {/* Purple illumination for the hovered bones + soft outer bloom */}
