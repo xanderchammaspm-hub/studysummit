@@ -14,6 +14,9 @@ import {
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
   useSubject,
+  useSubjectTerm,
+  TERMS_BY_YEAR,
+  TERM_LABEL,
   uid,
   renameSubject,
   deleteSubject,
@@ -21,8 +24,10 @@ import {
   type Topic,
   type Assessment,
   type TrafficColor,
+  type TermKey,
   type YearKey,
 } from "@/hooks/useSubjectStore";
+
 import { DraggableList } from "@/components/DraggableList";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -47,7 +52,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState(name);
-  const { state, update } = useSubject(id);
+  const terms = TERMS_BY_YEAR[year];
+  const [term, setTerm] = useState<TermKey>(terms[0]);
+  const { state: subject, update: updateSubject } = useSubject(id);
+  const { state, update } = useSubjectTerm(id, term);
+
   const { awardXp } = useProfile();
   const label = name.trim() || `Subject ${index + 1}`;
 
@@ -122,7 +131,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               aria-label="Change emoji"
               title="Change emoji"
             >
-              <span>{state.emoji || "📘"}</span>
+              <span>{subject.emoji || "📘"}</span>
             </button>
             {pickerOpen && (
               <>
@@ -141,7 +150,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       if (e.key === "Enter") {
                         const v = (e.target as HTMLInputElement).value.trim();
                         if (v) {
-                          update({ emoji: [...v][0] ?? v });
+                          updateSubject({ emoji: [...v][0] ?? v });
                           setPickerOpen(false);
                         }
                       }
@@ -154,7 +163,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       <button
                         key={em}
                         onClick={() => {
-                          update({ emoji: em });
+                          updateSubject({ emoji: em });
                           setPickerOpen(false);
                         }}
                         className="flex h-9 w-9 items-center justify-center rounded hover:bg-primary/20 text-lg"
@@ -258,7 +267,31 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       >
         <div className="overflow-hidden">
           <div className="border-t border-border/60 px-5 py-6 space-y-6">
+            {/* Term switcher */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
+                Term
+              </span>
+              {terms.map((t) => {
+                const active = t === term;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => setTerm(t)}
+                    className={`rounded-full border px-3.5 py-1.5 text-xs transition-all duration-300 ${
+                      active
+                        ? "border-primary/70 bg-primary/25 text-foreground shadow-[0_0_14px_oklch(0.7_0.22_300/0.35)]"
+                        : "border-border/70 bg-surface/50 text-muted-foreground hover:text-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    {TERM_LABEL[t]}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Papers */}
+
             <Section
               icon={<FileText className="h-4 w-4" />}
               title="Past Paper Resources"

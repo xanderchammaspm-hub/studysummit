@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSubjects, useAllSubjectStates, type YearKey } from "./useSubjectStore";
+import { useSubjects, useAllSubjectStates, flattenSubject, type YearKey } from "./useSubjectStore";
 
 export type Camp = {
   key: CampKey;
@@ -125,9 +125,10 @@ export function useMountainProgress() {
         subjectCount++;
         const st = store[s.id];
         if (!st) continue;
-        papers += st.papers?.length ?? 0;
-        assessments += st.assessments?.length ?? 0;
-        for (const t of st.topics ?? []) {
+        const flat = flattenSubject(st);
+        papers += flat.papers.length;
+        assessments += flat.assessments.length;
+        for (const t of flat.topics) {
           topics++;
           if (t.status === "green") green++;
         }

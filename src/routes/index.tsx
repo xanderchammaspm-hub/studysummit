@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Settings, BookOpen, FileText, BellRing } from "lucide-react";
+import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 import { AICoach } from "@/components/AICoach";
 import { MountainProgress } from "@/components/MountainProgress";
@@ -16,6 +16,7 @@ import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 import {
   useSubjects,
   useAllSubjectStates,
+  flattenSubject,
   addSubject,
   useQuickLinks,
   updateQuickLink,
@@ -67,10 +68,11 @@ function Home() {
         subjectCount++;
         const st = store[s.id];
         if (!st) continue;
-        papers += st.papers?.length ?? 0;
-        topics += st.topics?.length ?? 0;
-        assessments += st.assessments?.length ?? 0;
-        for (const t of st.topics ?? []) {
+        const flat = flattenSubject(st);
+        papers += flat.papers.length;
+        topics += flat.topics.length;
+        assessments += flat.assessments.length;
+        for (const t of flat.topics) {
           if (t.status === "red") red++;
           else if (t.status === "amber") amber++;
           else if (t.status === "green") green++;
@@ -105,9 +107,8 @@ function Home() {
             title: subjectLabel,
           });
         }
-        const st = store[slot.id];
-        if (!st) return;
-        for (const p of st.papers ?? []) {
+        const st = flattenSubject(store[slot.id]);
+        for (const p of st.papers) {
           if (p.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -118,7 +119,7 @@ function Home() {
             });
           }
         }
-        for (const a of st.assessments ?? []) {
+        for (const a of st.assessments) {
           if (a.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -129,7 +130,7 @@ function Home() {
             });
           }
         }
-        for (const t of st.topics ?? []) {
+        for (const t of st.topics) {
           if (t.title.toLowerCase().includes(q)) {
             results.push({
               subjectId: slot.id,
@@ -170,8 +171,8 @@ function Home() {
     for (const y of YEARS) {
       subjects[y].forEach((slot, i) => {
         const subjectLabel = slot.name.trim() || `Subject ${i + 1}`;
-        const st = store[slot.id];
-        for (const a of st?.assessments ?? []) {
+        const st = flattenSubject(store[slot.id]);
+        for (const a of st.assessments) {
           if (!a.due) continue;
           const target = new Date(a.due + "T00:00:00");
           if (Number.isNaN(target.getTime())) continue;
@@ -228,7 +229,6 @@ function Home() {
               ))}
             </nav>
             <SaveIndicator />
-            <SettingsButton />
             <AccountMenu />
           </div>
         </div>
@@ -770,107 +770,6 @@ function QuickLinkTile({
       >
         {editing ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
       </button>
-    </div>
-  );
-}
-
-const GRADIENT_KEY = "study-hub-gradient-intensity-v1";
-
-function SettingsButton() {
-  const [open, setOpen] = useState(false);
-  const [intensity, setIntensity] = useState<number>(() => {
-    if (typeof window === "undefined") return 100;
-    const raw = localStorage.getItem(GRADIENT_KEY);
-    const n = raw ? Number(raw) : 100;
-    return Number.isFinite(n) ? n : 100;
-  });
-
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--gradient-intensity",
-      String(intensity / 100),
-    );
-    try {
-      localStorage.setItem(GRADIENT_KEY, String(intensity));
-    } catch {
-      // ignore
-    }
-  }, [intensity]);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex h-9 w-9 items-center justify-center rounded-full purple-outline bg-surface/60 text-muted-foreground hover:text-primary transition-colors"
-        aria-label="Settings"
-        title="Settings"
-      >
-        <Settings className={`h-4 w-4 transition-transform duration-500 ${open ? "rotate-90" : ""}`} />
-      </button>
-      {open && (
-        <>
-          <button
-            className="fixed inset-0 z-40 cursor-default"
-            onClick={() => setOpen(false)}
-            tabIndex={-1}
-            aria-label="Close settings"
-          />
-          <div className="absolute right-0 z-50 mt-2 w-72 rounded-xl border border-border bg-popover p-4 shadow-2xl">
-            <div className="flex items-center gap-2 mb-3">
-              <Settings className="h-4 w-4 text-primary" />
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Appearance
-              </h3>
-            </div>
-            <label className="block text-sm text-foreground mb-1">
-              Gradient intensity
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min={0}
-                max={150}
-                step={1}
-                value={intensity}
-                onChange={(e) => setIntensity(Number(e.target.value))}
-                className="flex-1 accent-primary"
-              />
-              <span className="text-xs w-10 text-right text-muted-foreground tabular-nums">
-                {intensity}%
-              </span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground">
-              <button
-                onClick={() => setIntensity(0)}
-                className="hover:text-primary"
-              >
-                Off
-              </button>
-              <button
-                onClick={() => setIntensity(60)}
-                className="hover:text-primary"
-              >
-                Subtle
-              </button>
-              <button
-                onClick={() => setIntensity(100)}
-                className="hover:text-primary"
-              >
-                Default
-              </button>
-              <button
-                onClick={() => setIntensity(150)}
-                className="hover:text-primary"
-              >
-                Vivid
-              </button>
-            </div>
-            <p className="mt-3 text-[11px] text-muted-foreground/70">
-              Saved on this device.
-            </p>
-          </div>
-        </>
-      )}
     </div>
   );
 }
