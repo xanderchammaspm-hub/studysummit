@@ -16,6 +16,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedStatisticsRouteImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedExamRouteImport } from './routes/_authenticated/exam'
+import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -51,10 +52,17 @@ const AuthenticatedExamRoute = AuthenticatedExamRouteImport.update({
   path: '/exam',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAchievementsRoute =
+  AuthenticatedAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
   '/exam': typeof AuthenticatedExamRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
@@ -63,6 +71,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
   '/exam': typeof AuthenticatedExamRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
@@ -73,6 +82,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
   '/_authenticated/exam': typeof AuthenticatedExamRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/statistics': typeof AuthenticatedStatisticsRoute
@@ -80,14 +90,29 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/exam' | '/profile' | '/statistics' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/achievements'
+    | '/exam'
+    | '/profile'
+    | '/statistics'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/exam' | '/profile' | '/statistics' | '/api/chat'
+  to:
+    | '/'
+    | '/auth'
+    | '/achievements'
+    | '/exam'
+    | '/profile'
+    | '/statistics'
+    | '/api/chat'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/achievements'
     | '/_authenticated/exam'
     | '/_authenticated/profile'
     | '/_authenticated/statistics'
@@ -152,16 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExamRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/achievements': {
+      id: '/_authenticated/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
   AuthenticatedExamRoute: typeof AuthenticatedExamRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedStatisticsRoute: typeof AuthenticatedStatisticsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
   AuthenticatedExamRoute: AuthenticatedExamRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedStatisticsRoute: AuthenticatedStatisticsRoute,
