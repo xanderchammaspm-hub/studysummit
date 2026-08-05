@@ -1,3 +1,4 @@
+import { normalizeUrl } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Pencil, Check, X } from "lucide-react";
 
@@ -121,7 +122,7 @@ export function MemoriseLinkBox({
           </div>
         ) : state.url ? (
           <a
-            href={state.url}
+            href={normalizeUrl(state.url)}
             target="_blank"
             rel="noreferrer noopener"
             className="mt-0.5 flex items-center gap-1 truncate text-xs text-primary hover:underline"

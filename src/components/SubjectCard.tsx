@@ -1,3 +1,4 @@
+import { normalizeUrl } from "@/lib/utils";
 import { useState } from "react";
 import {
   ChevronDown,
@@ -345,7 +346,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     <span className="flex-1 truncate text-sm">{p.title}</span>
                     {p.url && (
                       <a
-                        href={p.url}
+                        href={normalizeUrl(p.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary/80 hover:text-primary"
@@ -444,7 +445,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       )}
                       {a.url && (
                         <a
-                          href={a.url}
+                          href={normalizeUrl(a.url)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary/80 hover:text-primary"
@@ -813,7 +814,7 @@ function NotesDocInput({
     <div className="flex items-center gap-2 rounded-md border border-border/60 bg-surface/60 px-3 py-2">
       <NotebookPen className="h-4 w-4 text-primary shrink-0" />
       <a
-        href={url}
+        href={normalizeUrl(url)}
         target="_blank"
         rel="noopener noreferrer"
         className="flex-1 truncate text-sm text-foreground hover:text-primary"
@@ -821,7 +822,7 @@ function NotesDocInput({
         {url!.replace(/^https?:\/\//, "")}
       </a>
       <a
-        href={url}
+        href={normalizeUrl(url)}
         target="_blank"
         rel="noopener noreferrer"
         className="text-primary/80 hover:text-primary"

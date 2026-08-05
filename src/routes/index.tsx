@@ -1,3 +1,4 @@
+import { normalizeUrl } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
@@ -743,7 +744,7 @@ function QuickLinkTile({
           />
         ) : link.url ? (
           <a
-            href={link.url}
+            href={normalizeUrl(link.url)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-muted-foreground hover:text-primary truncate block"
@@ -758,7 +759,7 @@ function QuickLinkTile({
       </div>
       {link.url && !editing && (
         <a
-          href={link.url}
+          href={normalizeUrl(link.url)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
