@@ -9,6 +9,7 @@ import {
   Trash2,
   Check,
   BellRing,
+  ListChecks,
   NotebookPen,
 } from "lucide-react";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
@@ -66,6 +67,19 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [aTitle, setATitle] = useState("");
   const [aUrl, setAUrl] = useState("");
   const [aDue, setADue] = useState("");
+  const [dotText, setDotText] = useState("");
+
+  const dotPct =
+    state.syllabus.length === 0
+      ? 0
+      : Math.round((state.syllabus.filter((p) => p.done).length / state.syllabus.length) * 100);
+
+  const addDot = () => {
+    const t = dotText.trim();
+    if (!t) return;
+    update((s) => ({ ...s, syllabus: [...s.syllabus, { id: uid(), text: t, done: false }] }));
+    setDotText("");
+  };
 
   const addPaper = () => {
     const t = paperTitle.trim();
