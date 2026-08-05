@@ -29,7 +29,9 @@ export function getSyncStatus() {
 
 export function subscribeSyncStatus(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 let currentUserId: string | null = null;
