@@ -305,6 +305,7 @@ const defaultLinks: QuickLink[] = [
   { id: "thsc", label: "THSC", url: "", emoji: "📝" },
   { id: "nesa", label: "NESA", url: "", emoji: "🏛️" },
   { id: "oakhill", label: "Oakhill Past Papers", url: "", emoji: "🗂️" },
+  { id: "leibniz", label: "Leibniz HSC", url: "", emoji: "🧮" },
 ];
 
 function loadLinks(): QuickLink[] {
