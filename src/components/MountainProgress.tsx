@@ -1,13 +1,32 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CAMPS, useMountainProgress } from "@/hooks/useMountainProgress";
+import { CalendarCog, RotateCcw } from "lucide-react";
+import {
+  CAMPS,
+  CAMP_LABEL,
+  daysUntil,
+  useMountainProgress,
+} from "@/hooks/useMountainProgress";
 
 const HIGHEST_KEY = "summit-highest-camp-v1";
 
 export function MountainProgress() {
-  const { progress, currentCamp, nextCamp, topics, green, papers, assessments } =
-    useMountainProgress();
+  const {
+    progress,
+    timeline,
+    mastery,
+    currentCamp,
+    nextCamp,
+    topics,
+    green,
+    papers,
+    assessments,
+    dates,
+    updateDate,
+    resetDates,
+  } = useMountainProgress();
   const prevCamp = useRef<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -25,13 +44,14 @@ export function MountainProgress() {
     prevCamp.current = currentCamp.key;
   }, [currentCamp]);
 
-  // Ridge waypoints — x/y in SVG coords, one per camp
+  // Ridge waypoints — x/y in SVG coords, one per camp (6 total)
   const pts: [number, number][] = [
-    [45, 300],
-    [220, 240],
-    [400, 190],
-    [580, 130],
-    [755, 55],
+    [40, 305],
+    [180, 258],
+    [320, 214],
+    [460, 170],
+    [610, 118],
+    [760, 48],
   ];
   const W = 800;
   const H = 340;
@@ -39,11 +59,14 @@ export function MountainProgress() {
   const ridgePath = `M${pts.map(([x, y]) => `${x},${y}`).join(" L ")}`;
 
   // Marker position along ridge
-  const seg = Math.max(0, Math.min(4, progress / 25));
+  const span = 100 / (pts.length - 1);
+  const seg = Math.max(0, Math.min(pts.length - 1, progress / span));
   const i0 = Math.min(Math.floor(seg), pts.length - 2);
   const t = seg - i0;
   const mx = pts[i0][0] + (pts[i0 + 1][0] - pts[i0][0]) * t;
   const my = pts[i0][1] + (pts[i0 + 1][1] - pts[i0][1]) * t;
+
+  const nextDays = nextCamp ? daysUntil(dates[nextCamp.key]) : null;
 
   return (
     <div className="mx-auto max-w-4xl purple-outline rounded-2xl bg-card/50 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden fade-in-up">
@@ -56,21 +79,64 @@ export function MountainProgress() {
           </div>
           <div className="text-lg font-semibold flex items-center gap-2">
             <span className="text-2xl leading-none">{currentCamp.emoji}</span>
-            <span className="gradient-text">{currentCamp.name}</span>
+            <span className="gradient-text">
+              {currentCamp.name} · {CAMP_LABEL[currentCamp.key]}
+            </span>
           </div>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {currentCamp.desc}
-          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">{currentCamp.desc}</div>
         </div>
         <div className="text-right shrink-0">
           <div className="text-3xl font-semibold tabular-nums gradient-text leading-none">
             {progress}%
           </div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-            {nextCamp ? `Next: ${nextCamp.name}` : "Summited"}
+            {nextCamp
+              ? `${CAMP_LABEL[nextCamp.key]} in ${Math.max(0, nextDays ?? 0)}d`
+              : "Summited"}
           </div>
+          <button
+            onClick={() => setEditing((v) => !v)}
+            className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-full purple-outline bg-surface/60 px-3 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <CalendarCog className="h-3.5 w-3.5" /> Exam dates
+          </button>
         </div>
       </div>
+
+      {editing && (
+        <div className="mb-5 rounded-xl border border-border/70 bg-surface/50 p-4 fade-in-up">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Milestone calendar
+            </div>
+            <button
+              onClick={resetDates}
+              className="inline-flex cursor-pointer items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="h-3 w-3" /> Reset
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {CAMPS.map((c) => (
+              <label key={c.key} className="block text-xs">
+                <span className="mb-1 block text-muted-foreground">
+                  {c.emoji} {CAMP_LABEL[c.key]}
+                </span>
+                <input
+                  type="date"
+                  value={dates[c.key]}
+                  onChange={(e) => updateDate(c.key, e.target.value)}
+                  className="w-full cursor-pointer rounded-lg border border-border bg-background/70 px-2.5 py-1.5 text-foreground outline-none transition-colors focus:border-primary/70"
+                />
+              </label>
+            ))}
+          </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            The climb tracks your exam calendar ({timeline}% by date) blended with topic mastery (
+            {mastery}%).
+          </p>
+        </div>
+      )}
 
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -103,10 +169,8 @@ export function MountainProgress() {
           </radialGradient>
         </defs>
 
-        {/* Sky wash */}
         <rect x="0" y="0" width={W} height={H} fill="url(#mtn-sky)" />
 
-        {/* Twinkling stars */}
         {[
           [80, 40], [160, 70], [260, 30], [340, 90], [480, 45],
           [560, 75], [640, 35], [700, 100], [140, 110], [420, 20],
@@ -123,18 +187,16 @@ export function MountainProgress() {
           />
         ))}
 
-        {/* Summit glow when near/at top */}
-        {progress >= 75 && (
+        {progress >= 70 && (
           <circle
-            cx={pts[4][0]}
-            cy={pts[4][1]}
+            cx={pts[5][0]}
+            cy={pts[5][1]}
             r={60}
             fill="url(#summit-glow)"
             style={{ opacity: (progress - 60) / 40, transition: "opacity 900ms ease" }}
           />
         )}
 
-        {/* Drifting clouds */}
         <g style={{ opacity: 0.35 }}>
           <ellipse cx="0" cy="140" rx="55" ry="9" fill="oklch(0.9 0.03 285)"
             style={{ animation: "cloudDrift 38s linear infinite" }} />
@@ -144,13 +206,11 @@ export function MountainProgress() {
             style={{ animation: "cloudDrift 46s linear -30s infinite" }} />
         </g>
 
-        {/* Back mountain (parallax) */}
         <path
           d={`M-50,${H} L120,180 L280,120 L440,175 L620,90 L820,200 L${W + 50},${H} Z`}
           fill="url(#mtn-back)"
         />
 
-        {/* Mountain body */}
         <path
           d={mountainPath}
           fill="url(#mtn-body)"
@@ -158,10 +218,9 @@ export function MountainProgress() {
           strokeWidth="1.2"
         />
 
-        {/* Snow caps on peaks — grow with progress */}
         {pts.map(([x, y], i) => {
           const reached = progress >= CAMPS[i].pct;
-          const size = reached ? 14 + i * 2 : 6;
+          const size = reached ? 12 + i * 1.6 : 6;
           return (
             <path
               key={`snow${i}`}
@@ -173,10 +232,8 @@ export function MountainProgress() {
           );
         })}
 
-        {/* Ridge base */}
         <path d={ridgePath} fill="none" stroke="oklch(0.4 0.1 285)" strokeWidth="2" />
 
-        {/* Ridge progress */}
         <path
           d={ridgePath}
           fill="none"
@@ -192,7 +249,6 @@ export function MountainProgress() {
           }}
         />
 
-        {/* Camps */}
         {CAMPS.map((c, i) => {
           const reached = progress >= c.pct;
           const [x, y] = pts[i];
@@ -207,37 +263,34 @@ export function MountainProgress() {
                 stroke={reached ? "oklch(0.96 0.06 82)" : "oklch(0.55 0.18 295 / 0.7)"}
                 strokeWidth="2"
                 style={{
-                  filter: reached
-                    ? "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.85))"
-                    : "none",
+                  filter: reached ? "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.85))" : "none",
                   transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               />
               <text
                 x={x}
-                y={above ? y - 26 : y - 14}
+                y={above ? y - 28 : y - 14}
                 textAnchor="middle"
-                fontSize="15"
+                fontSize="14"
                 style={{ pointerEvents: "none" }}
               >
                 {c.emoji}
               </text>
               <text
                 x={x}
-                y={above ? y - 42 : y + 22}
+                y={above ? y - 44 : y + 20}
                 textAnchor="middle"
                 fill={reached ? "oklch(0.95 0.02 285)" : "oklch(0.6 0.03 285)"}
-                fontSize="10"
+                fontSize="9.5"
                 fontWeight="700"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
               >
-                {c.name}
+                {CAMP_LABEL[c.key]}
               </text>
             </g>
           );
         })}
 
-        {/* Hiker marker with pulsing ring */}
         <g
           style={{
             transform: `translate(${mx}px, ${my - 18}px)`,
@@ -249,10 +302,7 @@ export function MountainProgress() {
             fill="none"
             stroke="oklch(0.85 0.15 300)"
             strokeWidth="2"
-            style={{
-              animation: "ringPulse 1.8s ease-out infinite",
-              transformOrigin: "center",
-            }}
+            style={{ animation: "ringPulse 1.8s ease-out infinite", transformOrigin: "center" }}
           />
           <g style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}>
             <circle
@@ -269,16 +319,15 @@ export function MountainProgress() {
         </g>
       </svg>
 
-
       {/* Progress bar to next camp */}
       <div className="mt-4">
         <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
           <span className="flex items-center gap-1">
-            <span>{currentCamp.emoji}</span> {currentCamp.name}
+            <span>{currentCamp.emoji}</span> {CAMP_LABEL[currentCamp.key]}
           </span>
           {nextCamp ? (
             <span>
-              {nextCamp.pct - progress}% to {nextCamp.name} {nextCamp.emoji}
+              {nextCamp.pct - progress}% to {CAMP_LABEL[nextCamp.key]} {nextCamp.emoji}
             </span>
           ) : (
             <span className="text-yellow">🎉 Summit reached</span>
@@ -291,16 +340,35 @@ export function MountainProgress() {
               width: nextCamp
                 ? `${Math.max(2, ((progress - currentCamp.pct) / Math.max(1, nextCamp.pct - currentCamp.pct)) * 100)}%`
                 : "100%",
-              background:
-                "linear-gradient(90deg, oklch(0.7 0.22 300), oklch(0.88 0.13 82))",
+              background: "linear-gradient(90deg, oklch(0.7 0.22 300), oklch(0.88 0.13 82))",
               boxShadow: "0 0 12px oklch(0.7 0.22 300 / 0.6)",
             }}
           />
         </div>
       </div>
 
+      {/* Countdown strip */}
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {CAMPS.filter((c) => c.key !== "base").map((c) => {
+          const d = daysUntil(dates[c.key]);
+          return (
+            <div
+              key={c.key}
+              className="rounded-lg border border-border/60 bg-surface/50 px-3 py-2 transition-colors hover:border-primary/50"
+            >
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {CAMP_LABEL[c.key]}
+              </div>
+              <div className="text-sm font-semibold tabular-nums text-foreground">
+                {d > 0 ? `${d} days` : "Done"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Contribution breakdown */}
-      <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+      <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
         <Contrib label="Mastered" value={`${green}/${topics}`} hint="Green topics" />
         <Contrib label="Papers" value={papers} hint="Past papers logged" />
         <Contrib label="Assessments" value={assessments} hint="Tracked assessments" />
@@ -320,12 +388,8 @@ function Contrib({
 }) {
   return (
     <div className="rounded-lg border border-border/60 bg-surface/50 px-3 py-2" title={hint}>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-        {label}
-      </div>
-      <div className="text-base font-semibold tabular-nums text-foreground">
-        {value}
-      </div>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="text-base font-semibold tabular-nums text-foreground">{value}</div>
     </div>
   );
 }
