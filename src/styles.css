@@ -401,3 +401,7 @@ button:disabled,
   animation-iteration-count: 1 !important;
   transition-duration: 120ms !important;
 }
+
+/* Compact density — tightens the vertical rhythm of the main sections. */
+.density-compact section { padding-top: 1rem; padding-bottom: 1rem; }
+.density-compact .fade-in-up { animation-duration: 0.4s; }
