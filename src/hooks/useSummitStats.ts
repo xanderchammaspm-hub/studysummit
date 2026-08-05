@@ -2,7 +2,15 @@ import { useMemo, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useSubjects, useAllSubjectStates, flattenSubject, type YearKey } from "@/hooks/useSubjectStore";
+import {
+  useSubjects,
+  useAllSubjectStates,
+  useQuickLinks,
+  flattenSubject,
+  subjectTerms,
+  TERMS_BY_YEAR,
+  type YearKey,
+} from "@/hooks/useSubjectStore";
 
 export type StudyLog = { id: string; date: string; hours: number; subjectId?: string; note?: string };
 
@@ -50,7 +58,20 @@ export function useSummitStats() {
   const subjects = useSubjects();
   const store = useAllSubjectStates();
   const logs = useStudyLogs();
+  const quickLinks = useQuickLinks();
   const { user } = useAuth();
+
+  const examEvents = useQuery({
+    queryKey: ["stat-exam-events", user?.id ?? null],
+    enabled: !!user,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("xp_events")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "examCompleted");
+      return count ?? 0;
+    },
+  });
 
   const attempts = useQuery({
     queryKey: ["stat-attempts", user?.id ?? null],
@@ -71,6 +92,12 @@ export function useSummitStats() {
     let papers = 0;
     let assessments = 0;
     let subjectCount = 0;
+    let subjectsNamed = 0;
+    let syllabusDone = 0;
+    let papersAdded = 0;
+    let notesDocs = 0;
+    let termsCleared = 0;
+    let subjectsCleared = 0;
     const perSubject: { label: string; hours: number; green: number; topics: number }[] = [];
 
     const hoursBySubject = new Map<string, number>();
@@ -82,6 +109,15 @@ export function useSummitStats() {
         const st = store[slot.id];
         if (!slot.name.trim() && !st) return;
         subjectCount++;
+        if (slot.name.trim()) subjectsNamed++;
+        const terms = subjectTerms(st);
+        for (const tk of TERMS_BY_YEAR[y]) {
+          const term = terms[tk];
+          if (term.notesUrl) notesDocs++;
+          papersAdded += term.papers.filter((p) => p.url).length;
+          syllabusDone += term.syllabus.filter((sp) => sp.done).length;
+          if (term.topics.length > 0 && term.topics.every((t) => t.status === "green")) termsCleared++;
+        }
         let sGreen = 0;
         let sTopics = 0;
         const flat = flattenSubject(st);
@@ -96,11 +132,30 @@ export function useSummitStats() {
           } else if (t.status === "amber") amber++;
           else if (t.status === "red") red++;
         }
+        if (sTopics > 0 && sGreen === sTopics) subjectsCleared++;
         perSubject.push({ label, hours: hoursBySubject.get(slot.id) ?? 0, green: sGreen, topics: sTopics });
       });
     }
 
     const totalHours = logs.reduce((s, l) => s + l.hours, 0);
+    const hoursByDay = new Map<string, number>();
+    for (const l of logs) hoursByDay.set(l.date, (hoursByDay.get(l.date) ?? 0) + l.hours);
+    const bestDayHours = Math.max(0, ...hoursByDay.values());
+    const weekendStudy = [...hoursByDay.entries()].some(([d, h]) => {
+      const wd = new Date(d + "T00:00:00").getDay();
+      return h > 0 && (wd === 0 || wd === 6);
+    })
+      ? 1
+      : 0;
+    const hoursByWeek = new Map<string, number>();
+    for (const l of logs) {
+      const d = new Date(l.date + "T00:00:00");
+      d.setDate(d.getDate() - d.getDay());
+      const key = d.toISOString().slice(0, 10);
+      hoursByWeek.set(key, (hoursByWeek.get(key) ?? 0) + l.hours);
+    }
+    const bestWeekHours = Math.max(0, ...hoursByWeek.values());
+    const activeWeeks = [...hoursByWeek.values()].filter((h) => h > 0).length;
     const days = new Set(logs.filter((l) => l.hours > 0).map((l) => l.date));
     const rows = attempts.data ?? [];
     const completed = rows.filter((r) => r.completed_at);
@@ -142,6 +197,19 @@ export function useSummitStats() {
       quizScores90: scores.filter((s) => s >= 0.9).length,
       avgScore,
       allTopicsGreen: topics > 0 && green === topics,
+      noRedTopics: topics > 0 && red === 0 ? 1 : 0,
+      bestDayHours,
+      bestWeekHours,
+      weekendStudy,
+      activeWeeks,
+      syllabusDone,
+      papersAdded,
+      notesDocs,
+      termsCleared,
+      subjectsCleared,
+      subjectsNamed,
+      quickLinks: quickLinks.filter((l) => l.url.trim()).length,
+      examsCompleted: examEvents.data ?? 0,
     };
-  }, [subjects, store, logs, attempts.data]);
+  }, [subjects, store, logs, attempts.data, quickLinks, examEvents.data]);
 }
