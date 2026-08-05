@@ -13,7 +13,7 @@ export type Prefs = {
 
 export const DEFAULT_PREFS: Prefs = {
   dailyGoalHours: 2,
-  targetAtar: 95,
+  targetAtar: 97,
   reminderDays: [7, 3, 1],
   accent: "purple",
   density: "comfortable",
