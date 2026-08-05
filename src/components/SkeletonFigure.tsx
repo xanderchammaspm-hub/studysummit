@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import skeletonHologram from "@/assets/skeleton-holo-v2.png";
+import skeletonHologram from "@/assets/skeleton-holo-v3.png.asset.json";
 import { FRONTAL_VIEWBOX as VB, ZONE_BOXES, type BoneZone } from "@/assets/skeletonFrontal";
 
 export const ZONE_IDS: BoneZone[] = ["skull", "spine", "vertebrae", "limbs", "feet"];
@@ -11,29 +11,30 @@ type Rect = [number, number, number, number];
  * (image is drawn with preserveAspectRatio="xMidYMid meet" into the 400x1080 box).
  */
 const HIT_RECTS: Record<BoneZone, Rect[]> = {
-  skull: [[148, 72, 104, 124]],
-  spine: [[126, 196, 148, 202]],
-  vertebrae: [[130, 398, 140, 174]],
+  skull: [[154, 36, 92, 122]],
+  spine: [[130, 162, 140, 216]],
+  vertebrae: [[132, 380, 136, 150]],
   limbs: [
-    [34, 240, 92, 530],
-    [274, 240, 92, 530],
-    [130, 578, 140, 316],
+    [44, 202, 84, 386],
+    [272, 202, 84, 386],
+    [124, 534, 152, 372],
   ],
-  feet: [[96, 894, 208, 106]],
+  feet: [[128, 908, 144, 116]],
 };
 
 /** Regions of the hologram lit up for each zone (same geometry as the hit areas). */
 const GLOW_RECTS: Record<BoneZone, Rect[]> = {
-  skull: [[142, 66, 116, 136]],
-  spine: [[96, 188, 208, 218]],
-  vertebrae: [[110, 392, 180, 188]],
+  skull: [[152, 34, 96, 126]],
+  spine: [[116, 160, 168, 246]],
+  vertebrae: [[126, 380, 148, 152]],
   limbs: [
-    [30, 232, 100, 546],
-    [270, 232, 100, 546],
-    [124, 572, 152, 326],
+    [42, 200, 92, 392],
+    [266, 200, 92, 392],
+    [120, 530, 160, 380],
   ],
-  feet: [[92, 886, 216, 116]],
+  feet: [[128, 906, 144, 120]],
 };
+
 
 const PAD = 40;
 
