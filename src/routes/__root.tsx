@@ -137,7 +137,7 @@ function RootComponent() {
   useEffect(() => {
     initCloudSync();
     const gradient = localStorage.getItem("study-hub-gradient-intensity-v1");
-    if (gradient) document.documentElement.style.setProperty("--aurora-strength", String(Number(gradient) / 100));
+    if (gradient) document.documentElement.style.setProperty("--gradient-intensity", String(Number(gradient) / 100));
     if (localStorage.getItem("summit-reduce-motion-v1") === "1") {
       document.documentElement.classList.add("reduce-motion");
     }

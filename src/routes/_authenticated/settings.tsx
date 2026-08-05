@@ -35,14 +35,14 @@ function SettingsPage() {
 
   useEffect(() => {
     const g = Number(localStorage.getItem(GRADIENT_KEY));
-    if (!Number.isNaN(g) && g > 0) setIntensity(g);
+    if (Number.isFinite(g) && g > 0) setIntensity(g);
     setReduceMotion(localStorage.getItem(MOTION_KEY) === "1");
   }, []);
 
   function applyIntensity(v: number) {
     setIntensity(v);
     localStorage.setItem(GRADIENT_KEY, String(v));
-    document.documentElement.style.setProperty("--aurora-strength", String(v / 100));
+    document.documentElement.style.setProperty("--gradient-intensity", String(v / 100));
   }
 
   function applyMotion(on: boolean) {
