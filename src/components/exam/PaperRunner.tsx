@@ -6,6 +6,7 @@ import { pct } from "./types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfile";
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
+  const { awardXp } = useProfile();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [idx, setIdx] = useState(0);
@@ -159,6 +161,8 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
           total_marks: totalMarks,
         })
         .eq("id", attemptId);
+      await awardXp("pastPaper");
+      if (totalMarks > 0 && awarded / totalMarks >= 0.9) await awardXp("quiz");
     }
     setDone(true);
     onFinished();

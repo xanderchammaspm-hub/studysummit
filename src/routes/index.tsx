@@ -7,9 +7,10 @@ import { MountainProgress } from "@/components/MountainProgress";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo } from "@/components/SummitLogo";
-import { RecallScheduler } from "@/components/RecallScheduler";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 import { EnglishFormula } from "@/components/EnglishFormula";
+import { UpcomingExams } from "@/components/UpcomingExams";
+import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
 
 import {
@@ -226,7 +227,9 @@ function Home() {
                 </button>
               ))}
             </nav>
+            <SaveIndicator />
             <SettingsButton />
+            <AccountMenu />
           </div>
         </div>
       </header>
@@ -330,8 +333,8 @@ function Home() {
       {/* Study calendar */}
       <StudyCalendar />
 
-      {/* Spaced repetition + active recall */}
-      <RecallScheduler />
+      {/* Upcoming exams countdown */}
+      <UpcomingExams />
 
 
 

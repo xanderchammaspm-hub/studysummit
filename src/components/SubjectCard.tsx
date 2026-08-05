@@ -24,6 +24,7 @@ import {
   type YearKey,
 } from "@/hooks/useSubjectStore";
 import { DraggableList } from "@/components/DraggableList";
+import { useProfile } from "@/hooks/useProfile";
 
 type Props = {
   index: number;
@@ -47,6 +48,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState(name);
   const { state, update } = useSubject(id);
+  const { awardXp } = useProfile();
   const label = name.trim() || `Subject ${index + 1}`;
 
   const [paperTitle, setPaperTitle] = useState("");
@@ -457,16 +459,16 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 renderItem={(t) => (
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const next = cycle(t.status);
+                        if (next === "green") void awardXp("syllabusPoint");
                         update((s) => ({
                           ...s,
                           topics: s.topics.map((x) =>
-                            x.id === t.id
-                              ? { ...x, status: cycle(x.status) }
-                              : x,
+                            x.id === t.id ? { ...x, status: next } : x,
                           ),
-                        }))
-                      }
+                        }));
+                      }}
                       title={`Status: ${t.status} — click to cycle`}
                       className="shrink-0"
                     >
@@ -475,15 +477,17 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     <span className="flex-1 truncate text-sm">{t.title}</span>
                     <QuickChips
                       status={t.status}
-                      onSet={(status) =>
-                        update((s) => ({
+                      onSet={(status) => {
+                        if (status === "green" && t.status !== "green") void awardXp("syllabusPoint");
+                        return update((s) => ({
                           ...s,
                           topics: s.topics.map((x) =>
                             x.id === t.id ? { ...x, status } : x,
                           ),
-                        }))
-                      }
+                        }));
+                      }}
                     />
+
                     <button
                       onClick={() =>
                         update((s) => ({
