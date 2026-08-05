@@ -132,8 +132,25 @@ export function SkeletonFigure({
                     0   0  1.15 0 0.20
                     1.0 1.0 1.0 0 -0.14"
           />
-          <feGaussianBlur stdDeviation="7" result="bloom" />
+          <feGaussianBlur stdDeviation="8" result="bloom" />
           <feMerge>
+            <feMergeNode in="bloom" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        {/* Stronger purple lift when a region is pressed/held */}
+        <filter id="zone-lift-press" x="-50%" y="-50%" width="200%" height="200%">
+          <feColorMatrix
+            type="matrix"
+            values="0.95 0 0 0 0.14
+                    0   0.55 0 0 0
+                    0   0  1.25 0 0.28
+                    1.1 1.1 1.1 0 -0.14"
+          />
+          <feGaussianBlur stdDeviation="14" result="bloom" />
+          <feMerge>
+            <feMergeNode in="bloom" />
             <feMergeNode in="bloom" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
