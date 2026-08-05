@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import skeletonHologram from "@/assets/skeleton-holo-v3.png.asset.json";
 import { FRONTAL_VIEWBOX as VB, ZONE_BOXES, type BoneZone } from "@/assets/skeletonFrontal";
@@ -70,9 +71,12 @@ export function SkeletonFigure({
   onHover: (id: string | null) => void;
   className?: string;
 }) {
+  const [pressed, setPressed] = useState<string | null>(null);
   const t = zoneTransform(active);
   const lit = (active ?? hovered) as BoneZone | null;
   const glow = lit ? (GLOW_RECTS[lit] ?? []) : [];
+  const isPressed = pressed === active && active !== null;
+
 
   return (
     <svg
@@ -116,7 +120,7 @@ export function SkeletonFigure({
           </g>
         </mask>
         <filter id="zone-feather" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="46" />
+          <feGaussianBlur stdDeviation="64" />
         </filter>
 
         {/* Purple illumination for the hovered bones + soft outer bloom */}
@@ -128,8 +132,25 @@ export function SkeletonFigure({
                     0   0  1.15 0 0.20
                     1.0 1.0 1.0 0 -0.14"
           />
-          <feGaussianBlur stdDeviation="7" result="bloom" />
+          <feGaussianBlur stdDeviation="8" result="bloom" />
           <feMerge>
+            <feMergeNode in="bloom" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        {/* Stronger purple lift when a region is pressed/held */}
+        <filter id="zone-lift-press" x="-50%" y="-50%" width="200%" height="200%">
+          <feColorMatrix
+            type="matrix"
+            values="0.95 0 0 0 0.14
+                    0   0.55 0 0 0
+                    0   0  1.25 0 0.28
+                    1.1 1.1 1.1 0 -0.14"
+          />
+          <feGaussianBlur stdDeviation="14" result="bloom" />
+          <feMerge>
+            <feMergeNode in="bloom" />
             <feMergeNode in="bloom" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
@@ -166,7 +187,12 @@ export function SkeletonFigure({
         {lit && (
           <g
             mask="url(#zone-mask)"
-            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.8 }}
+            style={{
+              filter: isPressed ? "url(#zone-lift-press)" : "url(#zone-lift)",
+              mixBlendMode: "screen",
+              opacity: isPressed ? 0.96 : 0.84,
+              transition: "opacity 200ms ease",
+            }}
           >
             <image
               href={skeletonHologram.url}
@@ -178,8 +204,6 @@ export function SkeletonFigure({
             />
           </g>
         )}
-
-
 
         {/* Click targets */}
         {ZONE_IDS.map((z) =>
@@ -193,8 +217,15 @@ export function SkeletonFigure({
               fill="transparent"
               style={{ cursor: "pointer" }}
               onClick={() => onPick(active === z ? null : z)}
+              onMouseDown={() => setPressed(z)}
+              onMouseUp={() => setPressed(null)}
+              onMouseLeave={() => {
+                onHover(null);
+                setPressed(null);
+              }}
               onMouseEnter={() => onHover(z)}
-              onMouseLeave={() => onHover(null)}
+              onTouchStart={() => setPressed(z)}
+              onTouchEnd={() => setPressed(null)}
             />
           )),
         )}
