@@ -14,6 +14,9 @@ import {
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
   useSubject,
+  useSubjectTerm,
+  TERMS_BY_YEAR,
+  TERM_LABEL,
   uid,
   renameSubject,
   deleteSubject,
@@ -21,8 +24,10 @@ import {
   type Topic,
   type Assessment,
   type TrafficColor,
+  type TermKey,
   type YearKey,
 } from "@/hooks/useSubjectStore";
+
 import { DraggableList } from "@/components/DraggableList";
 import { useProfile } from "@/hooks/useProfile";
 
