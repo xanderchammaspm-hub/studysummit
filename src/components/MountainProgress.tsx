@@ -277,9 +277,9 @@ export function MountainProgress() {
                 {c.emoji}
               </text>
               <text
-                x={x}
+                x={i === 0 ? x - 12 : i === CAMPS.length - 1 ? x + 12 : x}
                 y={above ? y - 42 : y + 20}
-                textAnchor="middle"
+                textAnchor={i === 0 ? "start" : i === CAMPS.length - 1 ? "end" : "middle"}
                 fill={reached ? "oklch(0.95 0.02 285)" : "oklch(0.6 0.03 285)"}
                 fontSize="9.5"
                 fontWeight="700"
@@ -287,6 +287,7 @@ export function MountainProgress() {
               >
                 {CAMP_LABEL[c.key]}
               </text>
+
             </g>
           );
         })}
