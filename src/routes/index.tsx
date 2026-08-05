@@ -773,8 +773,9 @@ function QuickLinkTile({
           href={normalizeUrl(link.url)}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label="Open"
+          className="text-muted-foreground hover:text-primary opacity-70 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity"
+          aria-label="Open in new tab"
+          title="Opens in a new tab"
         >
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
