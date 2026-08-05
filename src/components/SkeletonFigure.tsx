@@ -187,7 +187,12 @@ export function SkeletonFigure({
         {lit && (
           <g
             mask="url(#zone-mask)"
-            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.8 }}
+            style={{
+              filter: isPressed ? "url(#zone-lift-press)" : "url(#zone-lift)",
+              mixBlendMode: "screen",
+              opacity: isPressed ? 0.96 : 0.84,
+              transition: "opacity 200ms ease",
+            }}
           >
             <image
               href={skeletonHologram.url}
@@ -199,8 +204,6 @@ export function SkeletonFigure({
             />
           </g>
         )}
-
-
 
         {/* Click targets */}
         {ZONE_IDS.map((z) =>
@@ -214,8 +217,15 @@ export function SkeletonFigure({
               fill="transparent"
               style={{ cursor: "pointer" }}
               onClick={() => onPick(active === z ? null : z)}
+              onMouseDown={() => setPressed(z)}
+              onMouseUp={() => setPressed(null)}
+              onMouseLeave={() => {
+                onHover(null);
+                setPressed(null);
+              }}
               onMouseEnter={() => onHover(z)}
-              onMouseLeave={() => onHover(null)}
+              onTouchStart={() => setPressed(z)}
+              onTouchEnd={() => setPressed(null)}
             />
           )),
         )}
