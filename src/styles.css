@@ -334,3 +334,27 @@
   text-align: left;
   font-weight: 600;
 }
+
+/* Interactive elements always show a hand cursor */
+button:not(:disabled),
+summary,
+[role="button"]:not([aria-disabled="true"]),
+[role="tab"],
+[role="menuitem"],
+[role="option"],
+label[for],
+a[href],
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="file"],
+[data-slot="trigger"],
+[draggable="true"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
