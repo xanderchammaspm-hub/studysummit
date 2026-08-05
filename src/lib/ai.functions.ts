@@ -1,3 +1,4 @@
+import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 

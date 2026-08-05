@@ -1,3 +1,4 @@
+import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 import { useEffect, useRef, useState } from "react";
 import {
   Sparkles,
