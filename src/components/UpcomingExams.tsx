@@ -263,11 +263,27 @@ function ExamCard({
         className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-full"
         style={{ background: exam.color, boxShadow: `0 0 12px ${exam.color}` }}
       />
+      <button
+        onClick={() => {
+          if (confirmDelete) onDelete();
+          else setConfirmDelete(true);
+        }}
+        onBlur={() => setConfirmDelete(false)}
+        className={`absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] transition-colors ${
+          confirmDelete
+            ? "border-destructive/70 bg-destructive/20 text-destructive"
+            : "border-border/70 bg-background/60 text-muted-foreground hover:text-destructive"
+        }`}
+        aria-label={`Remove ${exam.subject}`}
+      >
+        <X className="h-3 w-3" />
+        {confirmDelete && "Remove?"}
+      </button>
       <div className="pl-3">
         <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
           {new Date(exam.exam_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
         </div>
-        <div className="mt-1 truncate text-lg font-medium">{exam.subject}</div>
+        <div className="mt-1 truncate pr-10 text-lg font-medium">{exam.subject}</div>
         {exam.note && <div className="truncate text-xs text-muted-foreground">{exam.note}</div>}
 
         <div className="mt-5 flex items-end gap-2">
@@ -280,7 +296,7 @@ function ExamCard({
         </div>
         <div className="mt-2 text-[11px] text-muted-foreground">{fmtDate(exam.exam_at)}</div>
 
-        <div className="mt-4 flex items-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-within:opacity-100">
+        <div className="mt-4 flex items-center gap-2 opacity-100 transition-opacity duration-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
           <button
             onClick={onComplete}
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-3 py-1.5 text-[11px] transition-colors hover:bg-primary/30"
@@ -296,6 +312,7 @@ function ExamCard({
           </button>
         </div>
       </div>
+
     </article>
   );
 }
