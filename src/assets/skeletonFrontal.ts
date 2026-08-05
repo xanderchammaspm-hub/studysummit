@@ -51,34 +51,16 @@ const vert = (cy: number, w: number, h: number) =>
 /* ---------------- Centre-line bones (drawn once) ---------------- */
 
 export const CENTER_BONES: Bone[] = [
-  // Cranium (tapered calvaria + facial skeleton)
+  // Cranium + face
+  { zone: "skull", d: ell(200, 88, 60, 68) },
+  { zone: "skull", d: ell(176, 92, 15, 12) },
+  { zone: "skull", d: ell(224, 92, 15, 12) },
+  { zone: "skull", d: "M 200,108 L 189,132 h 22 Z" },
   {
     zone: "skull",
-    d: "M 200,20 C 236,20 262,48 262,86 C 262,110 253,128 240,142 C 236,158 222,172 200,174 C 178,172 164,158 160,142 C 147,128 138,110 138,86 C 138,48 164,20 200,20 Z",
+    d: "M 158,138 c 6,26 24,40 42,40 c 18,0 36,-14 42,-40 c -14,10 -28,14 -42,14 c -14,0 -28,-4 -42,-14 Z",
   },
-  // Orbits (angled, with superior rim)
-  {
-    zone: "skull",
-    d: "M 165,87 c 3,-9 11,-13 19,-12 c 8,1 12,7 11,15 c -1,9 -8,14 -16,14 c -9,0 -16,-8 -14,-17 Z",
-  },
-  {
-    zone: "skull",
-    d: "M 235,87 c -3,-9 -11,-13 -19,-12 c -8,1 -12,7 -11,15 c 1,9 8,14 16,14 c 9,0 16,-8 14,-17 Z",
-  },
-  // Zygomatic arches
-  { zone: "skull", d: "M 160,110 c 8,7 15,10 22,10 l 0,4 c -9,0 -17,-4 -24,-11 Z" },
-  { zone: "skull", d: "M 240,110 c -8,7 -15,10 -22,10 l 0,4 c 9,0 17,-4 24,-11 Z" },
-  // Nasal aperture
-  { zone: "skull", d: "M 200,112 L 192,133 h 16 Z" },
-  // Maxilla + mandible (rami rising to the temporomandibular joints)
-  { zone: "skull", d: "M 176,138 h 48 v 8 h -48 Z" },
-  {
-    zone: "skull",
-    d: "M 168,132 l 6,0 c 1,15 4,24 10,29 c 5,4 10,6 16,6 c 6,0 11,-2 16,-6 c 6,-5 9,-14 10,-29 l 6,0 c -1,19 -5,31 -13,37 c -6,5 -12,7 -19,7 c -7,0 -13,-2 -19,-7 c -8,-6 -12,-18 -13,-37 Z",
-  },
-
-
-
+  { zone: "skull", d: "M 170,152 h 60 M 200,152 v 24" },
 
   // Cervical spine
   ...[0, 1, 2, 3, 4].map((i) => ({
@@ -134,43 +116,25 @@ export const SIDE_BONES: Bone[] = [
   },
   ...RIBS,
 
-  // Arm: humerus, radius, ulna, carpus, metacarpals, phalanges, thumb
+  // Arm: humerus, radius, ulna, hand
   { zone: "limbs", d: bone(103, 272, 88, 452, 11, 8) },
   { zone: "limbs", d: bone(83, 462, 70, 618, 7, 5) },
   { zone: "limbs", d: bone(96, 462, 84, 620, 6, 4.5) },
-  { zone: "limbs", d: ell(78, 634, 14, 11) },
-  // metacarpals
+  { zone: "limbs", d: ell(76, 636, 15, 17) },
   ...Array.from({ length: 4 }, (_, i) => ({
     zone: "limbs" as const,
-    d: bone(72 + i * 5, 646, 69 + i * 6, 682, 2.4, 2),
-  })),
-  // proximal + distal phalanges
-  ...Array.from({ length: 4 }, (_, i) => ({
-    zone: "limbs" as const,
-    d: bone(69 + i * 6, 686, 67 + i * 6.4, 706, 1.9, 1.6),
-  })),
-  ...Array.from({ length: 4 }, (_, i) => ({
-    zone: "limbs" as const,
-    d: bone(67 + i * 6.4, 709, 66 + i * 6.6, 722, 1.5, 1.2),
+    d: bone(70 + i * 6, 648, 62 + i * 7, 700, 2.6, 2),
   })),
 
-  // thumb
-  { zone: "limbs", d: bone(89, 648, 98, 676, 2.8, 2.3) },
-  { zone: "limbs", d: bone(98, 678, 104, 700, 2.3, 1.8) },
-
-
-  // Pelvis: iliac wing, acetabulum, pubic + ischial rami
+  // Pelvis (iliac wing + ischium)
   {
     zone: "vertebrae",
-    d: "M 178,602 C 150,592 118,606 106,636 C 98,658 104,682 122,694 C 140,706 158,700 166,682 C 174,660 178,630 178,602 Z",
+    d: "M 176,606 C 142,598 110,620 102,654 C 96,682 110,702 134,710 C 156,716 170,704 176,682 C 182,656 182,630 176,606 Z",
   },
-  { zone: "vertebrae", d: ell(128, 700, 15, 14) },
   {
     zone: "vertebrae",
-    d: "M 141,712 c -9,12 -8,30 5,38 c 14,9 30,1 36,-14 l -17,-24 Z",
+    d: "M 136,712 c -12,14 -12,36 4,46 c 16,10 34,0 40,-18 l -18,-26 Z",
   },
-  { zone: "vertebrae", d: bone(146, 706, 182, 700, 5, 6) },
-
 
   // Leg: femur, patella, tibia, fibula
   { zone: "limbs", d: bone(146, 726, 158, 902, 15, 11) },
@@ -187,13 +151,12 @@ export const SIDE_BONES: Bone[] = [
   { zone: "feet", d: "M 176,1024 c 12,6 16,18 10,28 c -8,10 -22,6 -26,-6 Z" },
 ];
 
-/** Calibrated against the vector geometry above, inside the 400x1080 viewBox. */
+/** Calibrated against the rendered hologram inside the 400x1080 viewBox. */
 export const ZONE_BOXES: Record<BoneZone, { x: number; y: number; w: number; h: number }> = {
-  skull: { x: 138, y: 18, w: 124, h: 168 },
-  spine: { x: 84, y: 186, w: 232, h: 300 },
-  vertebrae: { x: 100, y: 478, w: 200, h: 288 },
-  limbs: { x: 48, y: 250, w: 304, h: 760 },
-  feet: { x: 118, y: 998, w: 164, h: 76 },
-
+  skull: { x: 142, y: 66, w: 116, h: 136 },
+  spine: { x: 96, y: 188, w: 208, h: 218 },
+  vertebrae: { x: 110, y: 392, w: 180, h: 188 },
+  limbs: { x: 30, y: 232, w: 340, h: 666 },
+  feet: { x: 92, y: 886, w: 216, h: 116 },
 };
 
