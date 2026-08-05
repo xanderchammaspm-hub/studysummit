@@ -87,23 +87,22 @@ export function SkeletonFigure({
         </g>
 
         {/* Click targets */}
-        {ZONE_IDS.map((z) => {
-          const b = ZONE_BOXES[z];
-          return (
+        {ZONE_IDS.map((z) =>
+          HIT_RECTS[z].map((r, i) => (
             <rect
-              key={z}
-              x={b.x}
-              y={b.y}
-              width={b.w}
-              height={b.h}
+              key={`${z}-${i}`}
+              x={r[0]}
+              y={r[1]}
+              width={r[2]}
+              height={r[3]}
               fill="transparent"
               style={{ cursor: "pointer" }}
               onClick={() => onPick(active === z ? null : z)}
               onMouseEnter={() => onHover(z)}
               onMouseLeave={() => onHover(null)}
             />
-          );
-        })}
+          )),
+        )}
       </motion.g>
     </svg>
   );
