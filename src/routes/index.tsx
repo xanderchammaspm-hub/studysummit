@@ -745,7 +745,7 @@ function QuickLinkTile({
           <a
             href={link.url}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="text-xs text-muted-foreground hover:text-primary truncate block"
           >
             {link.url}
@@ -760,7 +760,7 @@ function QuickLinkTile({
         <a
           href={link.url}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
           aria-label="Open"
         >

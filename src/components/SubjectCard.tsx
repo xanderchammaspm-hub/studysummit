@@ -347,7 +347,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       <a
                         href={p.url}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="text-primary/80 hover:text-primary"
                         title="Open link"
                       >
@@ -446,7 +446,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                         <a
                           href={a.url}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="text-primary/80 hover:text-primary"
                           title="Open notification"
                         >
@@ -815,7 +815,7 @@ function NotesDocInput({
       <a
         href={url}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         className="flex-1 truncate text-sm text-foreground hover:text-primary"
       >
         {url!.replace(/^https?:\/\//, "")}
@@ -823,7 +823,7 @@ function NotesDocInput({
       <a
         href={url}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         className="text-primary/80 hover:text-primary"
         title="Open notes"
       >
