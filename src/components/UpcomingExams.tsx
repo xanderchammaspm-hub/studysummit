@@ -91,7 +91,11 @@ export function UpcomingExams() {
 
   async function add(exam: Omit<Exam, "id">) {
     if (user) {
-      await supabase.from("user_exams").insert({ ...exam, user_id: user.id });
+      const { error } = await supabase.from("user_exams").insert({ ...exam, user_id: user.id });
+      if (error) {
+        toast.error("Couldn't save that exam", { description: error.message });
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ["user-exams", user.id] });
     } else {
       const next = [...local, { ...exam, id: Math.random().toString(36).slice(2) }];
@@ -101,22 +105,43 @@ export function UpcomingExams() {
     setOpen(false);
   }
 
-  async function remove(id: string) {
+  async function remove(id: string, silent = false) {
+    const target = exams.find((e) => e.id === id);
     if (user) {
-      await supabase.from("user_exams").delete().eq("id", id);
+      const { error } = await supabase.from("user_exams").delete().eq("id", id);
+      if (error) {
+        toast.error("Couldn't remove that exam", { description: error.message });
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ["user-exams", user.id] });
     } else {
       const next = local.filter((e) => e.id !== id);
       setLocal(next);
       writeLocal(next);
     }
+    if (!silent && target) {
+      toast.success(`${target.subject} removed`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void add({
+              subject: target.subject,
+              note: target.note,
+              exam_at: target.exam_at,
+              color: target.color,
+            });
+          },
+        },
+      });
+    }
   }
 
   async function complete(exam: Exam) {
-    await remove(exam.id);
+    await remove(exam.id, true);
     await awardXp("examCompleted", 1, { subject: exam.subject });
     toast.success(`${exam.subject} completed`, { description: "+120 XP added to your climb." });
   }
+
 
   const nudge = (dir: 1 | -1) => {
     const el = railRef.current;
