@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, Flame, Plus, TrendingUp, X } from "lucide-react";
 import { useSubjects, type YearKey } from "@/hooks/useSubjectStore";
+import { useProfile } from "@/hooks/useProfile";
 
 type StudyLog = {
   id: string;
@@ -59,6 +60,8 @@ export function StudyCalendar() {
   const [logs, setLogs] = useState<StudyLog[]>(() => loadLogs());
   useEffect(() => saveLogs(logs), [logs]);
 
+  const { awardXp } = useProfile();
+
   const [month, setMonth] = useState(() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() };
@@ -81,6 +84,7 @@ export function StudyCalendar() {
         note: note.trim() || undefined,
       },
     ]);
+    void awardXp("studyHour", h);
     setHours("1");
     setNote("");
   };

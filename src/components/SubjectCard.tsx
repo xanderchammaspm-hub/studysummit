@@ -457,16 +457,16 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 renderItem={(t) => (
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const next = cycle(t.status);
+                        if (next === "green") void awardXp("syllabusPoint");
                         update((s) => ({
                           ...s,
                           topics: s.topics.map((x) =>
-                            x.id === t.id
-                              ? { ...x, status: cycle(x.status) }
-                              : x,
+                            x.id === t.id ? { ...x, status: next } : x,
                           ),
-                        }))
-                      }
+                        }));
+                      }}
                       title={`Status: ${t.status} — click to cycle`}
                       className="shrink-0"
                     >
