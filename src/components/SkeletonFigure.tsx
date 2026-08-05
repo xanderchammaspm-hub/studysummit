@@ -1,38 +1,37 @@
 import { motion } from "framer-motion";
-import skeletonHologram from "@/assets/skeleton-holo-v2.png";
-import { FRONTAL_VIEWBOX as VB, ZONE_BOXES, type BoneZone } from "@/assets/skeletonFrontal";
+import {
+  FRONTAL_VIEWBOX as VB,
+  MIRROR_TRANSFORM,
+  ZONE_BOXES,
+  CENTER_BONES,
+  SIDE_BONES,
+  type Bone,
+  type BoneZone,
+} from "@/assets/skeletonFrontal";
 
 export const ZONE_IDS: BoneZone[] = ["skull", "spine", "vertebrae", "limbs", "feet"];
 
 type Rect = [number, number, number, number];
 
-/**
- * Pointer hit areas, calibrated against the rendered hologram
- * (image is drawn with preserveAspectRatio="xMidYMid meet" into the 400x1080 box).
- */
+/** Pointer hit areas, aligned to the vector skeleton inside the 400x1080 box. */
 const HIT_RECTS: Record<BoneZone, Rect[]> = {
-  skull: [[148, 72, 104, 124]],
-  spine: [[126, 196, 148, 202]],
-  vertebrae: [[130, 398, 140, 174]],
+  skull: [[136, 18, 128, 168]],
+  spine: [[120, 188, 160, 200]],
+  vertebrae: [[112, 470, 176, 240]],
   limbs: [
-    [34, 240, 92, 530],
-    [274, 240, 92, 530],
-    [130, 578, 140, 316],
+    [40, 240, 96, 470],
+    [264, 240, 96, 470],
+    [118, 712, 164, 288],
   ],
-  feet: [[96, 894, 208, 106]],
+  feet: [[96, 1000, 208, 76]],
 };
 
-/** Regions of the hologram lit up for each zone (same geometry as the hit areas). */
-const GLOW_RECTS: Record<BoneZone, Rect[]> = {
-  skull: [[142, 66, 116, 136]],
-  spine: [[96, 188, 208, 218]],
-  vertebrae: [[110, 392, 180, 188]],
-  limbs: [
-    [30, 232, 100, 546],
-    [270, 232, 100, 546],
-    [124, 572, 152, 326],
-  ],
-  feet: [[92, 886, 216, 116]],
+const LABELS: Record<BoneZone, { text: string; x: number; y: number; anchor: "start" | "end" }> = {
+  skull: { text: "CRANIUM · INTRO", x: 292, y: 86, anchor: "start" },
+  spine: { text: "THORAX · THESIS", x: 320, y: 300, anchor: "start" },
+  vertebrae: { text: "LUMBAR · SUB-THESES", x: 300, y: 560, anchor: "start" },
+  limbs: { text: "APPENDICULAR · BODY", x: 384, y: 470, anchor: "end" },
+  feet: { text: "TARSALS · CONCLUSION", x: 328, y: 1040, anchor: "start" },
 };
 
 const PAD = 40;
@@ -46,15 +45,53 @@ export function zoneTransform(id: string | null) {
   return { x: VB.w / 2 - cx * scale, y: VB.h / 2 - cy * scale, scale };
 }
 
-/** Very faint radial bloom directly behind the figure. Purely decorative. */
-function AmbientGlow() {
+function Bones({
+  bones,
+  lit,
+  stroke,
+  strokeWidth,
+  fill,
+  opacityFor,
+}: {
+  bones: Bone[];
+  lit: BoneZone | null;
+  stroke: string;
+  strokeWidth: number;
+  fill: string;
+  opacityFor: (b: Bone) => number;
+}) {
   return (
-    <g aria-hidden pointerEvents="none">
-      <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#skel-aura)" />
-    </g>
+    <>
+      {bones.map((b, i) => (
+        <path
+          key={i}
+          d={b.d}
+          fill={fill}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          opacity={opacityFor(b)}
+          style={{ transition: "opacity 320ms ease" }}
+        />
+      ))}
+    </>
   );
 }
 
+/** Full figure: centre bones + mirrored side bones. */
+function Figure(props: Omit<Parameters<typeof Bones>[0], "bones">) {
+  return (
+    <>
+      <Bones {...props} bones={CENTER_BONES} />
+      <g transform={MIRROR_TRANSFORM}>
+        <Bones {...props} bones={SIDE_BONES} />
+      </g>
+      <Bones {...props} bones={SIDE_BONES} />
+    </>
+  );
+}
 
 export function SkeletonFigure({
   active,
@@ -71,112 +108,127 @@ export function SkeletonFigure({
 }) {
   const t = zoneTransform(active);
   const lit = (active ?? hovered) as BoneZone | null;
-  const glow = lit ? (GLOW_RECTS[lit] ?? []) : [];
+  const label = lit ? LABELS[lit] : null;
+  const box = lit ? ZONE_BOXES[lit] : null;
+
+  const dim = (b: Bone) => (!lit ? 0.92 : b.zone === lit ? 1 : 0.5);
 
   return (
     <svg
       viewBox={`0 0 ${VB.w} ${VB.h}`}
       className={className}
       role="img"
+      shapeRendering="geometricPrecision"
       aria-label="Interactive holographic anatomical essay skeleton, frontal view"
     >
       <defs>
-        <radialGradient id="skel-aura" cx="0.5" cy="0.45" r="0.55">
-          <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.10)" />
+        <radialGradient id="skel-aura" cx="0.5" cy="0.45" r="0.6">
+          <stop offset="0%" stopColor="oklch(0.55 0.19 300 / 0.10)" />
+          <stop offset="60%" stopColor="oklch(0.5 0.18 300 / 0.04)" />
           <stop offset="100%" stopColor="oklch(0.2 0.06 290 / 0)" />
         </radialGradient>
 
-        {/* Drops the image's near-black plate so the figure floats on the page */}
-        <filter id="holo-key" x="0%" y="0%" width="100%" height="100%">
-          <feColorMatrix
-            type="matrix"
-            values="1 0 0 0 0
-                    0 1 0 0 0
-                    0 0 1 0 0
-                    1.1 1.1 1.1 0 -0.12"
-          />
-          <feColorMatrix type="saturate" values="0.82" />
-        </filter>
-
-        {/* Soft-edged reveal for the hovered region — no visible boundary */}
-        <mask id="zone-mask" maskUnits="userSpaceOnUse" x="0" y="0" width={VB.w} height={VB.h}>
-          <g filter="url(#zone-feather)">
-            {glow.map((r, i) => (
-              <rect
-                key={i}
-                x={r[0]}
-                y={r[1]}
-                width={r[2]}
-                height={r[3]}
-                rx="24"
-                fill="white"
-              />
-            ))}
-          </g>
-        </mask>
-        <filter id="zone-feather" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="26" />
-        </filter>
-
-        <filter id="zone-lift" x="-30%" y="-30%" width="160%" height="160%">
-          <feColorMatrix
-            type="matrix"
-            values="1.25 0 0 0 0
-                    0   0.95 0 0 0
-                    0   0  1.45 0 0.04
-                    1.1 1.1 1.1 0 -0.12"
-          />
-          <feGaussianBlur stdDeviation="2.5" result="b" />
+        {/* Tight halo hugging the bone edges — soft falloff, no clipping */}
+        <filter id="bone-halo" x="-60%" y="-60%" width="220%" height="220%" colorInterpolationFilters="sRGB">
+          <feGaussianBlur stdDeviation="2.2" result="near" />
+          <feGaussianBlur stdDeviation="6" result="far" />
           <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
+            <feMergeNode in="far" />
+            <feMergeNode in="near" />
           </feMerge>
         </filter>
+
+        {/* Shimmer band travelling down the lit region */}
+        <linearGradient id="skel-shimmer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="white" stopOpacity="0" />
+          <stop offset="45%" stopColor="white" stopOpacity="0" />
+          <stop offset="50%" stopColor="white" stopOpacity="0.85" />
+          <stop offset="55%" stopColor="white" stopOpacity="0" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+          <animateTransform
+            attributeName="gradientTransform"
+            type="translate"
+            values="0 -1; 0 1"
+            dur="2.6s"
+            repeatCount="indefinite"
+          />
+        </linearGradient>
+        <mask id="skel-shimmer-mask" maskUnits="userSpaceOnUse" x="0" y="0" width={VB.w} height={VB.h}>
+          <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#skel-shimmer)" />
+        </mask>
       </defs>
 
-      <AmbientGlow />
+      <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#skel-aura)" aria-hidden pointerEvents="none" />
 
       <motion.g
         style={{ originX: 0, originY: 0 }}
         animate={{ x: t.x, y: t.y, scale: t.scale }}
         transition={{ type: "spring", stiffness: 120, damping: 22, mass: 0.9 }}
       >
-        {/* Base hologram */}
-        <g
-          style={{
-            opacity: lit ? 0.5 : 0.68,
-            transition: "opacity 400ms ease",
-            filter: "url(#holo-key) drop-shadow(0 0 10px oklch(0.6 0.2 300 / 0.28))",
-            mixBlendMode: "screen",
-          }}
-        >
-          <image
-            href={skeletonHologram}
-            x="0"
-            y="0"
-            width={VB.w}
-            height={VB.h}
-            preserveAspectRatio="xMidYMid meet"
+        {/* Close halo */}
+        <g filter="url(#bone-halo)" opacity={lit ? 0.55 : 0.42} pointerEvents="none">
+          <Figure
+            lit={lit}
+            stroke="oklch(0.62 0.21 300)"
+            strokeWidth={1.6}
+            fill="none"
+            opacityFor={dim}
           />
         </g>
 
-        {/* Highlighted region — same pixels, brightened, so it can never misalign */}
+        {/* Crisp outline pass */}
+        <g pointerEvents="none">
+          <Figure
+            lit={lit}
+            stroke="oklch(0.86 0.13 300)"
+            strokeWidth={1.15}
+            fill="oklch(0.55 0.18 300 / 0.06)"
+            opacityFor={dim}
+          />
+        </g>
+
+        {/* Hover shimmer: same outlines, brighter, swept by a moving band */}
         {lit && (
-          <g
-            mask="url(#zone-mask)"
-            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.95 }}
-          >
-            <image
-              href={skeletonHologram}
-              x="0"
-              y="0"
-              width={VB.w}
-              height={VB.h}
-              preserveAspectRatio="xMidYMid meet"
+          <g mask="url(#skel-shimmer-mask)" pointerEvents="none" opacity={0.9}>
+            <Figure
+              lit={lit}
+              stroke="oklch(0.95 0.08 300)"
+              strokeWidth={1.15}
+              fill="none"
+              opacityFor={(b) => (b.zone === lit ? 1 : 0)}
             />
           </g>
         )}
 
+        {/* Anatomical data callout */}
+        {label && box && (
+          <g pointerEvents="none" opacity={0.85}>
+            <circle
+              cx={box.x + box.w / 2}
+              cy={box.y + box.h / 2}
+              r={3}
+              fill="oklch(0.9 0.1 300)"
+            />
+            <path
+              d={`M ${box.x + box.w / 2},${box.y + box.h / 2} L ${label.anchor === "start" ? label.x - 10 : label.x + 10},${label.y - 4}`}
+              stroke="oklch(0.75 0.14 300 / 0.55)"
+              strokeWidth="0.8"
+              fill="none"
+              vectorEffect="non-scaling-stroke"
+            />
+            <text
+              x={label.x}
+              y={label.y}
+              textAnchor={label.anchor}
+              fill="oklch(0.88 0.09 300)"
+              fontSize="13"
+              letterSpacing="2"
+              style={{ fontFamily: "ui-monospace, SFMono-Regular, monospace" }}
+            >
+              {label.text}
+            </text>
+          </g>
+        )}
 
         {/* Click targets */}
         {ZONE_IDS.map((z) =>
