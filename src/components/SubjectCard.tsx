@@ -52,7 +52,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState(name);
-  const { state, update } = useSubject(id);
+  const terms = TERMS_BY_YEAR[year];
+  const [term, setTerm] = useState<TermKey>(terms[0]);
+  const { state: subject, update: updateSubject } = useSubject(id);
+  const { state, update } = useSubjectTerm(id, term);
+
   const { awardXp } = useProfile();
   const label = name.trim() || `Subject ${index + 1}`;
 
