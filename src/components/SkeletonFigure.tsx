@@ -81,38 +81,52 @@ export function SkeletonFigure({
       aria-label="Interactive holographic anatomical essay skeleton, frontal view"
     >
       <defs>
-        <radialGradient id="skel-aura" cx="0.5" cy="0.45" r="0.6">
-          <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.32)" />
+        <radialGradient id="skel-aura" cx="0.5" cy="0.45" r="0.55">
+          <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.10)" />
           <stop offset="100%" stopColor="oklch(0.2 0.06 290 / 0)" />
         </radialGradient>
-        <pattern id="hud-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-          <path
-            d="M 32 0 L 0 0 0 32"
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="0.4"
-            opacity="0.18"
+
+        {/* Drops the image's near-black plate so the figure floats on the page */}
+        <filter id="holo-key" x="0%" y="0%" width="100%" height="100%">
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    1.1 1.1 1.1 0 -0.12"
           />
-        </pattern>
-        <linearGradient id="hud-sweep" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.9 0.14 82 / 0)" />
-          <stop offset="50%" stopColor="oklch(0.85 0.16 300 / 0.35)" />
-          <stop offset="100%" stopColor="oklch(0.9 0.14 82 / 0)" />
-        </linearGradient>
-        <clipPath id="zone-clip">
-          {glow.map((r, i) => (
-            <rect key={i} x={r[0]} y={r[1]} width={r[2]} height={r[3]} rx="12" />
-          ))}
-        </clipPath>
+          <feColorMatrix type="saturate" values="0.82" />
+        </filter>
+
+        {/* Soft-edged reveal for the hovered region — no visible boundary */}
+        <mask id="zone-mask" maskUnits="userSpaceOnUse" x="0" y="0" width={VB.w} height={VB.h}>
+          <g filter="url(#zone-feather)">
+            {glow.map((r, i) => (
+              <rect
+                key={i}
+                x={r[0]}
+                y={r[1]}
+                width={r[2]}
+                height={r[3]}
+                rx="24"
+                fill="white"
+              />
+            ))}
+          </g>
+        </mask>
+        <filter id="zone-feather" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="26" />
+        </filter>
+
         <filter id="zone-lift" x="-30%" y="-30%" width="160%" height="160%">
           <feColorMatrix
             type="matrix"
-            values="1.6 0 0 0 0.05
-                    0   1.1 0 0 0
-                    0   0  1.9 0 0.12
-                    0   0   0  1 0"
+            values="1.25 0 0 0 0
+                    0   0.95 0 0 0
+                    0   0  1.45 0 0.04
+                    1.1 1.1 1.1 0 -0.12"
           />
-          <feGaussianBlur stdDeviation="3" result="b" />
+          <feGaussianBlur stdDeviation="2.5" result="b" />
           <feMerge>
             <feMergeNode in="b" />
             <feMergeNode in="SourceGraphic" />
@@ -120,7 +134,7 @@ export function SkeletonFigure({
         </filter>
       </defs>
 
-      <HudField />
+      <AmbientGlow />
 
       <motion.g
         style={{ originX: 0, originY: 0 }}
@@ -130,9 +144,10 @@ export function SkeletonFigure({
         {/* Base hologram */}
         <g
           style={{
-            opacity: lit ? 0.42 : 0.95,
+            opacity: lit ? 0.5 : 0.68,
             transition: "opacity 400ms ease",
-            filter: "drop-shadow(0 0 16px oklch(0.6 0.2 300 / 0.55))",
+            filter: "url(#holo-key) drop-shadow(0 0 10px oklch(0.6 0.2 300 / 0.28))",
+            mixBlendMode: "screen",
           }}
         >
           <image
@@ -147,7 +162,10 @@ export function SkeletonFigure({
 
         {/* Highlighted region — same pixels, brightened, so it can never misalign */}
         {lit && (
-          <g clipPath="url(#zone-clip)" style={{ filter: "url(#zone-lift)" }}>
+          <g
+            mask="url(#zone-mask)"
+            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.95 }}
+          >
             <image
               href={skeletonHologram}
               x="0"
@@ -159,38 +177,6 @@ export function SkeletonFigure({
           </g>
         )}
 
-        {/* Region frame */}
-        {lit &&
-          glow.map((r, i) => (
-            <rect
-              key={`f${i}`}
-              x={r[0]}
-              y={r[1]}
-              width={r[2]}
-              height={r[3]}
-              rx="12"
-              fill="none"
-              stroke="var(--primary)"
-              strokeWidth="1"
-              strokeDasharray="14 8"
-              opacity="0.75"
-              pointerEvents="none"
-              style={{ filter: "drop-shadow(0 0 6px var(--primary))" }}
-            />
-          ))}
-
-        {/* Scan sweep */}
-        <rect
-          x="0"
-          y="0"
-          width={VB.w}
-          height="140"
-          fill="url(#hud-sweep)"
-          opacity="0.5"
-          pointerEvents="none"
-          aria-hidden
-          style={{ animation: "hudScan 7s ease-in-out infinite" }}
-        />
 
         {/* Click targets */}
         {ZONE_IDS.map((z) =>
