@@ -56,17 +56,27 @@ export const CENTER_BONES: Bone[] = [
     zone: "skull",
     d: "M 200,20 C 236,20 262,48 262,86 C 262,110 253,128 240,142 C 236,158 222,172 200,174 C 178,172 164,158 160,142 C 147,128 138,110 138,86 C 138,48 164,20 200,20 Z",
   },
-  // Orbits
-  { zone: "skull", d: ell(179, 94, 15, 13) },
-  { zone: "skull", d: ell(221, 94, 15, 13) },
-  // Nasal aperture
-  { zone: "skull", d: "M 200,112 L 191,133 h 18 Z" },
-  // Maxilla + mandible
-  { zone: "skull", d: "M 174,140 h 52 v 8 h -52 Z" },
+  // Orbits (angled, with superior rim)
   {
     zone: "skull",
-    d: "M 172,148 c 3,17 13,27 28,27 c 15,0 25,-10 28,-27 l -8,0 c -2,12 -9,19 -20,19 c -11,0 -18,-7 -20,-19 Z",
+    d: "M 165,87 c 3,-9 11,-13 19,-12 c 8,1 12,7 11,15 c -1,9 -8,14 -16,14 c -9,0 -16,-8 -14,-17 Z",
   },
+  {
+    zone: "skull",
+    d: "M 235,87 c -3,-9 -11,-13 -19,-12 c -8,1 -12,7 -11,15 c 1,9 8,14 16,14 c 9,0 16,-8 14,-17 Z",
+  },
+  // Zygomatic arches
+  { zone: "skull", d: "M 160,110 c 8,7 15,10 22,10 l 0,4 c -9,0 -17,-4 -24,-11 Z" },
+  { zone: "skull", d: "M 240,110 c -8,7 -15,10 -22,10 l 0,4 c 9,0 17,-4 24,-11 Z" },
+  // Nasal aperture
+  { zone: "skull", d: "M 200,112 L 192,133 h 16 Z" },
+  // Maxilla + mandible (rami rising to the temporomandibular joints)
+  { zone: "skull", d: "M 176,138 h 48 v 8 h -48 Z" },
+  {
+    zone: "skull",
+    d: "M 168,132 l 6,0 c 1,15 4,24 10,29 c 5,4 10,6 16,6 c 6,0 11,-2 16,-6 c 6,-5 9,-14 10,-29 l 6,0 c -1,19 -5,31 -13,37 c -6,5 -12,7 -19,7 c -7,0 -13,-2 -19,-7 c -8,-6 -12,-18 -13,-37 Z",
+  },
+
 
 
 
