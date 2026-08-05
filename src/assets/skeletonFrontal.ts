@@ -153,10 +153,11 @@ export const SIDE_BONES: Bone[] = [
 
 /** Calibrated against the rendered hologram inside the 400x1080 viewBox. */
 export const ZONE_BOXES: Record<BoneZone, { x: number; y: number; w: number; h: number }> = {
-  skull: { x: 142, y: 66, w: 116, h: 136 },
-  spine: { x: 96, y: 188, w: 208, h: 218 },
-  vertebrae: { x: 110, y: 392, w: 180, h: 188 },
-  limbs: { x: 30, y: 232, w: 340, h: 666 },
-  feet: { x: 92, y: 886, w: 216, h: 116 },
+  skull: { x: 152, y: 34, w: 96, h: 126 },
+  spine: { x: 116, y: 160, w: 168, h: 246 },
+  vertebrae: { x: 126, y: 380, w: 148, h: 152 },
+  limbs: { x: 42, y: 200, w: 316, h: 740 },
+  feet: { x: 128, y: 908, w: 144, h: 120 },
 };
+
 
