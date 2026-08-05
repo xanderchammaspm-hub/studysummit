@@ -2,7 +2,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useSubjects, useAllSubjectStates, type YearKey } from "@/hooks/useSubjectStore";
+import { useSubjects, useAllSubjectStates, flattenSubject, type YearKey } from "@/hooks/useSubjectStore";
 
 export type StudyLog = { id: string; date: string; hours: number; subjectId?: string; note?: string };
 
@@ -84,9 +84,10 @@ export function useSummitStats() {
         subjectCount++;
         let sGreen = 0;
         let sTopics = 0;
-        papers += st?.papers?.length ?? 0;
-        assessments += st?.assessments?.length ?? 0;
-        for (const t of st?.topics ?? []) {
+        const flat = flattenSubject(st);
+        papers += flat.papers.length;
+        assessments += flat.assessments.length;
+        for (const t of flat.topics) {
           topics++;
           sTopics++;
           if (t.status === "green") {
