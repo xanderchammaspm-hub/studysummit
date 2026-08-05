@@ -51,6 +51,7 @@ export const XP_RULES = {
   quiz: 40,
   syllabusPoint: 15,
   pastPaper: 80,
+  examCompleted: 120,
   dailyStreak: 20,
 } as const;
 
@@ -61,6 +62,7 @@ export const XP_LABELS: Record<string, string> = {
   quiz: "Quiz completed",
   syllabusPoint: "Syllabus dot point finished",
   pastPaper: "Past paper completed",
+  examCompleted: "Exam completed",
   dailyStreak: "Daily streak",
 };
 
