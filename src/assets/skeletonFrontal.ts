@@ -142,17 +142,18 @@ export const SIDE_BONES: Bone[] = [
   // metacarpals
   ...Array.from({ length: 4 }, (_, i) => ({
     zone: "limbs" as const,
-    d: bone(72 + i * 6, 646, 66 + i * 8, 684, 2.6, 2.2),
+    d: bone(72 + i * 5, 646, 69 + i * 6, 682, 2.4, 2),
   })),
   // proximal + distal phalanges
   ...Array.from({ length: 4 }, (_, i) => ({
     zone: "limbs" as const,
-    d: bone(66 + i * 8, 688, 62 + i * 9, 710, 2.1, 1.7),
+    d: bone(69 + i * 6, 686, 67 + i * 6.4, 706, 1.9, 1.6),
   })),
   ...Array.from({ length: 4 }, (_, i) => ({
     zone: "limbs" as const,
-    d: bone(62 + i * 9, 713, 59 + i * 9.5, 728, 1.7, 1.3),
+    d: bone(67 + i * 6.4, 709, 66 + i * 6.6, 722, 1.5, 1.2),
   })),
+
   // thumb
   { zone: "limbs", d: bone(89, 648, 98, 676, 2.8, 2.3) },
   { zone: "limbs", d: bone(98, 678, 104, 700, 2.3, 1.8) },
