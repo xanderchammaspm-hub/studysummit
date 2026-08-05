@@ -41,10 +41,10 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/exam", replace: true });
+      if (data.session) navigate({ to: "/", replace: true });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: "/exam", replace: true });
+      if (session) navigate({ to: "/", replace: true });
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
@@ -58,7 +58,7 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/exam",
+            emailRedirectTo: window.location.origin + "/",
             data: { full_name: name },
           },
         });
@@ -78,6 +78,20 @@ function AuthPage() {
     }
   }
 
+  async function forgot() {
+    if (!email) {
+      toast.error("Enter your email first, then tap reset.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password",
+    });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Password reset link sent — check your inbox.");
+  }
+
   async function google() {
     setBusy(true);
     const result = await lovable.auth.signInWithOAuth("google", {
@@ -89,7 +103,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/exam", replace: true });
+    navigate({ to: "/", replace: true });
   }
 
   return (
@@ -177,6 +191,15 @@ function AuthPage() {
                     className="bg-surface/60"
                   />
                 </div>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={forgot}
+                    className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    Forgot your password?
+                  </button>
+                )}
                 <Button type="submit" disabled={busy} className="w-full gap-2">
                   {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                   {mode === "signin" ? "Sign in" : "Create account"}

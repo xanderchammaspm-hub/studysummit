@@ -14,13 +14,14 @@ export type CampKey = "base" | "c1" | "c2" | "c3" | "c4" | "summit";
 /** User-editable milestone dates (ISO yyyy-mm-dd). */
 export type ExamDates = Record<CampKey, string>;
 
+// Class of 2028 — Year 11 starts in 2027, HSC in October 2028.
 export const DEFAULT_DATES: ExamDates = {
-  base: "2026-01-28",
-  c1: "2026-06-26",
-  c2: "2026-09-14",
-  c3: "2027-04-02",
-  c4: "2027-08-02",
-  summit: "2027-10-13",
+  base: "2027-01-28",
+  c1: "2027-06-21",
+  c2: "2027-09-13",
+  c3: "2028-04-03",
+  c4: "2028-08-01",
+  summit: "2028-10-12",
 };
 
 export const CAMPS: Camp[] = [
