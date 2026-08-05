@@ -148,15 +148,18 @@ export const SIDE_BONES: Bone[] = [
   { zone: "limbs", d: bone(98, 678, 104, 700, 2.3, 1.8) },
 
 
-  // Pelvis (iliac wing + ischium)
+  // Pelvis: iliac wing, acetabulum, pubic + ischial rami
   {
     zone: "vertebrae",
-    d: "M 176,606 C 142,598 110,620 102,654 C 96,682 110,702 134,710 C 156,716 170,704 176,682 C 182,656 182,630 176,606 Z",
+    d: "M 178,602 C 150,592 118,606 106,636 C 98,658 104,682 122,694 C 140,706 158,700 166,682 C 174,660 178,630 178,602 Z",
   },
+  { zone: "vertebrae", d: ell(128, 700, 15, 14) },
   {
     zone: "vertebrae",
-    d: "M 136,712 c -12,14 -12,36 4,46 c 16,10 34,0 40,-18 l -18,-26 Z",
+    d: "M 141,712 c -9,12 -8,30 5,38 c 14,9 30,1 36,-14 l -17,-24 Z",
   },
+  { zone: "vertebrae", d: bone(146, 706, 182, 700, 5, 6) },
+
 
   // Leg: femur, patella, tibia, fibula
   { zone: "limbs", d: bone(146, 726, 158, 902, 15, 11) },
