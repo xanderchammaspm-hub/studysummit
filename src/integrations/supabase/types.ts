@@ -224,22 +224,154 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          coins: number
+          cosmetics: Json
           created_at: string
           display_name: string | null
           email: string | null
           id: string
+          last_active_date: string | null
+          level: number
+          streak: number
+          streak_days: number
+          updated_at: string
+          username: string | null
+          xp: number
         }
         Insert: {
+          avatar_url?: string | null
+          coins?: number
+          cosmetics?: Json
           created_at?: string
           display_name?: string | null
           email?: string | null
           id: string
+          last_active_date?: string | null
+          level?: number
+          streak?: number
+          streak_days?: number
+          updated_at?: string
+          username?: string | null
+          xp?: number
         }
         Update: {
+          avatar_url?: string | null
+          coins?: number
+          cosmetics?: Json
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          last_active_date?: string | null
+          level?: number
+          streak?: number
+          streak_days?: number
+          updated_at?: string
+          username?: string | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_exams: {
+        Row: {
+          color: string
+          created_at: string
+          exam_at: string
+          id: string
+          note: string | null
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          exam_at: string
+          id?: string
+          note?: string | null
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          exam_at?: string
+          id?: string
+          note?: string | null
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_state: {
+        Row: {
+          key: string
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          user_id: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      xp_events: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          meta: Json
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind: string
+          meta?: Json
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json
+          user_id?: string
         }
         Relationships: []
       }
