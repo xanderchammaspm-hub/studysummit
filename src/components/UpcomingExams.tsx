@@ -248,6 +248,7 @@ function ExamCard({
   onDelete: () => void;
   onComplete: () => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const d = daysAway(exam.exam_at);
   const past = d < 0;
   return (
