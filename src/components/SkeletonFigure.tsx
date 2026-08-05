@@ -96,11 +96,6 @@ export function SkeletonFigure({
           <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.35)" />
           <stop offset="100%" stopColor="oklch(0.2 0.06 290 / 0)" />
         </radialGradient>
-        <linearGradient id="skel-scan" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.9 0.16 300 / 0)" />
-          <stop offset="50%" stopColor="oklch(0.9 0.16 300 / 0.35)" />
-          <stop offset="100%" stopColor="oklch(0.9 0.16 300 / 0)" />
-        </linearGradient>
       </defs>
 
       <rect x="0" y="0" width={VB.w} height={VB.h} fill="url(#skel-aura)" />
@@ -139,16 +134,6 @@ export function SkeletonFigure({
             />
           </g>
         </g>
-
-        {/* HUD scan sweep */}
-        <rect
-          x="0"
-          y="-160"
-          width={VB.w}
-          height="160"
-          fill="url(#skel-scan)"
-          style={{ animation: "skelScan 6s linear infinite" }}
-        />
 
         {/* Highlighted region */}
         <ZoneGlow bones={CENTER_BONES} lit={lit} />
