@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
-import { ChevronDown, Maximize2, PenLine, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
-import { MODES } from "@/data/englishFormula";
+import { AtlasSectionChat } from "@/components/AtlasSectionChat";
+import { MODES, type DocSection } from "@/data/englishFormula";
+import { useEnglishFormula } from "@/hooks/useEnglishFormula";
 
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
@@ -11,11 +13,21 @@ export function EnglishFormula() {
   const [activePart, setActivePart] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [section, setSection] = useState<string>("skeleton");
+  const [adding, setAdding] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  const { store, updatePart, addSection, renameSection, removeSection } = useEnglishFormula();
+
   const mode = MODES.find((m) => m.id === modeId) ?? MODES[0];
-  const part = mode.parts.find((p) => p.id === activePart) ?? null;
-  const docSection = mode.sections.find((s) => s.id === section) ?? null;
+  const custom = store.sections[mode.id] ?? [];
+  const allSections: DocSection[] = [...mode.sections, ...custom];
+
+  const basePart = mode.parts.find((p) => p.id === activePart) ?? null;
+  const override = activePart ? store.parts[mode.id]?.[activePart] : undefined;
+  const part = basePart ? { ...basePart, ...override } : null;
+  const docSection = allSections.find((s) => s.id === section) ?? null;
+  const isCustom = custom.some((s) => s.id === section);
 
   const pick = (id: string | null) => setActivePart(id);
 
@@ -37,13 +49,22 @@ export function EnglishFormula() {
     );
   };
 
+  const submitNew = () => {
+    const label = newLabel.trim();
+    if (!label) return;
+    const id = addSection(mode.id, label);
+    setNewLabel("");
+    setAdding(false);
+    setSection(id);
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-6 mt-16">
       {/* Prompt card */}
       <button
         onClick={toggle}
         aria-expanded={open}
-        className="ef-prompt group w-full rounded-2xl border border-border/60 bg-card/50 px-6 py-7 text-left transition-all duration-300 hover:border-primary/70"
+        className="ef-prompt group w-full cursor-pointer rounded-2xl border border-border/60 bg-card/50 px-6 py-7 text-left transition-all duration-300 hover:border-primary/70"
       >
         <div className="flex items-center gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
@@ -73,7 +94,7 @@ export function EnglishFormula() {
               <button
                 key={m.id}
                 onClick={() => switchMode(m.id)}
-                className={`flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm transition-all duration-300 ${
+                className={`flex-1 cursor-pointer rounded-xl px-3 py-2.5 text-xs sm:text-sm transition-all duration-300 ${
                   modeId === m.id
                     ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
                     : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
@@ -91,11 +112,60 @@ export function EnglishFormula() {
               <SideItem active={section === "skeleton"} onClick={() => setSection("skeleton")}>
                 <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" /> Skeleton Blueprint
               </SideItem>
-              {mode.sections.map((s) => (
-                <SideItem key={s.id} active={section === s.id} onClick={() => setSection(s.id)}>
+              {allSections.map((s) => (
+                <SideItem
+                  key={s.id}
+                  active={section === s.id}
+                  onClick={() => setSection(s.id)}
+                  onDelete={
+                    custom.some((c) => c.id === s.id)
+                      ? () => {
+                          removeSection(mode.id, s.id);
+                          if (section === s.id) setSection("skeleton");
+                        }
+                      : undefined
+                  }
+                >
                   {s.label}
                 </SideItem>
               ))}
+
+              {adding ? (
+                <div className="mt-1 flex items-center gap-1 rounded-xl border border-primary/50 bg-surface/60 px-2 py-1.5">
+                  <input
+                    autoFocus
+                    value={newLabel}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") submitNew();
+                      if (e.key === "Escape") setAdding(false);
+                    }}
+                    placeholder="Section name…"
+                    className="min-w-0 flex-1 bg-transparent text-xs outline-none"
+                  />
+                  <button
+                    onClick={submitNew}
+                    className="cursor-pointer rounded-md p-1 text-primary hover:bg-primary/15"
+                    aria-label="Add section"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setAdding(false)}
+                    className="cursor-pointer rounded-md p-1 text-muted-foreground hover:bg-surface"
+                    aria-label="Cancel"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setAdding(true)}
+                  className="mt-1 flex w-full cursor-pointer items-center gap-1.5 rounded-xl border border-dashed border-border/70 px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add section
+                </button>
+              )}
             </aside>
 
             {/* Workspace */}
@@ -123,7 +193,7 @@ export function EnglishFormula() {
                   {part && (
                     <button
                       onClick={() => pick(null)}
-                      className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-border/60 bg-surface/80 px-2.5 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur hover:border-primary/60 hover:text-foreground transition-colors"
+                      className="absolute right-3 top-3 flex cursor-pointer items-center gap-1.5 rounded-lg border border-border/60 bg-surface/80 px-2.5 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur hover:border-primary/60 hover:text-foreground transition-colors"
                     >
                       <Maximize2 className="h-3 w-3" /> Reset view
                     </button>
@@ -134,28 +204,39 @@ export function EnglishFormula() {
                       <button
                         key={p.id}
                         onClick={() => pick(p.id)}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                        className={`cursor-pointer rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                           activePart === p.id
                             ? "border-primary bg-primary/20 text-foreground"
                             : "border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground"
                         }`}
                       >
-                        {p.sub}
+                        {store.parts[mode.id]?.[p.id]?.sub ?? p.sub}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="purple-outline rounded-2xl bg-card/50 p-5">
-                  {part ? (
+                  {part && basePart ? (
                     <div key={`${mode.id}-${part.id}`} className="fade-in-up">
-                      <h3 className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground">
-                        {part.title}
-                      </h3>
-                      <h4 className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                        {part.sub}
-                      </h4>
-                      <p className="mt-2 mb-4 text-sm text-muted-foreground">{part.hint}</p>
+                      <EditableText
+                        value={part.title}
+                        onChange={(v) => updatePart(mode.id, basePart.id, { title: v })}
+                        className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground"
+                        placeholder="Bone name"
+                      />
+                      <EditableText
+                        value={part.sub}
+                        onChange={(v) => updatePart(mode.id, basePart.id, { sub: v })}
+                        className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary"
+                        placeholder="Role in the essay"
+                      />
+                      <EditableText
+                        value={part.hint}
+                        onChange={(v) => updatePart(mode.id, basePart.id, { hint: v })}
+                        className="mt-2 mb-4 text-sm text-muted-foreground"
+                        placeholder="Short description"
+                      />
                       <RichEditor
                         storageKey={`${mode.id}-part-${part.id}`}
                         placeholder="Write your notes for this section…"
@@ -171,8 +252,8 @@ export function EnglishFormula() {
                         Pick a bone
                       </h4>
                       <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-                        Click the skull, spine, vertebrae, limbs or feet to zoom in and write the
-                        structure for this workspace.
+                        Click the skull, spine, vertebrae, limbs or feet to zoom in — then click any
+                        heading to rename it and write your own structure.
                       </p>
                     </div>
                   )}
@@ -183,26 +264,44 @@ export function EnglishFormula() {
                 key={`${mode.id}-${section}`}
                 className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up"
               >
-                <h3 className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground">
-                  {docSection?.label}
-                </h3>
+                {isCustom ? (
+                  <EditableText
+                    value={docSection?.label ?? ""}
+                    onChange={(v) => renameSection(mode.id, section, v)}
+                    className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground"
+                    placeholder="Section name"
+                  />
+                ) : (
+                  <h3 className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground">
+                    {docSection?.label}
+                  </h3>
+                )}
                 <h4 className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                   {mode.label}
                 </h4>
-                <p className="mt-2 mb-4 text-sm text-muted-foreground">{docSection?.blurb}</p>
+                {docSection?.blurb && (
+                  <p className="mt-2 text-sm text-muted-foreground">{docSection.blurb}</p>
+                )}
                 {docSection?.vault && (
-                  <div className="mb-4">
+                  <div className="mt-4">
                     <MemoriseLinkBox
                       storageKey={`${mode.id}-memorise-by-heart`}
                       label="Memorise By Heart"
                     />
                   </div>
                 )}
-                <RichEditor
-                  storageKey={`${mode.id}-doc-${section}`}
-                  placeholder="Add a table, list or notes — formatting is saved automatically…"
-                  minHeight={340}
-                />
+                {section === "short-answers" && (
+                  <div className="mt-4">
+                    <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
+                  </div>
+                )}
+                <div className="mt-4">
+                  <RichEditor
+                    storageKey={`${mode.id}-doc-${section}`}
+                    placeholder="Add a table, list or notes — formatting is saved automatically…"
+                    minHeight={section === "short-answers" ? 240 : 340}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -212,25 +311,93 @@ export function EnglishFormula() {
   );
 }
 
+function EditableText({
+  value,
+  onChange,
+  className,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+  placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => setDraft(value), [value]);
+
+  const commit = () => {
+    setEditing(false);
+    const next = draft.trim();
+    if (next && next !== value) onChange(next);
+    else setDraft(value);
+  };
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+        placeholder={placeholder}
+        className={`w-full rounded-md border border-primary/50 bg-background/60 px-2 py-1 outline-none ${className ?? ""}`}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      title="Click to edit"
+      className={`block w-full cursor-pointer rounded-md px-2 py-1 text-left transition-colors hover:bg-primary/10 ${className ?? ""}`}
+    >
+      {value || <span className="text-muted-foreground">{placeholder}</span>}
+    </button>
+  );
+}
+
 function SideItem({
   active,
   onClick,
+  onDelete,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  onDelete?: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors ${
-        active
-          ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
-          : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
+    <div className="group/side relative flex items-center">
+      <button
+        onClick={onClick}
+        className={`flex w-full cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors ${
+          active
+            ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
+            : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
+        }`}
+      >
+        {children}
+      </button>
+      {onDelete && (
+        <button
+          onClick={onDelete}
+          aria-label="Delete section"
+          className="absolute right-1.5 cursor-pointer rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/side:opacity-100"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      )}
+    </div>
   );
 }
