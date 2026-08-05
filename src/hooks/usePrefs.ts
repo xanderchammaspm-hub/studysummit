@@ -34,7 +34,14 @@ function load(): Prefs {
   if (typeof window === "undefined") return DEFAULT_PREFS;
   try {
     const raw = localStorage.getItem(PREFS_KEY);
-    return raw ? { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) } : DEFAULT_PREFS;
+    const parsed = raw ? ({ ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) } as Prefs) : DEFAULT_PREFS;
+    // one-time bump of the old default target ATAR (95 -> 97)
+    if (raw && parsed.targetAtar === 95 && !localStorage.getItem("summit-prefs-atar97")) {
+      parsed.targetAtar = 97;
+      localStorage.setItem("summit-prefs-atar97", "1");
+      localStorage.setItem(PREFS_KEY, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch {
     return DEFAULT_PREFS;
   }
