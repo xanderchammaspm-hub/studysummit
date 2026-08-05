@@ -46,12 +46,12 @@ export function MountainProgress() {
 
   // Ridge waypoints — x/y in SVG coords, one per camp (6 total)
   const pts: [number, number][] = [
-    [40, 305],
+    [70, 305],
     [180, 258],
     [320, 214],
     [460, 170],
     [610, 118],
-    [760, 48],
+    [736, 74],
   ];
   const W = 800;
   const H = 340;
@@ -269,7 +269,7 @@ export function MountainProgress() {
               />
               <text
                 x={x}
-                y={above ? y - 28 : y - 14}
+                y={above ? y - 26 : y - 14}
                 textAnchor="middle"
                 fontSize="14"
                 style={{ pointerEvents: "none" }}
@@ -278,7 +278,7 @@ export function MountainProgress() {
               </text>
               <text
                 x={x}
-                y={above ? y - 44 : y + 20}
+                y={above ? y - 42 : y + 20}
                 textAnchor="middle"
                 fill={reached ? "oklch(0.95 0.02 285)" : "oklch(0.6 0.03 285)"}
                 fontSize="9.5"
