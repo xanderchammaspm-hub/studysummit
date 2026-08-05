@@ -67,10 +67,11 @@ function Home() {
         subjectCount++;
         const st = store[s.id];
         if (!st) continue;
-        papers += st.papers?.length ?? 0;
-        topics += st.topics?.length ?? 0;
-        assessments += st.assessments?.length ?? 0;
-        for (const t of st.topics ?? []) {
+        const flat = flattenSubject(st);
+        papers += flat.papers.length;
+        topics += flat.topics.length;
+        assessments += flat.assessments.length;
+        for (const t of flat.topics) {
           if (t.status === "red") red++;
           else if (t.status === "amber") amber++;
           else if (t.status === "green") green++;
