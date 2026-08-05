@@ -89,7 +89,7 @@ export function SkeletonFigure({
       <motion.g
         style={{ originX: 0, originY: 0 }}
         animate={{ x: t.x, y: t.y, scale: t.scale }}
-        transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ type: "spring", stiffness: 130, damping: 18, mass: 0.9 }}
       >
         <Bones bones={CENTER_BONES} lit={lit} />
         <g>
