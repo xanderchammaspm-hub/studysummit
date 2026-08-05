@@ -83,7 +83,7 @@ export function SkeletonFigure({
     >
       <defs>
         <radialGradient id="skel-aura" cx="0.5" cy="0.45" r="0.55">
-          <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.10)" />
+          <stop offset="0%" stopColor="oklch(0.5 0.2 300 / 0.06)" />
           <stop offset="100%" stopColor="oklch(0.2 0.06 290 / 0)" />
         </radialGradient>
 
@@ -94,12 +94,12 @@ export function SkeletonFigure({
             values="1 0 0 0 0
                     0 1 0 0 0
                     0 0 1 0 0
-                    1.1 1.1 1.1 0 -0.12"
+                    1.1 1.1 1.1 0 -0.14"
           />
-          <feColorMatrix type="saturate" values="0.82" />
+          <feColorMatrix type="saturate" values="0.7" />
         </filter>
 
-        {/* Soft-edged reveal for the hovered region — no visible boundary */}
+        {/* Soft-edged reveal for the hovered region — long feather, no boundary */}
         <mask id="zone-mask" maskUnits="userSpaceOnUse" x="0" y="0" width={VB.w} height={VB.h}>
           <g filter="url(#zone-feather)">
             {glow.map((r, i) => (
@@ -109,27 +109,28 @@ export function SkeletonFigure({
                 y={r[1]}
                 width={r[2]}
                 height={r[3]}
-                rx="24"
+                rx="40"
                 fill="white"
               />
             ))}
           </g>
         </mask>
-        <filter id="zone-feather" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="26" />
+        <filter id="zone-feather" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="46" />
         </filter>
 
-        <filter id="zone-lift" x="-30%" y="-30%" width="160%" height="160%">
+        {/* Purple illumination for the hovered bones + soft outer bloom */}
+        <filter id="zone-lift" x="-40%" y="-40%" width="180%" height="180%">
           <feColorMatrix
             type="matrix"
-            values="1.25 0 0 0 0
-                    0   0.95 0 0 0
-                    0   0  1.45 0 0.04
-                    1.1 1.1 1.1 0 -0.12"
+            values="0.85 0 0 0 0.10
+                    0   0.45 0 0 0
+                    0   0  1.15 0 0.20
+                    1.0 1.0 1.0 0 -0.14"
           />
-          <feGaussianBlur stdDeviation="2.5" result="b" />
+          <feGaussianBlur stdDeviation="7" result="bloom" />
           <feMerge>
-            <feMergeNode in="b" />
+            <feMergeNode in="bloom" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
@@ -145,14 +146,14 @@ export function SkeletonFigure({
         {/* Base hologram */}
         <g
           style={{
-            opacity: lit ? 0.5 : 0.68,
+            opacity: 0.46,
             transition: "opacity 400ms ease",
-            filter: "url(#holo-key) drop-shadow(0 0 10px oklch(0.6 0.2 300 / 0.28))",
+            filter: "url(#holo-key) drop-shadow(0 0 6px oklch(0.6 0.2 300 / 0.16))",
             mixBlendMode: "screen",
           }}
         >
           <image
-            href={skeletonHologram}
+            href={skeletonHologram.url}
             x="0"
             y="0"
             width={VB.w}
@@ -161,14 +162,14 @@ export function SkeletonFigure({
           />
         </g>
 
-        {/* Highlighted region — same pixels, brightened, so it can never misalign */}
+        {/* Highlighted region — same pixels, purple-lit, so it can never misalign */}
         {lit && (
           <g
             mask="url(#zone-mask)"
-            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.95 }}
+            style={{ filter: "url(#zone-lift)", mixBlendMode: "screen", opacity: 0.8 }}
           >
             <image
-              href={skeletonHologram}
+              href={skeletonHologram.url}
               x="0"
               y="0"
               width={VB.w}
@@ -177,6 +178,7 @@ export function SkeletonFigure({
             />
           </g>
         )}
+
 
 
         {/* Click targets */}
