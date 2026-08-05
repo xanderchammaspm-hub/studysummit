@@ -131,7 +131,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               aria-label="Change emoji"
               title="Change emoji"
             >
-              <span>{state.emoji || "📘"}</span>
+              <span>{subject.emoji || "📘"}</span>
             </button>
             {pickerOpen && (
               <>
@@ -150,7 +150,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       if (e.key === "Enter") {
                         const v = (e.target as HTMLInputElement).value.trim();
                         if (v) {
-                          update({ emoji: [...v][0] ?? v });
+                          updateSubject({ emoji: [...v][0] ?? v });
                           setPickerOpen(false);
                         }
                       }
@@ -163,7 +163,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                       <button
                         key={em}
                         onClick={() => {
-                          update({ emoji: em });
+                          updateSubject({ emoji: em });
                           setPickerOpen(false);
                         }}
                         className="flex h-9 w-9 items-center justify-center rounded hover:bg-primary/20 text-lg"
