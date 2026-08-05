@@ -211,6 +211,39 @@ export function useSubject(id: string) {
   return { state, update };
 }
 
+/** Per-term slice of a subject (Past papers, notes, assessments, traffic lights). */
+export function useSubjectTerm(id: string, term: TermKey) {
+  const store = useAllSubjectStates();
+  const raw = store[id];
+  const terms = subjectTerms(raw);
+  const state = terms[term];
+
+  const update = useCallback(
+    (patch: Partial<TermState> | ((s: TermState) => TermState)) => {
+      setState((prev) => {
+        const cur = prev[id] ?? defaultState;
+        const curTerms = subjectTerms(cur);
+        const curTerm = curTerms[term];
+        const nextTerm =
+          typeof patch === "function" ? patch(curTerm) : { ...curTerm, ...patch };
+        const next: SubjectState = {
+          emoji: cur.emoji ?? "📘",
+          papers: [],
+          topics: [],
+          assessments: [],
+          notesUrl: undefined,
+          terms: { ...curTerms, [term]: nextTerm },
+        };
+        return { ...prev, [id]: next };
+      });
+    },
+    [id, term],
+  );
+
+  return { state, update };
+}
+
+
 export function useSubjects() {
   const [, setTick] = useState(0);
   useEffect(() => {
