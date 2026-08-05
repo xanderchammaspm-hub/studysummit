@@ -1,28 +1,40 @@
 import { useRef, useState } from "react";
-import { ChevronDown, Maximize2, PenLine, Sparkles } from "lucide-react";
+import { ChevronDown, MessageSquareText, PenLine, Plus, RotateCcw, Sparkles, Trash2 } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
-import { SkeletonFigure } from "@/components/SkeletonFigure";
-import { MODES } from "@/data/englishFormula";
+import { SkeletonOverlay } from "@/components/SkeletonOverlay";
+import { ShortAnswerLab } from "@/components/ShortAnswerLab";
+import { useEnglishFormula } from "@/hooks/useEnglishFormula";
+import type { BoneZone } from "@/data/englishFormula";
+
+const SHORT_ANSWER_ID = "short-answers";
 
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
-  const [modeId, setModeId] = useState(MODES[0].id);
   const [activePart, setActivePart] = useState<string | null>(null);
-  const [hovered, setHovered] = useState<string | null>(null);
   const [section, setSection] = useState<string>("skeleton");
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const mode = MODES.find((m) => m.id === modeId) ?? MODES[0];
-  const part = mode.parts.find((p) => p.id === activePart) ?? null;
-  const docSection = mode.sections.find((s) => s.id === section) ?? null;
+  const { parts, sections, updatePart, addSection, renameSection, removeSection, reset } =
+    useEnglishFormula();
 
-  const pick = (id: string | null) => setActivePart(id);
+  const part = parts.find((p) => p.id === activePart) ?? null;
+  const docSection = sections.find((s) => s.id === section) ?? null;
+  const activeZone: BoneZone | null = part?.zone ?? null;
 
-  const switchMode = (id: string) => {
-    setModeId(id);
-    setSection("skeleton");
-    setActivePart(null);
+  const pickZone = (zone: BoneZone) => {
+    const current = parts.find((p) => p.id === activePart);
+    if (current?.zone === zone) {
+      const sameZone = parts.filter((p) => p.zone === zone);
+      const idx = sameZone.findIndex((p) => p.id === current.id);
+      // Cycle through parts sharing a zone (e.g. Spine → Vertebrae), then clear.
+      setActivePart(idx + 1 < sameZone.length ? sameZone[idx + 1].id : null);
+      return;
+    }
+    const first = parts.find((p) => p.zone === zone);
+    setActivePart(first?.id ?? null);
   };
 
   const toggle = () => {
@@ -35,6 +47,18 @@ export function EnglishFormula() {
       () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       60,
     );
+  };
+
+  const submitNewSection = () => {
+    const label = draft.trim();
+    if (!label) {
+      setAdding(false);
+      return;
+    }
+    const id = addSection(label);
+    setDraft("");
+    setAdding(false);
+    setSection(id);
   };
 
   return (
@@ -53,8 +77,8 @@ export function EnglishFormula() {
             <h3 className="text-lg font-semibold tracking-tight gradient-text">English Formula</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {open
-                ? "Click to close the writing workspaces."
-                : "Five writing skeletons — analytical, imaginative, discursive, persuasive and reflection."}
+                ? "Click to close the analytical essay workspace."
+                : "The analytical essay skeleton — click a bone, write the structure, build your own toolset."}
             </p>
           </div>
           <ChevronDown
@@ -67,73 +91,82 @@ export function EnglishFormula() {
 
       {open && (
         <div ref={sectionRef} className="mt-6 fade-in-up scroll-mt-24">
-          {/* Workspace switcher */}
-          <div className="mb-4 flex flex-wrap gap-2 rounded-2xl border border-border/60 bg-card/40 p-1.5 backdrop-blur-md">
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => switchMode(m.id)}
-                className={`flex-1 rounded-xl px-3 py-2.5 text-xs sm:text-sm transition-all duration-300 ${
-                  modeId === m.id
-                    ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
-                    : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
-                }`}
-              >
-                <span className="block font-medium">{m.label}</span>
-                <span className="mt-0.5 block text-[10px] text-muted-foreground">{m.tagline}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,215px)_minmax(0,1fr)]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,230px)_minmax(0,1fr)]">
             {/* Sidebar */}
             <aside className="purple-outline h-fit rounded-2xl bg-card/40 p-2">
               <SideItem active={section === "skeleton"} onClick={() => setSection("skeleton")}>
                 <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" /> Skeleton Blueprint
               </SideItem>
-              {mode.sections.map((s) => (
-                <SideItem key={s.id} active={section === s.id} onClick={() => setSection(s.id)}>
-                  {s.label}
-                </SideItem>
+              <SideItem
+                active={section === SHORT_ANSWER_ID}
+                onClick={() => setSection(SHORT_ANSWER_ID)}
+              >
+                <MessageSquareText className="h-3.5 w-3.5 shrink-0 text-primary" /> Short Answers
+              </SideItem>
+
+              {sections.map((s) => (
+                <div key={s.id} className="group/side relative">
+                  <SideItem active={section === s.id} onClick={() => setSection(s.id)}>
+                    <span className="truncate pr-6">{s.label}</span>
+                  </SideItem>
+                  <button
+                    onClick={() => {
+                      removeSection(s.id);
+                      if (section === s.id) setSection("skeleton");
+                    }}
+                    aria-label={`Delete ${s.label}`}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/side:opacity-100"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
               ))}
+
+              {adding ? (
+                <input
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onBlur={submitNewSection}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitNewSection();
+                    if (e.key === "Escape") {
+                      setDraft("");
+                      setAdding(false);
+                    }
+                  }}
+                  placeholder="Section name…"
+                  className="mt-1 w-full rounded-xl border border-primary/50 bg-surface/60 px-3 py-2 text-xs text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              ) : (
+                <button
+                  onClick={() => setAdding(true)}
+                  className="mt-1 flex w-full items-center gap-1.5 rounded-xl border border-dashed border-border/60 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add section
+                </button>
+              )}
+
+              <button
+                onClick={reset}
+                className="mt-1 flex w-full items-center gap-1.5 rounded-xl px-3 py-2 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <RotateCcw className="h-3 w-3" /> Reset layout
+              </button>
             </aside>
 
             {/* Workspace */}
             {section === "skeleton" ? (
-              <div className="grid gap-4 xl:grid-cols-[minmax(0,55fr)_minmax(0,45fr)]">
-                <div className="ef-stage relative purple-outline rounded-2xl p-3 overflow-hidden">
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,50fr)_minmax(0,50fr)]">
+                <div className="ef-stage relative purple-outline rounded-2xl p-4 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
-                  <div
-                    className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
-                      part ? "opacity-100" : "opacity-0"
-                    }`}
-                    style={{
-                      background:
-                        "radial-gradient(circle at 50% 45%, transparent 30%, color-mix(in oklab, var(--background) 78%, transparent) 100%)",
-                    }}
-                  />
-                  <SkeletonFigure
-                    className="relative h-[440px] w-full sm:h-[560px]"
-                    active={activePart}
-                    hovered={hovered}
-                    onPick={pick}
-                    onHover={setHovered}
-                  />
+                  <SkeletonOverlay active={activeZone} onPick={pickZone} className="py-2" />
 
-                  {part && (
-                    <button
-                      onClick={() => pick(null)}
-                      className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-border/60 bg-surface/80 px-2.5 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur hover:border-primary/60 hover:text-foreground transition-colors"
-                    >
-                      <Maximize2 className="h-3 w-3" /> Reset view
-                    </button>
-                  )}
-
-                  <div className="relative mt-1 flex flex-wrap gap-1.5">
-                    {mode.parts.map((p) => (
+                  <div className="relative mt-4 flex flex-wrap gap-1.5">
+                    {parts.map((p) => (
                       <button
                         key={p.id}
-                        onClick={() => pick(p.id)}
+                        onClick={() => setActivePart(activePart === p.id ? null : p.id)}
                         className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                           activePart === p.id
                             ? "border-primary bg-primary/20 text-foreground"
@@ -148,58 +181,73 @@ export function EnglishFormula() {
 
                 <div className="purple-outline rounded-2xl bg-card/50 p-5">
                   {part ? (
-                    <div key={`${mode.id}-${part.id}`} className="fade-in-up">
-                      <h3 className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground">
-                        {part.title}
-                      </h3>
-                      <h4 className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                        {part.sub}
-                      </h4>
-                      <p className="mt-2 mb-4 text-sm text-muted-foreground">{part.hint}</p>
+                    <div key={part.id} className="fade-in-up">
+                      <EditableText
+                        value={part.title}
+                        onChange={(v) => updatePart(part.id, { title: v })}
+                        className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground"
+                      />
+                      <EditableText
+                        value={part.sub}
+                        onChange={(v) => updatePart(part.id, { sub: v })}
+                        className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary"
+                      />
+                      <EditableText
+                        value={part.hint}
+                        onChange={(v) => updatePart(part.id, { hint: v })}
+                        className="mt-2 mb-4 text-sm text-muted-foreground"
+                      />
                       <RichEditor
-                        storageKey={`${mode.id}-part-${part.id}`}
+                        storageKey={`analytical-part-${part.id}`}
                         placeholder="Write your notes for this section…"
-                        minHeight={260}
+                        minHeight={300}
                       />
                     </div>
                   ) : (
                     <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
                       <h3 className="text-xl font-semibold uppercase tracking-[0.18em] text-foreground">
-                        {mode.label}
+                        Analytical Essay
                       </h3>
                       <h4 className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                         Pick a bone
                       </h4>
                       <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-                        Click the skull, spine, vertebrae, limbs or feet to zoom in and write the
-                        structure for this workspace.
+                        Hover the skull, spine, limbs or feet on the render, then click to open that
+                        part. Every heading here is editable — rewrite it to match your own formula.
                       </p>
                     </div>
                   )}
                 </div>
               </div>
-            ) : (
-              <div
-                key={`${mode.id}-${section}`}
-                className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up"
-              >
+            ) : section === SHORT_ANSWER_ID ? (
+              <div className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up">
                 <h3 className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground">
-                  {docSection?.label}
+                  Short Answers
                 </h3>
-                <h4 className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                  {mode.label}
-                </h4>
+                <p className="mt-2 mb-4 text-sm text-muted-foreground">
+                  Draft a response, get it marked by Atlas AI, and keep your formulas in the notes
+                  below.
+                </p>
+                <ShortAnswerLab />
+              </div>
+            ) : (
+              <div key={section} className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up">
+                <EditableText
+                  value={docSection?.label ?? ""}
+                  onChange={(v) => docSection && renameSection(docSection.id, v)}
+                  className="text-2xl font-semibold uppercase tracking-[0.18em] text-foreground"
+                />
                 <p className="mt-2 mb-4 text-sm text-muted-foreground">{docSection?.blurb}</p>
                 {docSection?.vault && (
                   <div className="mb-4">
                     <MemoriseLinkBox
-                      storageKey={`${mode.id}-memorise-by-heart`}
+                      storageKey="analytical-memorise-by-heart"
                       label="Memorise By Heart"
                     />
                   </div>
                 )}
                 <RichEditor
-                  storageKey={`${mode.id}-doc-${section}`}
+                  storageKey={`analytical-doc-${section}`}
                   placeholder="Add a table, list or notes — formatting is saved automatically…"
                   minHeight={340}
                 />
@@ -208,6 +256,28 @@ export function EnglishFormula() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EditableText({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={false}
+      onBlur={(e) => onChange(e.currentTarget.textContent?.trim() || value)}
+      className={`${className ?? ""} cursor-text rounded-md outline-none transition-colors focus:bg-primary/10 focus:ring-1 focus:ring-primary/40`}
+    >
+      {value}
     </div>
   );
 }

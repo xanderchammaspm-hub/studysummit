@@ -334,3 +334,11 @@
   text-align: left;
   font-weight: 600;
 }
+
+@keyframes efPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+.ef-pulse {
+  animation: efPulse 1.8s ease-in-out infinite;
+}
