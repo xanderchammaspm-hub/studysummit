@@ -10,17 +10,85 @@ export type Assessment = {
   due?: string; // ISO date (yyyy-mm-dd)
 };
 
-export type SubjectState = {
-  emoji: string;
+export type TermKey = "T1" | "T2" | "T3" | "T4";
+
+export type TermState = {
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
   notesUrl?: string;
 };
 
+export type SubjectState = {
+  emoji: string;
+  papers: Paper[];
+  topics: Topic[];
+  assessments: Assessment[];
+  notesUrl?: string;
+  terms?: Partial<Record<TermKey, TermState>>;
+};
+
 export type YearKey = "Year 11" | "Year 12";
 export type SubjectMeta = { id: string; name: string };
 export type SubjectsByYear = Record<YearKey, SubjectMeta[]>;
+
+export const TERMS_BY_YEAR: Record<YearKey, TermKey[]> = {
+  "Year 11": ["T1", "T2", "T3"],
+  "Year 12": ["T1", "T2", "T3", "T4"],
+};
+
+export const TERM_LABEL: Record<TermKey, string> = {
+  T1: "Term 1",
+  T2: "Term 2",
+  T3: "Term 3",
+  T4: "Term 4",
+};
+
+const emptyTerm: TermState = { papers: [], topics: [], assessments: [] };
+
+/** Terms for a subject, migrating any legacy top-level content into Term 1. */
+export function subjectTerms(raw?: SubjectState): Record<TermKey, TermState> {
+  const base: Record<TermKey, TermState> = {
+    T1: { ...emptyTerm },
+    T2: { ...emptyTerm },
+    T3: { ...emptyTerm },
+    T4: { ...emptyTerm },
+  };
+  if (!raw) return base;
+  if (raw.terms) {
+    for (const k of Object.keys(base) as TermKey[]) {
+      const t = raw.terms[k];
+      if (t) {
+        base[k] = {
+          papers: t.papers ?? [],
+          topics: t.topics ?? [],
+          assessments: t.assessments ?? [],
+          notesUrl: t.notesUrl,
+        };
+      }
+    }
+    return base;
+  }
+  base.T1 = {
+    papers: raw.papers ?? [],
+    topics: raw.topics ?? [],
+    assessments: raw.assessments ?? [],
+    notesUrl: raw.notesUrl,
+  };
+  return base;
+}
+
+/** All papers/topics/assessments across every term, for stats + search. */
+export function flattenSubject(raw?: SubjectState) {
+  const t = subjectTerms(raw);
+  const keys: TermKey[] = ["T1", "T2", "T3", "T4"];
+  return {
+    papers: keys.flatMap((k) => t[k].papers),
+    topics: keys.flatMap((k) => t[k].topics),
+    assessments: keys.flatMap((k) => t[k].assessments),
+  };
+}
+
 
 const STATE_KEY = "study-hub-state-v1";
 const SUBJECTS_KEY = "study-hub-subjects-v1";
