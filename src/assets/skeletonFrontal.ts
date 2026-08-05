@@ -116,15 +116,29 @@ export const SIDE_BONES: Bone[] = [
   },
   ...RIBS,
 
-  // Arm: humerus, radius, ulna, hand
+  // Arm: humerus, radius, ulna, carpus, metacarpals, phalanges, thumb
   { zone: "limbs", d: bone(103, 272, 88, 452, 11, 8) },
   { zone: "limbs", d: bone(83, 462, 70, 618, 7, 5) },
   { zone: "limbs", d: bone(96, 462, 84, 620, 6, 4.5) },
-  { zone: "limbs", d: ell(76, 636, 15, 17) },
+  { zone: "limbs", d: ell(78, 634, 14, 11) },
+  // metacarpals
   ...Array.from({ length: 4 }, (_, i) => ({
     zone: "limbs" as const,
-    d: bone(70 + i * 6, 648, 62 + i * 7, 700, 2.6, 2),
+    d: bone(72 + i * 6, 646, 66 + i * 8, 684, 2.6, 2.2),
   })),
+  // proximal + distal phalanges
+  ...Array.from({ length: 4 }, (_, i) => ({
+    zone: "limbs" as const,
+    d: bone(66 + i * 8, 688, 62 + i * 9, 710, 2.1, 1.7),
+  })),
+  ...Array.from({ length: 4 }, (_, i) => ({
+    zone: "limbs" as const,
+    d: bone(62 + i * 9, 713, 59 + i * 9.5, 728, 1.7, 1.3),
+  })),
+  // thumb
+  { zone: "limbs", d: bone(89, 648, 98, 676, 2.8, 2.3) },
+  { zone: "limbs", d: bone(98, 678, 104, 700, 2.3, 1.8) },
+
 
   // Pelvis (iliac wing + ischium)
   {
