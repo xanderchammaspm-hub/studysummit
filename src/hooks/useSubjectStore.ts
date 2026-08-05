@@ -10,12 +10,15 @@ export type Assessment = {
   due?: string; // ISO date (yyyy-mm-dd)
 };
 
+export type SyllabusPoint = { id: string; text: string; done: boolean };
+
 export type TermKey = "T1" | "T2" | "T3" | "T4";
 
 export type TermState = {
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
+  syllabus: SyllabusPoint[];
   notesUrl?: string;
 };
 
