@@ -721,7 +721,18 @@ function QuickLinkTile({
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <div className="text-sm font-medium text-foreground truncate">{link.label}</div>
+          {link.url ? (
+            <a
+              href={normalizeUrl(link.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
+            >
+              {link.label}
+            </a>
+          ) : (
+            <div className="text-sm font-medium text-foreground truncate">{link.label}</div>
+          )}
           {link.iconUrl && (
             <button
               onClick={() => updateQuickLink(link.id, { iconUrl: undefined })}
