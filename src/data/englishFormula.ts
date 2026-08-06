@@ -91,4 +91,17 @@ export const MODES: WritingMode[] = [
     ],
     sections: [],
   },
+  {
+    id: "short-answer",
+    label: "Short Answer",
+    tagline: "1–6 mark precision responses",
+    parts: [],
+    sections: [
+      { id: "formulas", label: "Response Formulas", blurb: "1–6 mark scaffolds, mark allocation and timing." },
+      { id: "mark-allocation", label: "Mark Allocation", blurb: "What each mark band expects, line by line." },
+      { id: "exemplars", label: "Exemplar Responses", blurb: "Annotated model answers and why they score." },
+      { id: "notes", label: "Notes", blurb: "Free-form working space." },
+    ],
+  },
 ];
+
