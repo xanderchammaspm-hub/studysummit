@@ -56,10 +56,10 @@ export function SummitSplash() {
           </h1>
         </div>
         <p
-          className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground"
+          className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground"
           style={{ animation: "splashRise 1000ms 520ms cubic-bezier(0.22,1,0.36,1) both" }}
         >
-          Class of 2028
+          Climb higher. Study smarter.
         </p>
         <div className="relative h-px w-52 overflow-hidden rounded-full bg-border/60">
           <span

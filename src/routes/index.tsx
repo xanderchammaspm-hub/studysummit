@@ -274,8 +274,7 @@ function Home() {
           <span className="text-foreground">Subject Library</span>
         </h1>
         <p className="mt-5 max-w-xl mx-auto text-muted-foreground">
-          Every subject in one place. Drop in your past papers and keep track of
-          where you're at with a simple traffic light system.
+          Study smarter. Track progress. Reach the summit.
         </p>
 
         {/* Mountain progression — the core experience */}
