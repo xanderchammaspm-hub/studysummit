@@ -8,7 +8,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RANKS } from "@/lib/progression";
+import { RANKS, rankStyle } from "@/lib/progression";
+import { Nameplate } from "@/components/Nameplate";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -73,7 +74,7 @@ function ProfilePage() {
             className="group relative rounded-full"
             aria-label="Change profile picture"
           >
-            <Avatar url={avatarUrl} name={name} size={84} />
+            <Avatar url={avatarUrl} name={name} size={84} rankName={progression.rank.name} />
             <span className="absolute inset-0 grid place-items-center rounded-full bg-background/70 opacity-0 transition-opacity group-hover:opacity-100">
               <Camera className="h-5 w-5 text-primary" />
             </span>
@@ -86,7 +87,13 @@ function ProfilePage() {
             onChange={(e) => pick(e.target.files?.[0])}
           />
           <div className="flex-1 text-center sm:text-left">
-            <div className="text-xl font-semibold">{name}</div>
+            <Nameplate
+              name={name}
+              rankName={progression.rank.name}
+              level={progression.level}
+              emoji={progression.rank.emoji}
+              size="lg"
+            />
             <div className="text-sm text-muted-foreground">{user?.email}</div>
             <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
               <Chip>{progression.rank.emoji} {progression.rank.name}</Chip>
@@ -144,15 +151,33 @@ function ProfilePage() {
         <ol className="grid gap-2 sm:grid-cols-2">
           {RANKS.map((r) => {
             const reached = progression.level >= r.minLevel;
+            const rs = rankStyle(r.name);
             return (
               <li
                 key={r.name}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${
-                  reached ? "border-primary/60 bg-primary/10" : "border-border/50 bg-surface/40 opacity-60"
-                }`}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all duration-300"
+                style={
+                  reached
+                    ? { background: rs.fill, border: `1px solid ${rs.border}`, boxShadow: rs.glow }
+                    : { background: "oklch(0.2 0.02 288 / 0.4)", border: "1px solid var(--color-border)", opacity: 0.55 }
+                }
               >
                 <span className="text-lg">{r.emoji}</span>
-                <span className="flex-1">{r.name}</span>
+                <span
+                  className="flex-1 font-semibold"
+                  style={
+                    reached
+                      ? {
+                          backgroundImage: rs.nameGradient,
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                        }
+                      : undefined
+                  }
+                >
+                  {r.name}
+                </span>
                 <span className="text-xs text-muted-foreground">Lv {r.minLevel}+</span>
               </li>
             );
