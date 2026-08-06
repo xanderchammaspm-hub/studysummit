@@ -1,10 +1,13 @@
-import logoSrc from "@/assets/summit-logo.png";
+import logoAsset from "@/assets/summit-logo.webp.asset.json";
+
+export const SUMMIT_LOGO_SRC = logoAsset.url;
 
 type Props = {
   size?: number;
   className?: string;
   withWordmark?: boolean;
   glow?: boolean;
+  priority?: boolean;
 };
 
 export function SummitLogo({
@@ -12,13 +15,18 @@ export function SummitLogo({
   className = "",
   withWordmark = false,
   glow = true,
+  priority = false,
 }: Props) {
   const img = (
     <img
-      src={logoSrc}
+      src={SUMMIT_LOGO_SRC}
       alt="Summit logo"
       width={size}
       height={size}
+      loading={priority ? "eager" : "lazy"}
+      decoding={priority ? "sync" : "async"}
+      // @ts-expect-error -- fetchpriority is a valid HTML attribute
+      fetchpriority={priority ? "high" : undefined}
       className={`shrink-0 select-none ${glow ? "summit-logo-glow" : ""}`}
       style={{ width: size, height: size }}
       draggable={false}
