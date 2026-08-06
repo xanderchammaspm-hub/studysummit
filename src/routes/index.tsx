@@ -1,5 +1,5 @@
 import { normalizeUrl } from "@/lib/utils";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
@@ -7,7 +7,7 @@ const AICoach = lazy(() => import("@/components/AICoach").then((m) => ({ default
 const MountainProgress = lazy(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
 const StudyCalendar = lazy(() => import("@/components/StudyCalendar").then((m) => ({ default: m.StudyCalendar })));
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
-import { SummitLogo } from "@/components/SummitLogo";
+import { SummitLogo, SUMMIT_LOGO_SRC } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 const EnglishFormula = lazy(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
 const UpcomingExams = lazy(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
@@ -41,6 +41,9 @@ export const Route = createFileRoute("/")({
           "Summit is a personal study hub for Year 11 and Year 12 — past papers, assessments, and a traffic light progress system for every subject.",
       },
     ],
+    links: [
+      { rel: "preload", as: "image", href: SUMMIT_LOGO_SRC, fetchpriority: "high" },
+    ],
   }),
   component: Home,
 });
@@ -58,6 +61,7 @@ function SectionFallback({ height = 240 }: { height?: number }) {
 const YEARS: YearKey[] = ["Year 11", "Year 12"];
 
 function Home() {
+  const router = useRouter();
   const [activeYear, setActiveYear] = useState<YearKey>("Year 11");
   const [query, setQuery] = useState("");
   const [newName, setNewName] = useState("");
@@ -65,6 +69,18 @@ function Home() {
   const store = useAllSubjectStates();
   const quickLinks = useQuickLinks();
   const current = subjects[activeYear] ?? [];
+
+  // Warm the most-used routes once the home page is idle.
+  useEffect(() => {
+    const idle =
+      (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ??
+      ((cb: () => void) => window.setTimeout(cb, 1200));
+    idle(() => {
+      void router.preloadRoute({ to: "/exam" });
+      void router.preloadRoute({ to: "/statistics" });
+      void router.preloadRoute({ to: "/achievements" });
+    });
+  }, [router]);
 
 
   const stats = useMemo(() => {
@@ -205,7 +221,7 @@ function Home() {
       <header className="border-b border-border/60 backdrop-blur-md sticky top-0 z-30 bg-background/70">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <SummitLogo size={38} />
+            <SummitLogo size={38} priority />
             <div className="leading-tight">
               <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 HSC Study
