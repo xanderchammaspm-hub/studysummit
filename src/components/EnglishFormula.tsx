@@ -186,7 +186,7 @@ export function EnglishFormula() {
             </aside>
 
             {/* Workspace */}
-            {section === "skeleton" ? (
+            {section === "skeleton" && hasSkeleton ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,55fr)_minmax(0,45fr)]">
                 <div className="ef-stage relative purple-outline rounded-2xl p-3 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
