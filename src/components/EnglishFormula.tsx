@@ -235,7 +235,7 @@ export function EnglishFormula() {
                   </div>
                 </div>
 
-                <div className="purple-outline rounded-2xl bg-card/50 p-5">
+                <div className="glass-panel p-5">
                   {part && basePart ? (
                     <div key={`${mode.id}-${part.id}`} className="fade-in-up">
                       <EditableText
@@ -290,7 +290,7 @@ export function EnglishFormula() {
                     Read the extract, name the technique, land the effect — one clean move per mark.
                   </p>
                 </div>
-                <div className="purple-outline rounded-2xl bg-card/50 p-5">
+                <div className="glass-panel p-5">
                   <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                     Atlas marking
                   </h4>
@@ -310,7 +310,7 @@ export function EnglishFormula() {
 
               <div
                 key={`${mode.id}-${section}`}
-                className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up"
+                className="glass-panel p-5 fade-in-up"
               >
                 {isCustom ? (
                   <EditableText

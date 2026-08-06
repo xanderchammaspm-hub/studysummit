@@ -131,7 +131,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 
   return (
     <div
-      className="purple-outline purple-glow-hover rounded-xl bg-card/60 backdrop-blur-sm overflow-hidden fade-in-up"
+      className="purple-outline lift-hover rounded-xl bg-card/60 backdrop-blur-sm overflow-hidden fade-in-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">

@@ -176,7 +176,7 @@ export function StudyCalendar() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 mb-8 fade-in-up">
-      <div className="purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
+      <div className="glass-panel p-5 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
         <div className="flex items-center gap-2 mb-5">
           <CalendarDays className="h-4 w-4 text-primary" />
