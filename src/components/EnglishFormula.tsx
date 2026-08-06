@@ -92,7 +92,7 @@ export function EnglishFormula() {
             <p className="mt-1 text-sm text-muted-foreground">
               {open
                 ? "Click to close the writing workspaces."
-                : "Five writing skeletons — analytical, imaginative, discursive, persuasive and reflection."}
+                : "Six workspaces — essay, imaginative, discursive, persuasive, reflection and short answer."}
             </p>
           </div>
           <ChevronDown
