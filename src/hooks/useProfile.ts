@@ -109,7 +109,7 @@ export function useProfile() {
         .from("profiles")
         .update({ last_active_date: day, streak_days: streak })
         .eq("id", userId)
-        .neq("last_active_date", day)
+        .or(`last_active_date.is.null,last_active_date.neq.${day}`)
         .select("id");
       if (!claimed?.length) return;
       await supabase
