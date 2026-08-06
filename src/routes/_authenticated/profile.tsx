@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
       { title: "Your profile — Summit" },
-      { name: "description", content: "Your Summit climber profile: picture, username, level, rank and coins." },
+      { name: "description", content: "Your Summit climber profile: picture, username, level, rank and streak." },
       { property: "og:title", content: "Your profile — Summit" },
-      { property: "og:description", content: "Your Summit climber profile: picture, username, level, rank and coins." },
+      { property: "og:description", content: "Your Summit climber profile: picture, username, level, rank and streak." },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -99,7 +99,6 @@ function ProfilePage() {
               <Chip>{progression.rank.emoji} {progression.rank.name}</Chip>
               <Chip>Level {progression.level}</Chip>
               <Chip>{profile?.xp ?? 0} XP</Chip>
-              <Chip>🪙 {profile?.coins ?? 0}</Chip>
               <Chip>🔥 {profile?.streak_days ?? 0} day streak</Chip>
             </div>
           </div>

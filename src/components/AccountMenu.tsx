@@ -126,7 +126,7 @@ export function AccountMenu() {
             </div>
             <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
               <span>{profile?.xp ?? 0} XP</span>
-              <span>🪙 {profile?.coins ?? 0}</span>
+              <span>{progression.pct}%</span>
             </div>
           </div>
         </DropdownMenuLabel>

@@ -187,7 +187,6 @@ export type AchievementDef = {
   category: AchievementCategory;
   rarity: Rarity;
   xpReward: number;
-  coinReward: number;
 };
 
 export const RARITY_STYLE: Record<Rarity, { label: string; ring: string; glow: string; text: string }> = {
@@ -207,14 +206,13 @@ const A = (
   category: AchievementCategory,
   rarity: Rarity,
 ): AchievementDef => {
-  const rewards: Record<Rarity, [number, number]> = {
-    common: [50, 10],
-    rare: [120, 25],
-    epic: [300, 60],
-    legendary: [750, 150],
+  const rewards: Record<Rarity, number> = {
+    common: 50,
+    rare: 120,
+    epic: 300,
+    legendary: 750,
   };
-  const [xpReward, coinReward] = rewards[rarity];
-  return { id, name, desc, emoji, goal, metric, category, rarity, xpReward, coinReward };
+  return { id, name, desc, emoji, goal, metric, category, rarity, xpReward: rewards[rarity] };
 };
 
 export const ACHIEVEMENTS: AchievementDef[] = [

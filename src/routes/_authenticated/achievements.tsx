@@ -83,7 +83,7 @@ function AchievementsPage() {
           });
         }
         toast.success(`${a.emoji}  ${a.name} unlocked`, {
-          description: `${a.desc} · +${a.xpReward} XP · +${a.coinReward} coins`,
+          description: `${a.desc} · +${a.xpReward} XP`,
         });
       })();
     }
@@ -189,7 +189,7 @@ function AchievementsPage() {
                         {Math.min(value, a.goal).toFixed(a.metric === "studyHours" || a.metric.includes("Hours") ? 1 : 0)} / {a.goal}
                       </span>
                       <span>
-                        +{a.xpReward} XP · +{a.coinReward} coins
+                        +{a.xpReward} XP
                       </span>
                     </div>
                   </div>
