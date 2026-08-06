@@ -405,3 +405,22 @@ button:disabled,
 /* Compact density — tightens the vertical rhythm of the main sections. */
 .density-compact section { padding-top: 1rem; padding-bottom: 1rem; }
 .density-compact .fade-in-up { animation-duration: 0.4s; }
+
+/* Short Answer emblem — hover pulse on the highlighted snippet */
+@keyframes saHighlightPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.62; }
+}
+@keyframes saGlowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.62; }
+}
+.sa-mark .sa-mark-lens,
+.sa-mark .sa-mark-hl,
+.sa-mark .sa-mark-hl-glow {
+  transition: opacity 300ms ease, transform 300ms ease;
+  transform-origin: 132px 108px;
+}
+.sa-mark:hover .sa-mark-hl { animation: saHighlightPulse 1.6s ease-in-out infinite; }
+.sa-mark:hover .sa-mark-hl-glow { animation: saGlowPulse 1.6s ease-in-out infinite; }
+.sa-mark:hover .sa-mark-lens { transform: scale(1.02); }

@@ -3,9 +3,13 @@ import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } fro
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
+import { ShortAnswerMark } from "@/components/ShortAnswerMark";
 import { AtlasSectionChat } from "@/components/AtlasSectionChat";
 import { MODES, type DocSection } from "@/data/englishFormula";
 import { useEnglishFormula } from "@/hooks/useEnglishFormula";
+
+const EDITOR_PREFIX = "summit-english-formula-v1:";
+
 
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
@@ -28,8 +32,21 @@ export function EnglishFormula() {
   const part = basePart ? { ...basePart, ...override } : null;
   const docSection = allSections.find((s) => s.id === section) ?? null;
   const isCustom = custom.some((s) => s.id === section);
+  const hasSkeleton = mode.parts.length > 0;
+
+  // Carry over notes written when Short Answers lived inside the essay mode.
+  useEffect(() => {
+    try {
+      const from = localStorage.getItem(`${EDITOR_PREFIX}analytical-doc-short-answers`);
+      const toKey = `${EDITOR_PREFIX}short-answer-doc-formulas`;
+      if (from && !localStorage.getItem(toKey)) localStorage.setItem(toKey, from);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const pick = (id: string | null) => setActivePart(id);
+
 
   const switchMode = (id: string) => {
     setModeId(id);
@@ -75,7 +92,7 @@ export function EnglishFormula() {
             <p className="mt-1 text-sm text-muted-foreground">
               {open
                 ? "Click to close the writing workspaces."
-                : "Five writing skeletons — analytical, imaginative, discursive, persuasive and reflection."}
+                : "Six workspaces — essay, imaginative, discursive, persuasive, reflection and short answer."}
             </p>
           </div>
           <ChevronDown
@@ -110,8 +127,10 @@ export function EnglishFormula() {
             {/* Sidebar */}
             <aside className="purple-outline h-fit rounded-2xl bg-card/40 p-2">
               <SideItem active={section === "skeleton"} onClick={() => setSection("skeleton")}>
-                <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" /> Skeleton Blueprint
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />{" "}
+                {hasSkeleton ? "Skeleton Blueprint" : "Overview"}
               </SideItem>
+
               {allSections.map((s) => (
                 <SideItem
                   key={s.id}
@@ -169,7 +188,7 @@ export function EnglishFormula() {
             </aside>
 
             {/* Workspace */}
-            {section === "skeleton" ? (
+            {section === "skeleton" && hasSkeleton ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,55fr)_minmax(0,45fr)]">
                 <div className="ef-stage relative purple-outline rounded-2xl p-3 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
@@ -259,7 +278,36 @@ export function EnglishFormula() {
                   )}
                 </div>
               </div>
+            ) : section === "skeleton" ? (
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
+                <div className="ef-stage relative purple-outline flex flex-col items-center justify-center rounded-2xl p-6 overflow-hidden">
+                  <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+                  <ShortAnswerMark size={240} className="relative" />
+                  <h3 className="relative mt-5 text-xl font-semibold uppercase tracking-[0.18em] text-foreground">
+                    Short Answer
+                  </h3>
+                  <p className="relative mt-2 max-w-xs text-center text-sm text-muted-foreground">
+                    Read the extract, name the technique, land the effect — one clean move per mark.
+                  </p>
+                </div>
+                <div className="purple-outline rounded-2xl bg-card/50 p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+                    Atlas marking
+                  </h4>
+                  <div className="mt-3">
+                    <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
+                  </div>
+                  <div className="mt-4">
+                    <RichEditor
+                      storageKey={`${mode.id}-overview`}
+                      placeholder="Working space — paste a question, draft a response…"
+                      minHeight={220}
+                    />
+                  </div>
+                </div>
+              </div>
             ) : (
+
               <div
                 key={`${mode.id}-${section}`}
                 className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up"
@@ -290,17 +338,13 @@ export function EnglishFormula() {
                     />
                   </div>
                 )}
-                {section === "short-answers" && (
-                  <div className="mt-4">
-                    <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
-                  </div>
-                )}
                 <div className="mt-4">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
                     placeholder="Add a table, list or notes — formatting is saved automatically…"
-                    minHeight={section === "short-answers" ? 240 : 340}
+                    minHeight={340}
                   />
+
                 </div>
               </div>
             )}

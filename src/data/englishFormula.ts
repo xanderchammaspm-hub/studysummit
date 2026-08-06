@@ -18,7 +18,7 @@ const bone = (id: string, title: string, sub: string, hint: string): SkeletonPar
 export const MODES: WritingMode[] = [
   {
     id: "analytical",
-    label: "Analytical Essay",
+    label: "Essay",
     tagline: "Thesis-driven textual analysis",
     parts: [
       bone("skull", "Skull", "Introduction", "The thinking head — context, text, thesis."),
@@ -34,7 +34,7 @@ export const MODES: WritingMode[] = [
       { id: "flowing-phrases", label: "Flowing Phrases", blurb: "Bridges between ideas, paragraphs and texts." },
       { id: "structure", label: "Structure", blurb: "Paragraph scaffolds and sentence order." },
       { id: "comparative", label: "Comparative Structure", blurb: "Integrated two-text paragraph frames." },
-      { id: "short-answers", label: "Short Answers", blurb: "1–6 mark response formulas, mark allocation and timing." },
+      
       { id: "exemplar", label: "Exemplar Analysis", blurb: "Band 6 samples annotated for what earns the marks." },
       { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
     ],
@@ -91,4 +91,17 @@ export const MODES: WritingMode[] = [
     ],
     sections: [],
   },
+  {
+    id: "short-answer",
+    label: "Short Answer",
+    tagline: "1–6 mark precision responses",
+    parts: [],
+    sections: [
+      { id: "formulas", label: "Response Formulas", blurb: "1–6 mark scaffolds, mark allocation and timing." },
+      { id: "mark-allocation", label: "Mark Allocation", blurb: "What each mark band expects, line by line." },
+      { id: "exemplars", label: "Exemplar Responses", blurb: "Annotated model answers and why they score." },
+      { id: "notes", label: "Notes", blurb: "Free-form working space." },
+    ],
+  },
 ];
+
