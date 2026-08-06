@@ -4,7 +4,7 @@
  */
 export function ExamEngineLogo({
   size = 56,
-  animate = true,
+  animate = false,
   className,
 }: {
   size?: number;
