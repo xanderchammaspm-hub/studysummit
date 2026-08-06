@@ -34,7 +34,7 @@ export function DailyPlan() {
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-8">
-      <div className="relative overflow-hidden rounded-3xl purple-outline bg-card/50 p-6 backdrop-blur-2xl fade-in-up">
+      <div className="relative overflow-hidden glass-panel p-6 fade-in-up">
         <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
 
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
