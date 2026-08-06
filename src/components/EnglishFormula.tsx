@@ -127,8 +127,10 @@ export function EnglishFormula() {
             {/* Sidebar */}
             <aside className="purple-outline h-fit rounded-2xl bg-card/40 p-2">
               <SideItem active={section === "skeleton"} onClick={() => setSection("skeleton")}>
-                <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" /> Skeleton Blueprint
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />{" "}
+                {hasSkeleton ? "Skeleton Blueprint" : "Overview"}
               </SideItem>
+
               {allSections.map((s) => (
                 <SideItem
                   key={s.id}
