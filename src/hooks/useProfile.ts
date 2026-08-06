@@ -87,16 +87,16 @@ export function useProfile() {
   );
 
   // Daily streak — counted once per calendar day on first visit.
-  const streakGuard = useRef<string | null>(null);
   useEffect(() => {
     if (!userId || !profile) return;
     const day = today();
     if (profile.last_active_date === day) return;
-    // The profile query is refetched asynchronously, so guard against the effect
-    // re-firing (and re-awarding XP) before the fresh row arrives.
+    // The profile query refetches asynchronously and this hook is mounted by
+    // several components, so use a module-level guard to award the streak once.
     const guardKey = `${userId}:${day}`;
-    if (streakGuard.current === guardKey) return;
-    streakGuard.current = guardKey;
+    if (streakClaimed.has(guardKey)) return;
+    streakClaimed.add(guardKey);
+
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     const streak = profile.last_active_date === yesterday ? profile.streak_days + 1 : 1;
     void (async () => {
