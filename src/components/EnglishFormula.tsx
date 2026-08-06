@@ -32,8 +32,21 @@ export function EnglishFormula() {
   const part = basePart ? { ...basePart, ...override } : null;
   const docSection = allSections.find((s) => s.id === section) ?? null;
   const isCustom = custom.some((s) => s.id === section);
+  const hasSkeleton = mode.parts.length > 0;
+
+  // Carry over notes written when Short Answers lived inside the essay mode.
+  useEffect(() => {
+    try {
+      const from = localStorage.getItem(`${EDITOR_PREFIX}analytical-doc-short-answers`);
+      const toKey = `${EDITOR_PREFIX}short-answer-doc-formulas`;
+      if (from && !localStorage.getItem(toKey)) localStorage.setItem(toKey, from);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const pick = (id: string | null) => setActivePart(id);
+
 
   const switchMode = (id: string) => {
     setModeId(id);
