@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,9 @@ export type Profile = {
 function today() {
   return new Date().toISOString().slice(0, 10);
 }
+
+/** Guards the once-per-day streak award across every mounted useProfile(). */
+const streakClaimed = new Set<string>();
 
 export function useProfile() {
   const { user, loading: authLoading } = useAuth();
