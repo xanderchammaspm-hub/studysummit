@@ -276,7 +276,36 @@ export function EnglishFormula() {
                   )}
                 </div>
               </div>
+            ) : section === "skeleton" ? (
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
+                <div className="ef-stage relative purple-outline flex flex-col items-center justify-center rounded-2xl p-6 overflow-hidden">
+                  <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
+                  <ShortAnswerMark size={240} className="relative" />
+                  <h3 className="relative mt-5 text-xl font-semibold uppercase tracking-[0.18em] text-foreground">
+                    Short Answer
+                  </h3>
+                  <p className="relative mt-2 max-w-xs text-center text-sm text-muted-foreground">
+                    Read the extract, name the technique, land the effect — one clean move per mark.
+                  </p>
+                </div>
+                <div className="purple-outline rounded-2xl bg-card/50 p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+                    Atlas marking
+                  </h4>
+                  <div className="mt-3">
+                    <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
+                  </div>
+                  <div className="mt-4">
+                    <RichEditor
+                      storageKey={`${mode.id}-overview`}
+                      placeholder="Working space — paste a question, draft a response…"
+                      minHeight={220}
+                    />
+                  </div>
+                </div>
+              </div>
             ) : (
+
               <div
                 key={`${mode.id}-${section}`}
                 className="purple-outline rounded-2xl bg-card/50 p-5 fade-in-up"
