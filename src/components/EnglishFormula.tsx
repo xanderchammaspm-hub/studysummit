@@ -3,9 +3,13 @@ import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } fro
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
+import { ShortAnswerMark } from "@/components/ShortAnswerMark";
 import { AtlasSectionChat } from "@/components/AtlasSectionChat";
 import { MODES, type DocSection } from "@/data/englishFormula";
 import { useEnglishFormula } from "@/hooks/useEnglishFormula";
+
+const EDITOR_PREFIX = "summit-english-formula-v1:";
+
 
 export function EnglishFormula() {
   const [open, setOpen] = useState(false);
