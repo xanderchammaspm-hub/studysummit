@@ -104,10 +104,34 @@
     opacity: var(--gradient-intensity, 1);
     transition: opacity 400ms ease;
     background:
-      radial-gradient(1400px 900px at 8% -15%, oklch(0.42 0.18 295 / 0.28), transparent 55%),
-      radial-gradient(1100px 800px at 100% 5%, oklch(0.36 0.19 320 / 0.22), transparent 60%),
-      radial-gradient(900px 700px at 50% 115%, oklch(0.4 0.16 275 / 0.22), transparent 60%),
-      radial-gradient(700px 500px at 90% 85%, oklch(0.7 0.11 85 / 0.05), transparent 60%);
+      radial-gradient(1500px 950px at 8% -18%, oklch(0.42 0.18 295 / 0.24), transparent 58%),
+      radial-gradient(1200px 850px at 100% 2%, oklch(0.36 0.19 320 / 0.19), transparent 62%),
+      radial-gradient(950px 750px at 50% 118%, oklch(0.4 0.16 275 / 0.19), transparent 62%),
+      radial-gradient(750px 520px at 90% 85%, oklch(0.7 0.11 85 / 0.045), transparent 60%);
+  }
+
+  /* Soft vignette so content sits forward of the field */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, oklch(0.08 0.02 285 / 0.55) 100%);
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--color-background),
+      0 0 0 4px oklch(0.72 0.22 300 / 0.65);
+    border-radius: var(--radius-md);
   }
 
   ::selection {
@@ -117,26 +141,31 @@
 
   /* Scrollbar */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.5 0.15 295 / 0.4);
-    border-radius: 8px;
+    background: linear-gradient(180deg, oklch(0.62 0.2 300 / 0.5), oklch(0.5 0.16 295 / 0.35));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.65 0.2 300 / 0.6);
+    background: linear-gradient(180deg, oklch(0.72 0.23 302 / 0.75), oklch(0.58 0.2 298 / 0.55));
+    background-clip: padding-box;
   }
 }
 
 @utility purple-outline {
+  position: relative;
   border: 1px solid var(--color-border);
   box-shadow:
-    0 0 0 1px oklch(0.55 0.18 295 / 0.15),
-    0 10px 40px -20px oklch(0.55 0.2 295 / 0.5);
+    inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.07),
+    0 0 0 1px oklch(0.55 0.18 295 / 0.12),
+    0 18px 50px -28px oklch(0.55 0.2 295 / 0.65);
 }
 
 @utility purple-glow-hover {
@@ -206,20 +235,6 @@
   }
 }
 
-@utility aurora {
-  position: fixed;
-  inset: -20% -10% auto -10%;
-  height: 70vh;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(80px);
-  opacity: 0.55;
-  background:
-    radial-gradient(40% 60% at 20% 30%, oklch(0.55 0.22 300 / 0.55), transparent 60%),
-    radial-gradient(35% 55% at 80% 20%, oklch(0.5 0.22 320 / 0.45), transparent 60%),
-    radial-gradient(30% 50% at 50% 80%, oklch(0.65 0.12 82 / 0.15), transparent 60%);
-  animation: auroraDrift 22s ease-in-out infinite alternate;
-}
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -424,3 +439,141 @@ button:disabled,
 .sa-mark:hover .sa-mark-hl { animation: saHighlightPulse 1.6s ease-in-out infinite; }
 .sa-mark:hover .sa-mark-hl-glow { animation: saGlowPulse 1.6s ease-in-out infinite; }
 .sa-mark:hover .sa-mark-lens { transform: scale(1.02); }
+
+/* ---------- Aesthetic polish pass ---------- */
+
+/* Glass surface used by cards, panels and tiles */
+@utility glass-panel {
+  background:
+    linear-gradient(160deg, oklch(0.24 0.045 292 / 0.72) 0%, oklch(0.18 0.035 288 / 0.6) 100%);
+  backdrop-filter: blur(18px) saturate(1.15);
+  border: 1px solid oklch(0.6 0.18 298 / 0.28);
+  box-shadow:
+    inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.08),
+    0 22px 60px -34px oklch(0.5 0.2 295 / 0.8);
+  border-radius: calc(var(--radius) + 6px);
+}
+
+/* Subtle hover lift for interactive tiles */
+@utility lift-hover {
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms ease,
+    border-color 320ms ease;
+  &:hover {
+    transform: translateY(-3px);
+    border-color: oklch(0.72 0.22 300 / 0.55);
+    box-shadow:
+      inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.1),
+      0 26px 70px -34px oklch(0.68 0.24 303 / 0.75);
+  }
+  &:active {
+    transform: translateY(-1px) scale(0.995);
+  }
+}
+
+/* Muted small-caps section label */
+@utility section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+/* Staggered entrance for grids/lists: wrap children */
+@utility stagger-children {
+  & > * {
+    animation: fadeInUp 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  & > *:nth-child(1) { animation-delay: 40ms; }
+  & > *:nth-child(2) { animation-delay: 90ms; }
+  & > *:nth-child(3) { animation-delay: 140ms; }
+  & > *:nth-child(4) { animation-delay: 190ms; }
+  & > *:nth-child(5) { animation-delay: 240ms; }
+  & > *:nth-child(6) { animation-delay: 290ms; }
+  & > *:nth-child(n + 7) { animation-delay: 330ms; }
+}
+
+/* Softer, slower aurora that sits further back */
+@utility aurora {
+  position: fixed;
+  inset: -22% -12% auto -12%;
+  height: 72vh;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(96px);
+  opacity: 0.42;
+  background:
+    radial-gradient(40% 60% at 20% 30%, oklch(0.55 0.22 300 / 0.5), transparent 60%),
+    radial-gradient(35% 55% at 80% 20%, oklch(0.5 0.22 320 / 0.38), transparent 60%),
+    radial-gradient(30% 50% at 50% 80%, oklch(0.65 0.12 82 / 0.12), transparent 60%);
+  animation: auroraDrift 38s ease-in-out infinite alternate;
+}
+
+/* Global interaction feel */
+button,
+[role="button"],
+a[href] {
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 240ms ease,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: translateY(0.5px) scale(0.985);
+}
+button:disabled,
+[aria-disabled="true"] {
+  opacity: 0.55;
+}
+
+input,
+textarea,
+select {
+  transition:
+    border-color 200ms ease,
+    box-shadow 240ms ease,
+    background-color 200ms ease;
+}
+input:hover:not(:disabled),
+textarea:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: oklch(0.68 0.2 300 / 0.5);
+}
+
+/* Progress bars and rings animate their fill smoothly */
+[role="progressbar"] > *,
+.progress-fill {
+  transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Traffic-light dots ease between states */
+.status-dot,
+[data-status-dot] {
+  transition:
+    background-color 260ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease;
+}
+
+/* Toasts pick up the theme */
+[data-sonner-toast] {
+  backdrop-filter: blur(16px);
+  border: 1px solid oklch(0.6 0.18 298 / 0.35) !important;
+  box-shadow: 0 20px 60px -30px oklch(0.5 0.2 295 / 0.85) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+  }
+}

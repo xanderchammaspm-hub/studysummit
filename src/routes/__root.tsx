@@ -17,6 +17,7 @@ import { SummitSplash } from "@/components/SummitSplash";
 import { Toaster } from "@/components/ui/sonner";
 import { initCloudSync } from "@/lib/cloudSync";
 import { applyPrefs } from "@/hooks/usePrefs";
+import { runProgressResetOnce } from "@/lib/resetProgress";
 
 
 function NotFoundComponent() {
@@ -136,6 +137,7 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    runProgressResetOnce();
     initCloudSync();
     applyPrefs();
     const gradient = localStorage.getItem("study-hub-gradient-intensity-v1");

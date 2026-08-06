@@ -242,7 +242,7 @@ function Home() {
           <Sparkles className="h-3.5 w-3.5 text-yellow" />
           Your personal study space
         </div>
-        <h1 className="mt-6 text-4xl sm:text-6xl font-semibold tracking-tight">
+        <h1 className="mt-6 text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
           <span className="gradient-text">Year 11 & 12</span>
           <br />
           <span className="text-foreground">Subject Library</span>
@@ -263,7 +263,7 @@ function Home() {
 
       {/* Quick links */}
       <div className="mx-auto max-w-3xl px-6 mb-6">
-        <div className="purple-outline rounded-xl bg-card/50 p-4">
+        <div className="glass-panel p-5">
           <div className="flex items-center gap-2 mb-3">
             <Link2 className="h-4 w-4 text-primary" />
             <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -281,7 +281,7 @@ function Home() {
       {/* Upcoming assessments */}
       {upcoming.length > 0 && (
         <div className="mx-auto max-w-3xl px-6 mb-6 fade-in-up">
-          <div className="purple-outline rounded-xl bg-card/50 p-4 relative overflow-hidden">
+          <div className="glass-panel p-5 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
             <div className="flex items-center gap-2 mb-3">
               <span className="text-yellow">⏰</span>
@@ -432,7 +432,7 @@ function Home() {
             ) : (
               <div
                 key={activeYear}
-                className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 stagger-children"
               >
                 {current.map((s, i) => (
                   <SubjectCard
@@ -447,7 +447,7 @@ function Home() {
             )}
 
             {/* Traffic light legend */}
-            <div className="mt-16 purple-outline rounded-xl bg-card/50 p-6">
+            <div className="mt-16 glass-panel p-7">
               <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                 <TrafficLightIcon size={14} className="text-primary" />
                 Traffic Light Legend
@@ -494,7 +494,7 @@ function Home() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="purple-outline rounded-lg bg-card/50 px-3 py-2 text-center">
+    <div className="glass-panel lift-hover rounded-xl px-3 py-2.5 text-center">
       <div className="text-xl font-semibold tracking-tight text-foreground">
         {value}
       </div>
@@ -515,7 +515,7 @@ function StatTraffic({
   status: "red" | "amber" | "green";
 }) {
   return (
-    <div className="purple-outline rounded-lg bg-card/50 px-3 py-2 text-center">
+    <div className="glass-panel lift-hover rounded-xl px-3 py-2.5 text-center">
       <div className="flex items-center justify-center gap-1.5">
         <StatusDot status={status} />
         <span className="text-xl font-semibold tracking-tight text-foreground">
@@ -562,7 +562,7 @@ function SearchResults({
           {results.map((r, i) => (
             <li
               key={`${r.subjectId}-${r.kind}-${i}`}
-              className="purple-outline rounded-lg bg-card/60 px-4 py-3 flex items-center gap-3"
+              className="glass-panel lift-hover px-4 py-3 flex items-center gap-3"
             >
               {r.kind === "topic" && r.status ? (
                 <StatusDot status={r.status} />

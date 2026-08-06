@@ -69,7 +69,7 @@ export function MountainProgress() {
   const nextDays = nextCamp ? daysUntil(dates[nextCamp.key]) : null;
 
   return (
-    <div className="mx-auto max-w-4xl purple-outline rounded-2xl bg-card/50 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden fade-in-up">
+    <div className="mx-auto max-w-4xl glass-panel p-5 sm:p-6 relative overflow-hidden fade-in-up">
       <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
 
       <div className="flex items-center justify-between mb-4 gap-3">

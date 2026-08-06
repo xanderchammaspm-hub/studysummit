@@ -34,7 +34,7 @@ export function DailyPlan() {
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-8">
-      <div className="relative overflow-hidden rounded-3xl purple-outline bg-card/50 p-6 backdrop-blur-2xl fade-in-up">
+      <div className="relative overflow-hidden glass-panel p-6 fade-in-up">
         <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
 
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -78,7 +78,7 @@ export function DailyPlan() {
             <div className="space-y-2">
               {weakest.length === 0 ? (
                 <p className="px-1 text-xs italic text-muted-foreground">
-                  No red or amber topics — nice work.
+                  No red or yellow topics — nice work.
                 </p>
               ) : (
                 weakest.map((w) => (
@@ -92,7 +92,7 @@ export function DailyPlan() {
                     </div>
                     <div className="shrink-0 text-xs tabular-nums">
                       <span className={w.status === "red" ? "text-destructive" : "text-yellow"}>
-                        {w.status}
+                        {w.status === "amber" ? "yellow" : w.status}
                       </span>
                     </div>
                   </div>

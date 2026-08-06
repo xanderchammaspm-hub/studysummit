@@ -21,6 +21,9 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Guards the once-per-day streak award across every mounted useProfile(). */
+const streakClaimed = new Set<string>();
+
 export function useProfile() {
   const { user, loading: authLoading } = useAuth();
   const qc = useQueryClient();
@@ -91,18 +94,30 @@ export function useProfile() {
     if (!userId || !profile) return;
     const day = today();
     if (profile.last_active_date === day) return;
+    // The profile query refetches asynchronously and this hook is mounted by
+    // several components, so use a module-level guard to award the streak once.
+    const guardKey = `${userId}:${day}`;
+    if (streakClaimed.has(guardKey)) return;
+    streakClaimed.add(guardKey);
+
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     const streak = profile.last_active_date === yesterday ? profile.streak_days + 1 : 1;
     void (async () => {
-      await supabase
+      // Claim the day atomically: only the write that actually flips
+      // last_active_date returns a row, and only that one awards XP.
+      const { data: claimed } = await supabase
         .from("profiles")
         .update({ last_active_date: day, streak_days: streak })
-        .eq("id", userId);
+        .eq("id", userId)
+        .or(`last_active_date.is.null,last_active_date.neq.${day}`)
+        .select("id");
+      if (!claimed?.length) return;
       await supabase
         .from("xp_events")
         .insert({ user_id: userId, kind: "dailyStreak", amount: XP_RULES.dailyStreak, meta: { streak } });
       await qc.invalidateQueries({ queryKey: ["profile", userId] });
     })();
+
   }, [userId, profile, qc]);
 
   const progression = useMemo(() => progressionFromXp(profile?.xp ?? 0), [profile?.xp]);

@@ -4,7 +4,7 @@
  */
 export function ExamEngineLogo({
   size = 56,
-  animate = true,
+  animate = false,
   className,
 }: {
   size?: number;
@@ -84,10 +84,7 @@ export function ExamEngineLogo({
       </g>
 
       {/* Verdict badge */}
-      <g
-        filter={`url(#${uid}-glow)`}
-        style={animate ? { animation: "nodePulse 2.6s ease-in-out infinite" } : undefined}
-      >
+      <g filter={`url(#${uid}-glow)`} style={animate ? { animation: "nodePulse 2.6s ease-in-out infinite" } : undefined}>
         <circle
           cx="45"
           cy="27"
