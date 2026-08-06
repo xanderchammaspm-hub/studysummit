@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({
       },
     ],
     links: [
-      { rel: "preload", as: "image", href: SUMMIT_LOGO_SRC, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: SUMMIT_LOGO_SRC },
     ],
   }),
   component: Home,
