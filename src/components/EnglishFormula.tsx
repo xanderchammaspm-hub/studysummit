@@ -307,17 +307,13 @@ export function EnglishFormula() {
                     />
                   </div>
                 )}
-                {section === "short-answers" && (
-                  <div className="mt-4">
-                    <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
-                  </div>
-                )}
                 <div className="mt-4">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
                     placeholder="Add a table, list or notes — formatting is saved automatically…"
-                    minHeight={section === "short-answers" ? 240 : 340}
+                    minHeight={340}
                   />
+
                 </div>
               </div>
             )}
