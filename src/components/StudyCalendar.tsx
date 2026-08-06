@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, Flame, Plus, TrendingUp, X } from "lucide-react";
 import { useSubjects, type YearKey } from "@/hooks/useSubjectStore";
 import { useProfile } from "@/hooks/useProfile";
+import { StudyHeatmap } from "@/components/StudyHeatmap";
 
 type StudyLog = {
   id: string;
@@ -430,6 +431,13 @@ export function StudyCalendar() {
           </div>
         )}
       </div>
+
+      <StudyHeatmap
+        logs={logs}
+        subjectLabel={(id) =>
+          id ? (allSubjects.find((s) => s.id === id)?.label ?? "Unassigned") : "Unassigned"
+        }
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { SummitSplash } from "@/components/SummitSplash";
+import { AmbientBackground } from "@/components/AmbientBackground";
 import { Toaster } from "@/components/ui/sonner";
 import { initCloudSync } from "@/lib/cloudSync";
 import { applyPrefs } from "@/hooks/usePrefs";
@@ -155,6 +156,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ClientOnly fallback={null}>
+        <AmbientBackground />
+      </ClientOnly>
       <ClientOnly fallback={null}>
         <SummitSplash />
       </ClientOnly>

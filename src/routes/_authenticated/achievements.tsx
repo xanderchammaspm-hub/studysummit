@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { AccountShell, Panel } from "@/components/account/AccountShell";
 import {
   ACHIEVEMENTS,
@@ -11,6 +10,10 @@ import {
 import { useAchievements, useProfile } from "@/hooks/useProfile";
 import { useSummitStats } from "@/hooks/useSummitStats";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AchievementCelebration,
+  type CelebrationPayload,
+} from "@/components/AchievementCelebration";
 
 export const Route = createFileRoute("/_authenticated/achievements")({
   head: () => ({
@@ -35,6 +38,7 @@ function AchievementsPage() {
   const [category, setCategory] = useState<AchievementCategory | "All">("All");
   const [filter, setFilter] = useState<Filter>("all");
   const rewarded = useRef<Set<string>>(new Set());
+  const [celebration, setCelebration] = useState<CelebrationPayload | null>(null);
 
   const metrics: Record<string, number> = useMemo(
     () => ({
@@ -82,8 +86,15 @@ function AchievementsPage() {
             meta: { achievement: a.id } as never,
           });
         }
-        toast.success(`${a.emoji}  ${a.name} unlocked`, {
-          description: `${a.desc} · +${a.xpReward} XP`,
+        const style = RARITY_STYLE[a.rarity];
+        setCelebration({
+          id: a.id,
+          emoji: a.emoji,
+          name: a.name,
+          desc: a.desc,
+          xp: a.xpReward,
+          ring: style.ring,
+          text: style.text,
         });
       })();
     }
@@ -107,6 +118,8 @@ function AchievementsPage() {
   });
 
   return (
+    <>
+    <AchievementCelebration item={celebration} onDone={() => setCelebration(null)} />
     <AccountShell
       title="Achievements"
       subtitle={`${earned} of ${ACHIEVEMENTS.length} unlocked — every badge is a marker on the mountain.`}
@@ -203,6 +216,7 @@ function AchievementsPage() {
         </div>
       </Panel>
     </AccountShell>
+    </>
   );
 }
 

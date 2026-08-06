@@ -11,6 +11,7 @@ import { SummitLogo, SUMMIT_LOGO_SRC } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 const EnglishFormula = lazy(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
 const UpcomingExams = lazy(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
+const WeeklyReport = lazy(() => import("@/components/WeeklyReport").then((m) => ({ default: m.WeeklyReport })));
 const DailyPlan = lazy(() => import("@/components/DailyPlan").then((m) => ({ default: m.DailyPlan })));
 import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
@@ -274,8 +275,7 @@ function Home() {
           <span className="text-foreground">Subject Library</span>
         </h1>
         <p className="mt-5 max-w-xl mx-auto text-muted-foreground">
-          Every subject in one place. Drop in your past papers and keep track of
-          where you're at with a simple traffic light system.
+          Study smarter. Track progress. Reach the summit.
         </p>
 
         {/* Mountain progression — the core experience */}
@@ -373,6 +373,11 @@ function Home() {
       {/* Today's plan */}
       <Suspense fallback={<SectionFallback height={220} />}>
         <DailyPlan />
+      </Suspense>
+
+      {/* AI weekly report */}
+      <Suspense fallback={<SectionFallback height={240} />}>
+        <WeeklyReport />
       </Suspense>
 
 

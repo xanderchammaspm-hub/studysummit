@@ -121,3 +121,89 @@ export const studyKit = createServerFn({ method: "POST" })
     const text = await callAI(messages);
     return { text };
   });
+
+/* ------------------------- HSC question generator ------------------------ */
+
+const QuestionsInput = z.object({
+  topic: z.string().min(1).max(500),
+  subject: z.string().max(120).optional(),
+  focus: z.enum(["Mixed", "Easy", "Medium", "Hard", "HSC"]).default("Mixed"),
+});
+
+export const generateQuestions = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => QuestionsInput.parse(d))
+  .handler(async ({ data }) => {
+    const focusLine =
+      data.focus === "Mixed"
+        ? "Spread them evenly across the four difficulty bands (7 Easy, 7 Medium, 7 Hard, 7 HSC)."
+        : `Weight the set heavily toward ${data.focus} difficulty (at least 16 of the 28), and include a few of the other bands.`;
+
+    const system = `${SYSTEM_BASE}
+
+You are generating an exam question bank. Reply with RAW JSON ONLY — no prose, no markdown fences.
+Schema: {"questions":[{"n":1,"difficulty":"Easy"|"Medium"|"Hard"|"HSC","marks":number,"question":string,"rubric":string}]}
+Return EXACTLY 28 questions. "rubric" is a compact NESA-style marking guide (2-4 short lines, may use "•").`;
+
+    const user = `${data.subject ? `Subject: ${data.subject}\n` : ""}Topic: ${data.topic}\n${focusLine}`;
+
+    const raw = await callAI([
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ]);
+
+    const cleaned = raw.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(start >= 0 ? cleaned.slice(start, end + 1) : cleaned);
+    } catch {
+      throw new Error("Atlas returned an unreadable question set — try again.");
+    }
+    const shape = z.object({
+      questions: z
+        .array(
+          z.object({
+            n: z.number().optional(),
+            difficulty: z.enum(["Easy", "Medium", "Hard", "HSC"]).catch("Medium"),
+            marks: z.number().catch(2),
+            question: z.string(),
+            rubric: z.string().default(""),
+          }),
+        )
+        .min(1),
+    });
+    const out = shape.parse(parsed);
+    return { questions: out.questions.map((q, i) => ({ ...q, n: i + 1 })) };
+  });
+
+/* --------------------------- AI weekly report ---------------------------- */
+
+const WeeklyInput = z.object({
+  weekLabel: z.string().max(60),
+  summary: z.string().min(1).max(6000),
+});
+
+export const weeklyReport = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => WeeklyInput.parse(d))
+  .handler(async ({ data }) => {
+    const system = `${SYSTEM_BASE}
+
+Write a Sunday weekly study report for a Year 10 student aiming for a 97 ATAR (Class of 2028).
+Structure exactly:
+### 📈 [THE WEEK IN NUMBERS]
+a compact markdown table of the supplied metrics
+### 🎯 [WHAT WENT WELL]
+2-3 bullets
+### ⚠️ [WHAT SLIPPED]
+2-3 bullets
+### 🚀 [THREE MOVES FOR NEXT WEEK]
+exactly 3 numbered, specific, time-boxed actions
+Keep the whole report under 300 words.`;
+
+    const text = await callAI([
+      { role: "system", content: system },
+      { role: "user", content: `Week: ${data.weekLabel}\n\nData:\n${data.summary}` },
+    ]);
+    return { text };
+  });

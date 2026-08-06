@@ -29,6 +29,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { studyKit } from "@/lib/ai.functions";
+import { QuestionBankPanel } from "@/components/QuestionBank";
 import { SummitLogo } from "@/components/SummitLogo";
 
 /* --------------------------------- Chat --------------------------------- */
@@ -102,9 +103,12 @@ export function AICoach() {
                   Study coach
                 </span>
               </SheetTitle>
-              <TabsList className="h-8 grid-cols-2 grid">
+              <TabsList className="h-8 grid-cols-3 grid">
                 <TabsTrigger value="chat" className="text-xs px-3">
                   Chat
+                </TabsTrigger>
+                <TabsTrigger value="questions" className="text-xs px-3">
+                  Questions
                 </TabsTrigger>
                 <TabsTrigger value="kit" className="text-xs px-3">
                   Study Kit
@@ -114,6 +118,9 @@ export function AICoach() {
           </SheetHeader>
           <TabsContent value="chat" className="min-h-0 flex-1 overflow-hidden m-0">
             <ChatPanel />
+          </TabsContent>
+          <TabsContent value="questions" className="min-h-0 flex-1 overflow-hidden m-0">
+            <QuestionBankPanel />
           </TabsContent>
           <TabsContent value="kit" className="min-h-0 flex-1 overflow-hidden m-0">
             <StudyKitPanel />
