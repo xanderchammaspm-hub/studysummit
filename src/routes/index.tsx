@@ -11,6 +11,7 @@ import { SummitLogo, SUMMIT_LOGO_SRC } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
 const EnglishFormula = lazy(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
 const UpcomingExams = lazy(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
+const WeeklyReport = lazy(() => import("@/components/WeeklyReport").then((m) => ({ default: m.WeeklyReport })));
 const DailyPlan = lazy(() => import("@/components/DailyPlan").then((m) => ({ default: m.DailyPlan })));
 import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
@@ -372,6 +373,11 @@ function Home() {
       {/* Today's plan */}
       <Suspense fallback={<SectionFallback height={220} />}>
         <DailyPlan />
+      </Suspense>
+
+      {/* AI weekly report */}
+      <Suspense fallback={<SectionFallback height={240} />}>
+        <WeeklyReport />
       </Suspense>
 
 
