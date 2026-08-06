@@ -74,14 +74,18 @@ export function applyPrefs(p: Prefs = getPrefs()) {
 
 export function usePrefs() {
   const [, tick] = useState(0);
+  // Server render (and the first client render) must agree, so stored prefs are
+  // only applied after hydration.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     const l = () => tick((n) => n + 1);
     listeners.add(l);
     applyPrefs();
+    setHydrated(true);
     return () => {
       listeners.delete(l);
     };
   }, []);
   const update = useCallback((patch: Partial<Prefs>) => setPrefs(patch), []);
-  return { prefs: getPrefs(), update };
+  return { prefs: hydrated ? getPrefs() : DEFAULT_PREFS, update };
 }
