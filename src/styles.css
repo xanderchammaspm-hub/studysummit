@@ -440,7 +440,29 @@ button:disabled,
 .sa-mark:hover .sa-mark-hl-glow { animation: saGlowPulse 1.6s ease-in-out infinite; }
 .sa-mark:hover .sa-mark-lens { transform: scale(1.02); }
 
+/* Rank nameplate sheen — earned at Summit Climber and above */
+@keyframes nameplateSheen {
+  0% { transform: translateX(-140%); }
+  100% { transform: translateX(240%); }
+}
+.nameplate-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.16) 50%,
+    transparent 100%
+  );
+  animation: nameplateSheen 3.4s ease-in-out infinite;
+}
+
 /* ---------- Aesthetic polish pass ---------- */
+
 
 /* Glass surface used by cards, panels and tiles */
 @utility glass-panel {

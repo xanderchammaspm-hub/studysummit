@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { Nameplate } from "@/components/Nameplate";
+import { rankStyle } from "@/lib/progression";
 import { getSyncStatus, subscribeSyncStatus } from "@/lib/cloudSync";
 import {
   DropdownMenu,
@@ -81,21 +83,31 @@ export function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger ref={closeRef} asChild>
         <button className="flex items-center gap-2 rounded-full purple-outline bg-surface/60 py-1 pl-1 pr-3 transition-transform hover:scale-[1.03]">
-          <Avatar url={avatarUrl} name={name} />
-          <span className="hidden sm:flex flex-col items-start leading-none">
-            <span className="text-sm font-medium">{name}</span>
-            <span className="text-[10px] text-muted-foreground">
-              Lv {progression.level} · {progression.rank.name}
-            </span>
+          <Avatar url={avatarUrl} name={name} rankName={progression.rank.name} />
+          <span className="hidden sm:flex flex-col items-start gap-1 leading-none">
+            <Nameplate
+              name={name}
+              rankName={progression.rank.name}
+              level={progression.level}
+              emoji={progression.rank.emoji}
+              size="sm"
+            />
           </span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60 border-border bg-card/95 backdrop-blur-xl">
         <DropdownMenuLabel className="space-y-2">
           <div className="flex items-center gap-2">
-            <Avatar url={avatarUrl} name={name} />
+            <Avatar url={avatarUrl} name={name} rankName={progression.rank.name} />
             <div className="min-w-0">
-              <div className="truncate text-sm font-medium">{name}</div>
+              <div className="truncate">
+                <Nameplate
+                  name={name}
+                  rankName={progression.rank.name}
+                  emoji={progression.rank.emoji}
+                  size="sm"
+                />
+              </div>
               <div className="truncate text-[11px] text-muted-foreground">{user.email}</div>
             </div>
           </div>
@@ -148,20 +160,33 @@ export function AccountMenu() {
   );
 }
 
-export function Avatar({ url, name, size = 32 }: { url: string | null; name: string; size?: number }) {
+export function Avatar({
+  url,
+  name,
+  size = 32,
+  rankName,
+}: {
+  url: string | null;
+  name: string;
+  size?: number;
+  rankName?: string;
+}) {
+  const ring = rankName
+    ? { boxShadow: `0 0 0 2px ${rankStyle(rankName).border}, ${rankStyle(rankName).glow}` }
+    : undefined;
   return url ? (
     <img
       src={url}
       alt={`${name} profile picture`}
       width={size}
       height={size}
-      className="rounded-full object-cover ring-1 ring-primary/60"
-      style={{ width: size, height: size }}
+      className="rounded-full object-cover"
+      style={{ width: size, height: size, ...ring }}
     />
   ) : (
     <span
-      className="grid place-items-center rounded-full bg-gradient-to-br from-primary/70 to-yellow/60 text-background font-semibold ring-1 ring-primary/60"
-      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      className="grid place-items-center rounded-full bg-gradient-to-br from-primary/70 to-yellow/60 text-background font-semibold"
+      style={{ width: size, height: size, fontSize: size * 0.42, ...ring }}
     >
       {name.slice(0, 1).toUpperCase()}
     </span>

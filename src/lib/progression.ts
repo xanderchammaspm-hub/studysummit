@@ -15,6 +15,90 @@ export const RANKS: Rank[] = [
   { name: "Legend", emoji: "🌟", minLevel: 90 },
 ];
 
+/**
+ * Cosmetic reward tied to rank: the climber's name gradient, nameplate border
+ * and surrounding glow all upgrade as levels are earned.
+ */
+export type RankStyle = {
+  /** CSS gradient used for the name text. */
+  nameGradient: string;
+  /** Border colour of the nameplate. */
+  border: string;
+  /** Outer glow / shadow of the nameplate. */
+  glow: string;
+  /** Soft interior fill of the nameplate. */
+  fill: string;
+  /** Whether the nameplate gets a moving sheen (top ranks only). */
+  animated: boolean;
+};
+
+const RANK_STYLES: Record<string, RankStyle> = {
+  "Base Camp": {
+    nameGradient: "linear-gradient(100deg, oklch(0.92 0.02 285), oklch(0.8 0.03 285))",
+    border: "oklch(0.6 0.05 290 / 0.45)",
+    glow: "0 10px 30px -22px oklch(0.6 0.08 290 / 0.7)",
+    fill: "linear-gradient(140deg, oklch(0.26 0.03 290 / 0.6), oklch(0.2 0.02 288 / 0.5))",
+    animated: false,
+  },
+  "Camp I": {
+    nameGradient: "linear-gradient(100deg, oklch(0.93 0.05 250), oklch(0.78 0.12 245))",
+    border: "oklch(0.7 0.13 245 / 0.6)",
+    glow: "0 12px 34px -22px oklch(0.7 0.16 245 / 0.8)",
+    fill: "linear-gradient(140deg, oklch(0.28 0.06 250 / 0.6), oklch(0.2 0.03 248 / 0.5))",
+    animated: false,
+  },
+  "Camp II": {
+    nameGradient: "linear-gradient(100deg, oklch(0.93 0.07 185), oklch(0.78 0.13 190))",
+    border: "oklch(0.72 0.13 190 / 0.6)",
+    glow: "0 12px 34px -20px oklch(0.72 0.16 190 / 0.8)",
+    fill: "linear-gradient(140deg, oklch(0.27 0.06 195 / 0.6), oklch(0.2 0.03 195 / 0.5))",
+    animated: false,
+  },
+  "Camp III": {
+    nameGradient: "linear-gradient(100deg, oklch(0.94 0.08 150), oklch(0.76 0.16 150))",
+    border: "oklch(0.72 0.16 152 / 0.62)",
+    glow: "0 14px 36px -20px oklch(0.72 0.18 152 / 0.85)",
+    fill: "linear-gradient(140deg, oklch(0.27 0.07 155 / 0.6), oklch(0.2 0.03 152 / 0.5))",
+    animated: false,
+  },
+  "Ridge Walker": {
+    nameGradient: "linear-gradient(100deg, oklch(0.95 0.06 300), oklch(0.76 0.21 300))",
+    border: "oklch(0.72 0.2 300 / 0.65)",
+    glow: "0 16px 40px -20px oklch(0.7 0.24 302 / 0.9)",
+    fill: "linear-gradient(140deg, oklch(0.28 0.09 297 / 0.62), oklch(0.2 0.05 292 / 0.5))",
+    animated: false,
+  },
+  "Summit Climber": {
+    nameGradient:
+      "linear-gradient(100deg, oklch(0.95 0.06 300) 0%, oklch(0.78 0.21 300) 50%, oklch(0.9 0.13 82) 100%)",
+    border: "oklch(0.8 0.16 300 / 0.75)",
+    glow: "0 18px 46px -20px oklch(0.75 0.24 303 / 0.95)",
+    fill: "linear-gradient(140deg, oklch(0.3 0.1 298 / 0.65), oklch(0.21 0.05 292 / 0.5))",
+    animated: true,
+  },
+  "Peak Conqueror": {
+    nameGradient:
+      "linear-gradient(100deg, oklch(0.96 0.06 92) 0%, oklch(0.88 0.14 82) 45%, oklch(0.82 0.18 55) 100%)",
+    border: "oklch(0.86 0.13 84 / 0.8)",
+    glow: "0 18px 48px -18px oklch(0.86 0.14 82 / 0.85)",
+    fill: "linear-gradient(140deg, oklch(0.3 0.06 90 / 0.55), oklch(0.21 0.04 300 / 0.5))",
+    animated: true,
+  },
+  Legend: {
+    nameGradient:
+      "linear-gradient(100deg, oklch(0.97 0.05 300) 0%, oklch(0.85 0.18 330) 30%, oklch(0.9 0.14 82) 60%, oklch(0.82 0.2 300) 100%)",
+    border: "oklch(0.9 0.14 88 / 0.9)",
+    glow: "0 20px 55px -16px oklch(0.8 0.22 320 / 0.95)",
+    fill: "linear-gradient(140deg, oklch(0.32 0.1 310 / 0.6), oklch(0.22 0.05 292 / 0.5))",
+    animated: true,
+  },
+};
+
+export function rankStyle(rankName: string): RankStyle {
+  return RANK_STYLES[rankName] ?? RANK_STYLES["Base Camp"];
+}
+
+
 /** XP required to *reach* a level. Gentle quadratic curve. */
 export function xpForLevel(level: number) {
   if (level <= 1) return 0;
