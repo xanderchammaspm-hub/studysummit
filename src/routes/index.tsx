@@ -1,17 +1,17 @@
 import { normalizeUrl } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
-import { AICoach } from "@/components/AICoach";
-import { MountainProgress } from "@/components/MountainProgress";
-import { StudyCalendar } from "@/components/StudyCalendar";
+const AICoach = lazy(() => import("@/components/AICoach").then((m) => ({ default: m.AICoach })));
+const MountainProgress = lazy(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
+const StudyCalendar = lazy(() => import("@/components/StudyCalendar").then((m) => ({ default: m.StudyCalendar })));
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
-import { EnglishFormula } from "@/components/EnglishFormula";
-import { UpcomingExams } from "@/components/UpcomingExams";
-import { DailyPlan } from "@/components/DailyPlan";
+const EnglishFormula = lazy(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
+const UpcomingExams = lazy(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
+const DailyPlan = lazy(() => import("@/components/DailyPlan").then((m) => ({ default: m.DailyPlan })));
 import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
 
@@ -44,6 +44,16 @@ export const Route = createFileRoute("/")({
   }),
   component: Home,
 });
+
+function SectionFallback({ height = 240 }: { height?: number }) {
+  return (
+    <div
+      aria-hidden
+      className="mx-auto max-w-6xl px-6"
+      style={{ minHeight: height }}
+    />
+  );
+}
 
 const YEARS: YearKey[] = ["Year 11", "Year 12"];
 
@@ -254,7 +264,9 @@ function Home() {
 
         {/* Mountain progression — the core experience */}
         <div className="mt-10">
-          <MountainProgress />
+          <Suspense fallback={<SectionFallback height={420} />}>
+            <MountainProgress />
+          </Suspense>
         </div>
 
         {/* Live stats + progress */}
@@ -333,13 +345,19 @@ function Home() {
       )}
 
       {/* Study calendar */}
-      <StudyCalendar />
+      <Suspense fallback={<SectionFallback height={360} />}>
+        <StudyCalendar />
+      </Suspense>
 
       {/* Upcoming exams countdown */}
-      <UpcomingExams />
+      <Suspense fallback={<SectionFallback height={320} />}>
+        <UpcomingExams />
+      </Suspense>
 
       {/* Today's plan */}
-      <DailyPlan />
+      <Suspense fallback={<SectionFallback height={220} />}>
+        <DailyPlan />
+      </Suspense>
 
 
 
@@ -475,7 +493,9 @@ function Home() {
             </div>
 
             {/* English Formula */}
-            <EnglishFormula />
+            <Suspense fallback={<SectionFallback height={520} />}>
+              <EnglishFormula />
+            </Suspense>
           </>
         )}
       </main>
@@ -487,7 +507,9 @@ function Home() {
           <span>Summit · Built for focused revision</span>
         </div>
       </footer>
-      <AICoach />
+      <Suspense fallback={null}>
+        <AICoach />
+      </Suspense>
     </div>
   );
 }
