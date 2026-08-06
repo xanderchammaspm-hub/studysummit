@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -87,10 +87,16 @@ export function useProfile() {
   );
 
   // Daily streak — counted once per calendar day on first visit.
+  const streakGuard = useRef<string | null>(null);
   useEffect(() => {
     if (!userId || !profile) return;
     const day = today();
     if (profile.last_active_date === day) return;
+    // The profile query is refetched asynchronously, so guard against the effect
+    // re-firing (and re-awarding XP) before the fresh row arrives.
+    const guardKey = `${userId}:${day}`;
+    if (streakGuard.current === guardKey) return;
+    streakGuard.current = guardKey;
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     const streak = profile.last_active_date === yesterday ? profile.streak_days + 1 : 1;
     void (async () => {
