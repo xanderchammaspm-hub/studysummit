@@ -103,15 +103,21 @@ export function useProfile() {
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     const streak = profile.last_active_date === yesterday ? profile.streak_days + 1 : 1;
     void (async () => {
-      await supabase
+      // Claim the day atomically: only the write that actually flips
+      // last_active_date returns a row, and only that one awards XP.
+      const { data: claimed } = await supabase
         .from("profiles")
         .update({ last_active_date: day, streak_days: streak })
-        .eq("id", userId);
+        .eq("id", userId)
+        .neq("last_active_date", day)
+        .select("id");
+      if (!claimed?.length) return;
       await supabase
         .from("xp_events")
         .insert({ user_id: userId, kind: "dailyStreak", amount: XP_RULES.dailyStreak, meta: { streak } });
       await qc.invalidateQueries({ queryKey: ["profile", userId] });
     })();
+
   }, [userId, profile, qc]);
 
   const progression = useMemo(() => progressionFromXp(profile?.xp ?? 0), [profile?.xp]);
