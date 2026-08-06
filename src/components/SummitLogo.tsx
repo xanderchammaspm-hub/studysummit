@@ -25,8 +25,7 @@ export function SummitLogo({
       height={size}
       loading={priority ? "eager" : "lazy"}
       decoding={priority ? "sync" : "async"}
-      // @ts-expect-error -- fetchpriority is a valid HTML attribute
-      fetchpriority={priority ? "high" : undefined}
+      fetchPriority={priority ? "high" : undefined}
       className={`shrink-0 select-none ${glow ? "summit-logo-glow" : ""}`}
       style={{ width: size, height: size }}
       draggable={false}
