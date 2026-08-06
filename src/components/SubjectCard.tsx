@@ -501,7 +501,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 onReorder={(topics) => update({ topics })}
                 empty={
                   <p className="text-xs text-muted-foreground italic px-1">
-                    No topics yet. Add one, then set red / amber / green.
+                    No topics yet. Add one, then set red / yellow / green.
                   </p>
                 }
                 renderItem={(t) => (
@@ -711,7 +711,7 @@ function QuickChips({
           <button
             key={it.key}
             onClick={() => onSet(active ? "none" : it.key)}
-            title={active ? "Clear" : `Set ${it.key}`}
+            title={active ? "Clear" : `Set ${it.key === "amber" ? "yellow" : it.key}`}
             className="h-5 w-5 rounded-full text-[10px] font-semibold flex items-center justify-center border transition-colors"
             style={{
               borderColor: active ? STATUS_COLOR[it.key] : "var(--color-border)",
