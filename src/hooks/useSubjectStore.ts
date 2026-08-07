@@ -198,6 +198,7 @@ export function useSubject(id: string) {
   const raw = store[id] ?? defaultState;
   const state: SubjectState = {
     emoji: raw.emoji ?? "📘",
+    color: raw.color,
     papers: raw.papers ?? [],
     topics: raw.topics ?? [],
     assessments: raw.assessments ?? [],
