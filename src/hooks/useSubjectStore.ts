@@ -237,6 +237,7 @@ export function useSubjectTerm(id: string, term: TermKey) {
           typeof patch === "function" ? patch(curTerm) : { ...curTerm, ...patch };
         const next: SubjectState = {
           emoji: cur.emoji ?? "📘",
+          color: cur.color,
           papers: [],
           topics: [],
           assessments: [],
