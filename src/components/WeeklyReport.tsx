@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Loader2, RefreshCw, CalendarCheck } from "lucide-react";
+import { Loader2, RefreshCw, CalendarCheck, Trash2, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { weeklyReport } from "@/lib/ai.functions";
