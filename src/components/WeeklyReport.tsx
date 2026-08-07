@@ -27,16 +27,50 @@ export function WeeklyReport() {
   const stats = useSummitStats();
   const [cached, setCached] = useState<Cached | null>(null);
   const [busy, setBusy] = useState(false);
+  const [hidden, setHiddenState] = useState(false);
   const week = weekId();
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) setCached(JSON.parse(raw) as Cached);
+      setHiddenState(localStorage.getItem(HIDE_KEY) === "1");
     } catch {
       /* ignore */
     }
   }, []);
+
+  const setHidden = (v: boolean) => {
+    setHiddenState(v);
+    try {
+      localStorage.setItem(HIDE_KEY, v ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const removeReport = () => {
+    setCached(null);
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* ignore */
+    }
+    toast.success("Weekly report removed");
+  };
+
+  const weekStats = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - 6);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    const inWeek = logs.filter((l) => l.date >= iso(start) && l.date <= iso(now));
+    return {
+      hours: inWeek.reduce((s, l) => s + l.hours, 0),
+      days: new Set(inWeek.map((l) => l.date)).size,
+    };
+  }, [logs]);
+
 
   const summary = useMemo(() => {
     const now = new Date();
