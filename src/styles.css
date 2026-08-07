@@ -708,3 +708,70 @@ select:hover:not(:disabled) {
   60%  { transform: scale(1.25) rotate(6deg); }
   100% { transform: scale(1) rotate(0deg); }
 }
+
+/* ---------- Per-subject glossy accent cards ---------- */
+.subject-card {
+  --acc: var(--color-primary);
+  position: relative;
+  background:
+    linear-gradient(160deg, color-mix(in oklab, var(--acc) 13%, transparent) 0%, transparent 42%),
+    linear-gradient(160deg, oklch(0.24 0.045 292 / 0.6) 0%, oklch(0.17 0.032 288 / 0.66) 100%);
+  backdrop-filter: blur(18px) saturate(1.15);
+  border: 1px solid color-mix(in oklab, var(--acc) 34%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.07),
+    0 22px 60px -38px color-mix(in oklab, var(--acc) 75%, transparent);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms ease,
+    border-color 320ms ease;
+}
+.subject-card:hover {
+  border-color: color-mix(in oklab, var(--acc) 58%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.1),
+    0 28px 74px -34px color-mix(in oklab, var(--acc) 80%, transparent);
+}
+.subject-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--acc) 85%, transparent) 35%,
+    color-mix(in oklab, var(--acc) 45%, white 25%) 60%,
+    transparent 100%
+  );
+  opacity: 0.85;
+  pointer-events: none;
+}
+.subject-card-sheen {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--acc) 9%, transparent) 0%, transparent 100%);
+}
+
+/* Range inputs used by the subject colour picker */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid oklch(0.6 0.18 298 / 0.28);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+  background: oklch(0.98 0.01 285);
+  border: 2px solid oklch(0.2 0.03 285);
+  box-shadow: 0 0 10px -2px oklch(0.75 0.2 300 / 0.8);
+}
+input[type="range"]::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 999px;
+  background: oklch(0.98 0.01 285);
+  border: 2px solid oklch(0.2 0.03 285);
+}
