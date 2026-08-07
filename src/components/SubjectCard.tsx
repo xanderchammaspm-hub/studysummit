@@ -130,14 +130,22 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
     }
   };
 
+  const accent = subject.color || DEFAULT_SUBJECT_COLOR;
+
   return (
     <div
-      className="purple-outline lift-hover rounded-xl bg-card/60 backdrop-blur-sm overflow-hidden fade-in-up"
-      style={{ animationDelay: `${index * 60}ms` }}
+      className="subject-card lift-hover rounded-xl overflow-hidden fade-in-up"
+      style={
+        {
+          animationDelay: `${index * 60}ms`,
+          ["--acc" as string]: accent,
+        } as React.CSSProperties
+      }
     >
-      <div className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">
+      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="relative">
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
