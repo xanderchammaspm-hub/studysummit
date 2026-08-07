@@ -24,6 +24,7 @@ export type TermState = {
 
 export type SubjectState = {
   emoji: string;
+  color?: string;
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
