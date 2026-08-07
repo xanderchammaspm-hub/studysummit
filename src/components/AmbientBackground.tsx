@@ -8,25 +8,25 @@ import { useMemo } from "react";
 export function AmbientBackground() {
   const motes = useMemo(
     () =>
-      Array.from({ length: 26 }, (_, i) => ({
+      Array.from({ length: 18 }, (_, i) => ({
         id: i,
         left: (i * 37.5) % 100,
         top: (i * 61.7) % 100,
-        size: 1.5 + ((i * 7) % 5) * 0.7,
-        dur: 26 + ((i * 13) % 26),
+        size: 1.2 + ((i * 7) % 5) * 0.5,
+        dur: 40 + ((i * 13) % 34),
         delay: -((i * 5) % 30),
-        hue: i % 3 === 0 ? "oklch(0.9 0.14 85 / 0.55)" : "oklch(0.78 0.2 300 / 0.55)",
+        hue: i % 3 === 0 ? "oklch(0.9 0.14 85 / 0.32)" : "oklch(0.78 0.2 300 / 0.34)",
       })),
     [],
   );
 
   const stars = useMemo(
     () =>
-      Array.from({ length: 70 }, (_, i) => ({
+      Array.from({ length: 58 }, (_, i) => ({
         id: i,
         left: (i * 13.37) % 100,
         top: (i * 29.7) % 100,
-        size: i % 9 === 0 ? 2 : 1,
+        size: i % 9 === 0 ? 1.6 : 1,
         delay: -((i * 3) % 12),
       })),
     [],
@@ -38,6 +38,8 @@ export function AmbientBackground() {
       <div className="nebula nebula-a" />
       <div className="nebula nebula-b" />
       <div className="nebula nebula-c" />
+      <div className="nebula nebula-d" />
+
 
       {/* Star field */}
       <div className="absolute inset-0">
