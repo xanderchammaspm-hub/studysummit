@@ -7,6 +7,7 @@ import { weeklyReport } from "@/lib/ai.functions";
 import { useStudyLogs, useSummitStats } from "@/hooks/useSummitStats";
 
 const KEY = "summit-weekly-report-v1";
+const HIDE_KEY = "summit-weekly-report-hidden-v1";
 
 /** Monday-anchored ISO-ish week id, e.g. 2026-W32. */
 function weekId(d = new Date()) {
