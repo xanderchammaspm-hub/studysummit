@@ -200,6 +200,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               </>
             )}
           </div>
+          <SubjectColorPicker value={accent} onChange={(hex) => updateSubject({ color: hex })} />
           <div className="min-w-0 flex-1">
             <div className="text-xs uppercase tracking-widest text-primary/80">
               {year} · Subject {index + 1}
