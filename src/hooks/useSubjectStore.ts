@@ -24,6 +24,7 @@ export type TermState = {
 
 export type SubjectState = {
   emoji: string;
+  color?: string;
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
@@ -197,6 +198,7 @@ export function useSubject(id: string) {
   const raw = store[id] ?? defaultState;
   const state: SubjectState = {
     emoji: raw.emoji ?? "📘",
+    color: raw.color,
     papers: raw.papers ?? [],
     topics: raw.topics ?? [],
     assessments: raw.assessments ?? [],
@@ -235,6 +237,7 @@ export function useSubjectTerm(id: string, term: TermKey) {
           typeof patch === "function" ? patch(curTerm) : { ...curTerm, ...patch };
         const next: SubjectState = {
           emoji: cur.emoji ?? "📘",
+          color: cur.color,
           papers: [],
           topics: [],
           assessments: [],
