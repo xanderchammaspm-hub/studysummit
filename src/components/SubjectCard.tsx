@@ -31,6 +31,7 @@ import {
 } from "@/hooks/useSubjectStore";
 
 import { DraggableList } from "@/components/DraggableList";
+import { SubjectColorPicker, DEFAULT_SUBJECT_COLOR } from "@/components/SubjectColorPicker";
 import { useProfile } from "@/hooks/useProfile";
 
 type Props = {
