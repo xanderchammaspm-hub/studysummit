@@ -27,6 +27,9 @@ export function MountainProgress() {
   } = useMountainProgress();
   const prevCamp = useRef<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
