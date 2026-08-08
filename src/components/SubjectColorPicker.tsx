@@ -91,9 +91,10 @@ export function SubjectColorPicker({ value, onChange }: Props) {
             tabIndex={-1}
             aria-label="Close colour picker"
           />
-          <div className="absolute right-0 z-50 mt-2 w-72 rounded-xl border border-border bg-popover/95 p-3 shadow-2xl backdrop-blur-xl">
+          <div className="absolute left-0 z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-xl">
             <div className="section-label mb-2">Subject colour</div>
-            <div className="grid grid-cols-10 gap-1.5">
+            <div className="grid grid-cols-10 gap-2">
+
               {SUBJECT_PRESETS.map((p) => (
                 <button
                   key={p.hex}
