@@ -108,14 +108,14 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -2;
     opacity: var(--gradient-intensity, 1);
     transition: opacity 400ms ease;
     background:
-      radial-gradient(1500px 950px at 8% -18%, oklch(0.42 0.18 295 / 0.24), transparent 58%),
-      radial-gradient(1200px 850px at 100% 2%, oklch(0.36 0.19 320 / 0.19), transparent 62%),
-      radial-gradient(950px 750px at 50% 118%, oklch(0.4 0.16 275 / 0.19), transparent 62%),
-      radial-gradient(750px 520px at 90% 85%, oklch(0.7 0.11 85 / 0.045), transparent 60%);
+      radial-gradient(1500px 950px at 8% -18%, oklch(0.42 0.18 295 / 0.2), transparent 58%),
+      radial-gradient(1200px 850px at 100% 2%, oklch(0.36 0.19 320 / 0.16), transparent 62%),
+      radial-gradient(950px 750px at 50% 118%, oklch(0.4 0.16 275 / 0.16), transparent 62%),
+      radial-gradient(750px 520px at 90% 85%, oklch(0.7 0.11 85 / 0.04), transparent 60%);
   }
 
   /* Soft vignette so content sits forward of the field */
@@ -124,9 +124,10 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
-    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, oklch(0.08 0.02 285 / 0.55) 100%);
+    z-index: -1;
+    background: radial-gradient(125% 95% at 50% 40%, transparent 55%, oklch(0.08 0.02 285 / 0.42) 100%);
   }
+
 
   h1,
   h2,
