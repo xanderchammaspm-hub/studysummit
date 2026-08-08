@@ -292,7 +292,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-border/60 px-5 py-6 space-y-6">
+          <div className="border-t border-border/60 px-6 py-7 space-y-7">
+
             {/* Term switcher */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
