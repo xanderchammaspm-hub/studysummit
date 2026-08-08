@@ -134,7 +134,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 
   return (
     <div
-      className="subject-card lift-hover rounded-xl overflow-hidden fade-in-up"
+      className="subject-card lift-hover rounded-xl fade-in-up"
       style={
         {
           animationDelay: `${index * 60}ms`,
@@ -142,7 +142,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         } as React.CSSProperties
       }
     >
-      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">
+      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 rounded-t-xl px-6 py-5 text-left group">
+
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="relative">
 
@@ -291,7 +292,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-border/60 px-5 py-6 space-y-6">
+          <div className="border-t border-border/60 px-6 py-7 space-y-7">
+
             {/* Term switcher */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
@@ -399,7 +401,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               icon={<BellRing className="h-4 w-4" />}
               title="Assessment Notifications"
             >
-              <div className="grid gap-2 mb-3 sm:grid-cols-[1fr_1fr_auto_auto]">
+              <div className="grid gap-2 mb-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto]">
                 <input
                   value={aTitle}
                   onChange={(e) => setATitle(e.target.value)}

@@ -256,15 +256,19 @@ export function useSubjectTerm(id: string, term: TermKey) {
 
 export function useSubjects() {
   const [, setTick] = useState(0);
+  // First render must match the server output, so hold the defaults until mount.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
+    setHydrated(true);
     const l = () => setTick((n) => n + 1);
     subjectListeners.add(l);
     return () => {
       subjectListeners.delete(l);
     };
   }, []);
-  return getSubjectsStore();
+  return hydrated ? getSubjectsStore() : defaultSubjects;
 }
+
 
 export function addSubject(year: YearKey, name: string) {
   const id = `${year === "Year 11" ? "y11" : "y12"}-${uid()}`;
