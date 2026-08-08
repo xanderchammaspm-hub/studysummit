@@ -620,7 +620,7 @@ select:hover:not(:disabled) {
 .nebula {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(90px);
   will-change: transform, opacity;
 }
 .nebula-a {
@@ -628,7 +628,7 @@ select:hover:not(:disabled) {
   left: -16%;
   width: 88vw;
   height: 88vw;
-  background: radial-gradient(circle, oklch(0.58 0.26 300 / 0.5) 0%, transparent 68%);
+  background: radial-gradient(circle, oklch(0.62 0.28 300 / 0.85) 0%, transparent 68%);
   animation: nebulaDrift 96s ease-in-out infinite alternate;
 }
 .nebula-b {
@@ -636,7 +636,7 @@ select:hover:not(:disabled) {
   right: -22%;
   width: 78vw;
   height: 78vw;
-  background: radial-gradient(circle, oklch(0.52 0.26 328 / 0.42) 0%, transparent 68%);
+  background: radial-gradient(circle, oklch(0.56 0.28 328 / 0.7) 0%, transparent 68%);
   animation: nebulaDrift 122s ease-in-out -20s infinite alternate-reverse;
 }
 .nebula-c {
@@ -644,7 +644,7 @@ select:hover:not(:disabled) {
   left: 12%;
   width: 92vw;
   height: 70vw;
-  background: radial-gradient(circle, oklch(0.66 0.14 84 / 0.14) 0%, transparent 66%);
+  background: radial-gradient(circle, oklch(0.7 0.15 84 / 0.22) 0%, transparent 66%);
   animation: nebulaDrift 148s ease-in-out -46s infinite alternate;
 }
 .nebula-d {
@@ -652,7 +652,7 @@ select:hover:not(:disabled) {
   left: 28%;
   width: 66vw;
   height: 56vw;
-  background: radial-gradient(circle, oklch(0.56 0.24 268 / 0.34) 0%, transparent 68%);
+  background: radial-gradient(circle, oklch(0.6 0.26 268 / 0.55) 0%, transparent 68%);
   animation: nebulaDrift 168s ease-in-out -70s infinite alternate;
 }
 .science-hud {
