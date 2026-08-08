@@ -93,10 +93,13 @@ export function MountainProgress() {
             {progress}%
           </div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-            {nextCamp
-              ? `${CAMP_LABEL[nextCamp.key]} in ${Math.max(0, nextDays ?? 0)}d`
-              : "Summited"}
+            {!mounted
+              ? "\u00A0"
+              : nextCamp
+                ? `${CAMP_LABEL[nextCamp.key]} in ${Math.max(0, nextDays ?? 0)}d`
+                : "Summited"}
           </div>
+
           <button
             onClick={() => setEditing((v) => !v)}
             className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-full purple-outline bg-surface/60 px-3 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
