@@ -134,7 +134,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 
   return (
     <div
-      className="subject-card lift-hover rounded-xl overflow-hidden fade-in-up"
+      className="subject-card lift-hover rounded-xl fade-in-up"
       style={
         {
           animationDelay: `${index * 60}ms`,
@@ -142,7 +142,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         } as React.CSSProperties
       }
     >
-      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 px-5 py-4 text-left group">
+      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 rounded-t-xl px-6 py-5 text-left group">
+
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="relative">
 
