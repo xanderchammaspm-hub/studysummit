@@ -105,7 +105,11 @@ export function SubjectColorPicker({ value, onChange }: Props) {
             tabIndex={-1}
             aria-label="Close colour picker"
           />
-          <div className="absolute left-0 z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-xl">
+          <div
+            className={`absolute z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-xl animate-scale-in ${
+              alignRight ? "right-0" : "left-0"
+            }`}
+          >
             <div className="section-label mb-2">Subject colour</div>
             <div className="grid grid-cols-10 gap-2">
 
