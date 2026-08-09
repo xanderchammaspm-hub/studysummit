@@ -70,12 +70,20 @@ export function setPrefs(patch: Partial<Prefs>) {
   listeners.forEach((l) => l());
 }
 
-/** Paints accent + density onto the document root. */
+/** Paints accent, density and galaxy background prefs onto the document root. */
 export function applyPrefs(p: Prefs = getPrefs()) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.style.setProperty("--primary", ACCENTS[p.accent]?.primary ?? ACCENTS.purple.primary);
   root.classList.toggle("density-compact", p.density === "compact");
+
+  const intensity = Math.min(100, Math.max(0, p.bgIntensity ?? 70));
+  const speed = Math.min(200, Math.max(0, p.bgSpeed ?? 100));
+  root.style.setProperty("--nebula-opacity", String(intensity / 70));
+  // 0 speed = frozen; otherwise scale animation durations inversely.
+  root.style.setProperty("--nebula-speed", String(speed === 0 ? 0 : speed / 100));
+  root.classList.toggle("bg-still", speed === 0);
+  root.classList.toggle("bg-off", intensity === 0);
 }
 
 export function usePrefs() {
