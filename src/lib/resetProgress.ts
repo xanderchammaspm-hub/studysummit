@@ -2,9 +2,14 @@
  * One-time local progress reset (study hours / streak caches).
  * Runs once per browser, then never again.
  */
-const FLAG = "summit-progress-reset-v2";
+const FLAG = "summit-progress-reset-v3";
 
-const KEYS = ["summit-study-logs-v1", "summit-streak-v1", "summit-xp-cache-v1"];
+const KEYS = [
+  "summit-study-logs-v1",
+  "summit-streak-v1",
+  "summit-xp-cache-v1",
+  "summit-level-cache-v1",
+];
 
 export function runProgressResetOnce() {
   if (typeof window === "undefined") return;

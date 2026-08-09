@@ -618,53 +618,70 @@ select:hover:not(:disabled) {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
+  contain: strict;
+  /* user-tunable galaxy: intensity + motion speed */
+  opacity: clamp(0, var(--nebula-opacity, 1), 1.6);
+  transition: opacity 400ms ease;
+}
+.bg-off .ambient-root {
+  display: none;
+}
+/* Freeze everything when the tab is hidden or motion speed is 0 */
+.bg-still .ambient-root *,
+.bg-paused .ambient-root * {
+  animation-play-state: paused !important;
 }
 .nebula {
   position: absolute;
   border-radius: 50%;
   filter: blur(90px);
-  will-change: transform, opacity;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .nebula-a {
   top: -24%;
   left: -16%;
   width: 88vw;
   height: 88vw;
+  opacity: 0.85;
   background: radial-gradient(circle, oklch(0.62 0.28 300 / 0.85) 0%, transparent 68%);
-  animation: nebulaDrift 96s ease-in-out infinite alternate;
+  animation: nebulaDrift calc(96s / var(--nebula-speed, 1)) ease-in-out infinite alternate;
 }
 .nebula-b {
   top: 2%;
   right: -22%;
   width: 78vw;
   height: 78vw;
+  opacity: 0.8;
   background: radial-gradient(circle, oklch(0.56 0.28 328 / 0.7) 0%, transparent 68%);
-  animation: nebulaDrift 122s ease-in-out -20s infinite alternate-reverse;
+  animation: nebulaDrift calc(122s / var(--nebula-speed, 1)) ease-in-out -20s infinite alternate-reverse;
 }
 .nebula-c {
   bottom: -30%;
   left: 12%;
   width: 92vw;
   height: 70vw;
+  opacity: 0.8;
   background: radial-gradient(circle, oklch(0.7 0.15 84 / 0.22) 0%, transparent 66%);
-  animation: nebulaDrift 148s ease-in-out -46s infinite alternate;
+  animation: nebulaDrift calc(148s / var(--nebula-speed, 1)) ease-in-out -46s infinite alternate;
 }
 .nebula-d {
   top: 30%;
   left: 28%;
   width: 66vw;
   height: 56vw;
+  opacity: 0.75;
   background: radial-gradient(circle, oklch(0.6 0.26 268 / 0.55) 0%, transparent 68%);
-  animation: nebulaDrift 168s ease-in-out -70s infinite alternate;
+  animation: nebulaDrift calc(168s / var(--nebula-speed, 1)) ease-in-out -70s infinite alternate;
 }
 .science-hud {
   color: oklch(0.85 0.1 300);
   opacity: 0.03;
 }
 @keyframes nebulaDrift {
-  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.75; }
-  50%  { opacity: 1; }
-  to   { transform: translate3d(4%, -3.5%, 0) scale(1.12); opacity: 0.85; }
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(4%, -3.5%, 0) scale(1.12); }
 }
 
 @keyframes moteDrift {
@@ -673,6 +690,7 @@ select:hover:not(:disabled) {
   88%  { opacity: 0.4; }
   100% { transform: translate3d(48px, -150px, 0); opacity: 0; }
 }
+
 
 
 /* ---------- Achievement celebration ---------- */
