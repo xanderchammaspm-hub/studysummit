@@ -9,6 +9,10 @@ export type Prefs = {
   reminderDays: number[];
   accent: AccentKey;
   density: Density;
+  /** Galaxy background brightness, 0–100. */
+  bgIntensity: number;
+  /** Galaxy background motion speed, 0 (still) – 200 (lively). 100 = default. */
+  bgSpeed: number;
 };
 
 export const DEFAULT_PREFS: Prefs = {
@@ -17,6 +21,8 @@ export const DEFAULT_PREFS: Prefs = {
   reminderDays: [7, 3, 1],
   accent: "purple",
   density: "comfortable",
+  bgIntensity: 70,
+  bgSpeed: 100,
 };
 
 export const ACCENTS: Record<AccentKey, { label: string; primary: string; swatch: string }> = {
