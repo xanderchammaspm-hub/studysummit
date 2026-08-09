@@ -348,6 +348,56 @@ function SettingsPage() {
             <div className="mt-2 text-xs text-muted-foreground">{intensity}%</div>
           </div>
 
+          <div className="rounded-xl border border-border/50 bg-surface/40 px-4 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label>Galaxy background</Label>
+                <p className="text-xs text-muted-foreground">
+                  Only affects the page background — glass cards stay exactly as they are.
+                </p>
+              </div>
+              <button
+                onClick={() => updatePrefs({ bgIntensity: 70, bgSpeed: 100 })}
+                className="shrink-0 text-xs text-primary underline-offset-4 hover:underline"
+              >
+                Reset to default
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Intensity</span>
+                <span className="tabular-nums">
+                  {prefs.bgIntensity === 0 ? "Off" : `${prefs.bgIntensity}%`}
+                </span>
+              </div>
+              <Slider
+                value={[prefs.bgIntensity]}
+                min={0}
+                max={100}
+                step={5}
+                onValueChange={(v) => updatePrefs({ bgIntensity: v[0] ?? 70 })}
+              />
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Motion speed</span>
+                <span className="tabular-nums">
+                  {prefs.bgSpeed === 0 ? "Still" : `${prefs.bgSpeed}%`}
+                </span>
+              </div>
+              <Slider
+                value={[prefs.bgSpeed]}
+                min={0}
+                max={200}
+                step={10}
+                onValueChange={(v) => updatePrefs({ bgSpeed: v[0] ?? 100 })}
+              />
+            </div>
+          </div>
+
+
           <div className="flex items-center justify-between rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
             <div>
               <Label>Reduce motion</Label>
