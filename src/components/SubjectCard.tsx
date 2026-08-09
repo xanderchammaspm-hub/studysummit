@@ -273,8 +273,10 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               <button
                 onClick={() => setOpen((o) => !o)}
                 aria-label={open ? "Collapse" : "Expand"}
-                className="p-1"
+                aria-expanded={open}
+                className="rounded-md p-1 transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
+
                 <ChevronDown
                   className={`h-5 w-5 text-primary transition-transform duration-300 ${
                     open ? "rotate-180" : ""
