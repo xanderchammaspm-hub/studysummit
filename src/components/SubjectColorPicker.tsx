@@ -47,13 +47,26 @@ type Props = {
 /** Glossy accent picker: presets, free hue/saturation/lightness and hex entry. */
 export function SubjectColorPicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
+  const [alignRight, setAlignRight] = useState(false);
   const [hue, setHue] = useState(280);
   const [sat, setSat] = useState(85);
   const [lig, setLig] = useState(65);
   const [hex, setHex] = useState(value);
   const first = useRef(true);
+  const wrap = useRef<HTMLDivElement>(null);
 
   useEffect(() => setHex(value), [value]);
+
+  useEffect(() => {
+    if (!open) return;
+    const rect = wrap.current?.getBoundingClientRect();
+    if (rect) setAlignRight(rect.left + 320 > window.innerWidth - 16);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   useEffect(() => {
     if (first.current) {
@@ -65,7 +78,8 @@ export function SubjectColorPicker({ value, onChange }: Props) {
   }, [hue, sat, lig]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={wrap}>
+
       <button
         onClick={(e) => {
           e.stopPropagation();
