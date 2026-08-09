@@ -1,14 +1,39 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { usePrefs } from "@/hooks/usePrefs";
 
 /**
  * Living background: a slow nebula galaxy, drifting glow motes and a very
  * faint scientific HUD (grids, graphs, DNA, molecules, equations,
  * constellations). Purely decorative — never interactive.
+ *
+ * Intensity and motion speed are user preferences; both only affect this
+ * background layer, never the glass cards above it.
  */
 export function AmbientBackground() {
+  const { prefs } = usePrefs();
+  const intensity = Math.min(100, Math.max(0, prefs.bgIntensity));
+  const speed = Math.min(200, Math.max(0, prefs.bgSpeed));
+  const factor = intensity / 100;
+  const timeScale = speed === 0 ? 1 : 100 / speed;
+
+  // Pause all background animation while the tab is hidden — zero cost when away.
+  useEffect(() => {
+    const onVis = () =>
+      document.documentElement.classList.toggle("bg-paused", document.hidden);
+    onVis();
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      document.documentElement.classList.remove("bg-paused");
+    };
+  }, []);
+
+  const moteCount = Math.round(18 * factor);
+  const starCount = Math.round(58 * factor);
+
   const motes = useMemo(
     () =>
-      Array.from({ length: 18 }, (_, i) => ({
+      Array.from({ length: moteCount }, (_, i) => ({
         id: i,
         left: (i * 37.5) % 100,
         top: (i * 61.7) % 100,
@@ -17,20 +42,23 @@ export function AmbientBackground() {
         delay: -((i * 5) % 30),
         hue: i % 3 === 0 ? "oklch(0.9 0.14 85 / 0.32)" : "oklch(0.78 0.2 300 / 0.34)",
       })),
-    [],
+    [moteCount],
   );
 
   const stars = useMemo(
     () =>
-      Array.from({ length: 58 }, (_, i) => ({
+      Array.from({ length: starCount }, (_, i) => ({
         id: i,
         left: (i * 13.37) % 100,
         top: (i * 29.7) % 100,
         size: i % 9 === 0 ? 1.6 : 1,
         delay: -((i * 3) % 12),
       })),
-    [],
+    [starCount],
   );
+
+  if (intensity === 0) return null;
+
 
   return (
     <div aria-hidden className="ambient-root">
