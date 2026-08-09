@@ -80,7 +80,7 @@ export function AmbientBackground() {
               top: `${s.top}%`,
               width: s.size,
               height: s.size,
-              animation: `twinkle ${6 + (s.id % 5)}s ease-in-out ${s.delay}s infinite`,
+              animation: `twinkle ${((6 + (s.id % 5)) * timeScale).toFixed(1)}s ease-in-out ${s.delay}s infinite`,
             }}
           />
         ))}
@@ -169,7 +169,7 @@ export function AmbientBackground() {
               height: m.size,
               background: m.hue,
               boxShadow: `0 0 ${m.size * 5}px ${m.hue}`,
-              animation: `moteDrift ${m.dur}s linear ${m.delay}s infinite`,
+              animation: `moteDrift ${(m.dur * timeScale).toFixed(1)}s linear ${m.delay}s infinite`,
             }}
           />
         ))}
