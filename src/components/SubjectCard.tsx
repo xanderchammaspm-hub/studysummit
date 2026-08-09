@@ -289,11 +289,13 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       </div>
 
       <div
+        aria-hidden={!open}
         className={`grid transition-[grid-template-rows] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
+
           <div
             className={`border-t border-border/60 px-6 py-7 space-y-7 transition-[opacity,transform] duration-300 ease-out ${
               open ? "opacity-100 translate-y-0 delay-75" : "opacity-0 -translate-y-1"
