@@ -47,26 +47,13 @@ type Props = {
 /** Glossy accent picker: presets, free hue/saturation/lightness and hex entry. */
 export function SubjectColorPicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
-  const [alignRight, setAlignRight] = useState(false);
   const [hue, setHue] = useState(280);
   const [sat, setSat] = useState(85);
   const [lig, setLig] = useState(65);
   const [hex, setHex] = useState(value);
   const first = useRef(true);
-  const wrap = useRef<HTMLDivElement>(null);
 
   useEffect(() => setHex(value), [value]);
-
-  useEffect(() => {
-    if (!open) return;
-    const rect = wrap.current?.getBoundingClientRect();
-    if (rect) setAlignRight(rect.left + 320 > window.innerWidth - 16);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
 
   useEffect(() => {
     if (first.current) {
@@ -78,8 +65,7 @@ export function SubjectColorPicker({ value, onChange }: Props) {
   }, [hue, sat, lig]);
 
   return (
-    <div className="relative" ref={wrap}>
-
+    <div className="relative">
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -105,11 +91,7 @@ export function SubjectColorPicker({ value, onChange }: Props) {
             tabIndex={-1}
             aria-label="Close colour picker"
           />
-          <div
-            className={`absolute z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-xl animate-scale-in ${
-              alignRight ? "right-0" : "left-0"
-            }`}
-          >
+          <div className="absolute left-0 z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-xl">
             <div className="section-label mb-2">Subject colour</div>
             <div className="grid grid-cols-10 gap-2">
 

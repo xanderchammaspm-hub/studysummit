@@ -273,10 +273,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               <button
                 onClick={() => setOpen((o) => !o)}
                 aria-label={open ? "Collapse" : "Expand"}
-                aria-expanded={open}
-                className="rounded-md p-1 transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                className="p-1"
               >
-
                 <ChevronDown
                   className={`h-5 w-5 text-primary transition-transform duration-300 ${
                     open ? "rotate-180" : ""
@@ -289,19 +287,12 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       </div>
 
       <div
-        aria-hidden={!open}
-        className={`grid transition-[grid-template-rows] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
-
-          <div
-            className={`border-t border-border/60 px-6 py-7 space-y-7 transition-[opacity,transform] duration-300 ease-out ${
-              open ? "opacity-100 translate-y-0 delay-75" : "opacity-0 -translate-y-1"
-            }`}
-          >
-
+          <div className="border-t border-border/60 px-6 py-7 space-y-7">
 
             {/* Term switcher */}
             <div className="flex flex-wrap items-center gap-2">
