@@ -9,8 +9,10 @@ export type Paper = {
   year: number | null;
   exam_type: string;
   description: string | null;
+  file_path?: string | null;
   created_at: string;
 };
+
 
 export type Question = {
   id: string;
