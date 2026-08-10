@@ -38,9 +38,10 @@ function readAsDataUrl(file: File) {
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [pending, setPending] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback(
+  const handleInteractive = useCallback(
     async (file: File) => {
       setUploading(true);
       const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
@@ -93,12 +94,60 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
     [onRefresh, userId],
   );
 
+  /** Store the file as-is so it can be opened or downloaded later. */
+  const handleKeepAsPdf = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      const t = toast.loading(`Saving "${file.name}"…`);
+      try {
+        const safe = file.name.replace(/[^\w.\-]+/g, "_");
+        const path = `${userId}/${Date.now()}-${safe}`;
+        const { error: upErr } = await supabase.storage
+          .from("exam-papers")
+          .upload(path, file, { contentType: file.type || "application/pdf", upsert: false });
+        if (upErr) throw upErr;
+
+        const { error } = await supabase.from("exam_papers").insert({
+          owner_id: userId,
+          is_library: false,
+          title: file.name.replace(/\.[^.]+$/, ""),
+          subject: "Uploaded",
+          exam_type: "PDF",
+          description: "Stored as a file — open or download it any time.",
+          file_path: path,
+        });
+        if (error) throw error;
+
+        toast.success("Saved to your uploads", { id: t });
+        onRefresh();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Save failed", { id: t });
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onRefresh, userId],
+  );
+
   async function remove(paper: Paper) {
+    if (paper.file_path) {
+      await supabase.storage.from("exam-papers").remove([paper.file_path]);
+    }
     const { error } = await supabase.from("exam_papers").delete().eq("id", paper.id);
     if (error) return toast.error(error.message);
     toast.success("Paper removed");
     onRefresh();
   }
+
+  async function openPdf(paper: Paper) {
+    if (!paper.file_path) return;
+    const { data, error } = await supabase.storage
+      .from("exam-papers")
+      .createSignedUrl(paper.file_path, 60 * 60);
+    if (error || !data) return toast.error(error?.message ?? "Could not open that file");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
 
   const library = papers.filter((p) => p.is_library);
   const mine = papers.filter((p) => !p.is_library);
