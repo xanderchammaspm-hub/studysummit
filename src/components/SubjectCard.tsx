@@ -689,7 +689,79 @@ const STATUS_COLOR: Record<TrafficColor, string> = {
   green: "oklch(0.72 0.19 145)",
 };
 
+
+/** Mastery meter + counts for a subject's traffic-light topics. */
+function TrafficStats({ label, topics }: { label: string; topics: Topic[] }) {
+  const total = topics.length;
+  const green = topics.filter((t) => t.status === "green").length;
+  const yellow = topics.filter((t) => t.status === "amber").length;
+  const red = topics.filter((t) => t.status === "red").length;
+  const pct = total ? Math.round(((green + yellow * 0.5) / total) * 100) : 0;
+
+  return (
+    <div className="mb-4 rounded-lg border border-border/60 bg-background/40 px-3.5 py-3 backdrop-blur-sm">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="truncate text-sm font-medium">{label || "Untitled subject"}</span>
+        <span className="font-mono text-sm tabular-nums" style={{ color: "var(--acc)" }}>
+          {pct}%
+        </span>
+      </div>
+
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-elevated/80 ring-1 ring-inset ring-border/60">
+        <div className="flex h-full w-full">
+          <Seg pct={total ? (green / total) * 100 : 0} color={STATUS_COLOR.green} />
+          <Seg pct={total ? (yellow / total) * 100 : 0} color={STATUS_COLOR.amber} />
+          <Seg pct={total ? (red / total) * 100 : 0} color={STATUS_COLOR.red} />
+        </div>
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        <CountPill status="green" n={green} />
+        <CountPill status="amber" n={yellow} />
+        <CountPill status="red" n={red} />
+        {total > green + yellow + red && (
+          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground">
+            {total - green - yellow - red} untagged
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Seg({ pct, color }: { pct: number; color: string }) {
+  if (pct <= 0) return null;
+  return (
+    <span
+      className="h-full transition-[width] duration-700 ease-out"
+      style={{
+        width: `${pct}%`,
+        background: `linear-gradient(180deg, color-mix(in oklab, ${color} 85%, white 15%), ${color})`,
+        boxShadow: `0 0 10px -2px ${color}`,
+      }}
+    />
+  );
+}
+
+function CountPill({ status, n }: { status: TrafficColor; n: number }) {
+  const c = STATUS_COLOR[status];
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums transition-transform duration-200 hover:scale-105"
+      style={{
+        borderColor: `color-mix(in oklab, ${c} 45%, transparent)`,
+        background: `color-mix(in oklab, ${c} 12%, transparent)`,
+        color: `color-mix(in oklab, ${c} 80%, white 20%)`,
+      }}
+    >
+      <span className="h-2 w-2 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}` }} />
+      {n}
+    </span>
+  );
+}
+
 export function StatusDot({ status }: { status: TrafficColor }) {
+
   const color = STATUS_COLOR[status];
   const glow = status === "none" ? "none" : `0 0 8px ${color}`;
   return (
