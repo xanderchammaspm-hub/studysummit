@@ -154,6 +154,24 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
 
   return (
     <div className="space-y-8">
+      {pending && (
+        <ImportChoiceDialog
+          file={pending}
+          busy={uploading}
+          onClose={() => setPending(null)}
+          onInteractive={() => {
+            const f = pending;
+            setPending(null);
+            void handleInteractive(f);
+          }}
+          onPdf={() => {
+            const f = pending;
+            setPending(null);
+            void handleKeepAsPdf(f);
+          }}
+        />
+      )}
+
       {/* Uploader */}
       <div
         onDragOver={(e) => {
@@ -165,7 +183,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           e.preventDefault();
           setDragging(false);
           const f = e.dataTransfer.files?.[0];
-          if (f) void handleFile(f);
+          if (f) setPending(f);
         }}
         className={`relative overflow-hidden rounded-2xl border border-dashed p-8 text-center transition-all duration-300 ${
           dragging
@@ -180,7 +198,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void handleFile(f);
+            if (f) setPending(f);
             e.target.value = "";
           }}
         />
@@ -194,8 +212,8 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </div>
           <h3 className="text-lg font-semibold tracking-tight">Upload a past paper</h3>
           <p className="text-sm text-muted-foreground">
-            Drop a PDF, image or text file here and Summit turns it into an interactive quiz with
-            marking criteria and exemplar answers.
+            Drop a PDF, image or text file here — then choose an interactive exam or keep it as a
+            plain PDF.
           </p>
           <Button
             type="button"
@@ -208,6 +226,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </Button>
         </div>
       </div>
+
 
       <Section
         icon={<Library className="h-4 w-4 text-primary" />}
