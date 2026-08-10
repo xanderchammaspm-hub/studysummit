@@ -145,13 +145,26 @@ export function SubjectColorPicker({ value, onChange }: Props) {
             </div>
 
             <div className="mt-3 space-y-2">
-              <Slider label="Hue" min={0} max={360} value={hue} onChange={setHue} track="linear-gradient(90deg,#f43f5e,#fbbf24,#a3e635,#2dd4bf,#38bdf8,#a855f7,#f43f5e)" />
+              <Slider
+                label="Hue"
+                min={0}
+                max={360}
+                value={hue}
+                onChange={(n) => {
+                  setHue(n);
+                  commit(n, sat, lig);
+                }}
+                track="linear-gradient(90deg,#f43f5e,#fbbf24,#a3e635,#2dd4bf,#38bdf8,#a855f7,#f43f5e)"
+              />
               <Slider
                 label="Saturation"
                 min={0}
                 max={100}
                 value={sat}
-                onChange={setSat}
+                onChange={(n) => {
+                  setSat(n);
+                  commit(hue, n, lig);
+                }}
                 track={`linear-gradient(90deg, ${hslToHex(hue, 0, lig)}, ${hslToHex(hue, 100, lig)})`}
               />
               <Slider
@@ -159,10 +172,14 @@ export function SubjectColorPicker({ value, onChange }: Props) {
                 min={20}
                 max={90}
                 value={lig}
-                onChange={setLig}
+                onChange={(n) => {
+                  setLig(n);
+                  commit(hue, sat, n);
+                }}
                 track={`linear-gradient(90deg, ${hslToHex(hue, sat, 20)}, ${hslToHex(hue, sat, 90)})`}
               />
             </div>
+
 
             <div className="mt-3 flex items-center gap-2">
               <span
