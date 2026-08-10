@@ -256,7 +256,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {mine.map((p, i) => (
-              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} />
+              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} onOpenPdf={openPdf} />
             ))}
           </div>
         )}
