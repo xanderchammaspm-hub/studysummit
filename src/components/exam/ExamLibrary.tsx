@@ -12,7 +12,11 @@ import {
   Play,
   Library,
   Sparkles,
+  X,
+  Wand2,
+  FileDown,
 } from "lucide-react";
+
 
 type Props = {
   papers: Paper[];
