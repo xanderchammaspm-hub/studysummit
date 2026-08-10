@@ -493,7 +493,9 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               title="Traffic Light System"
               accent
             >
+              <TrafficStats label={label} topics={state.topics} />
               <div className="flex gap-2 mb-3">
+
                 <input
                   value={topicTitle}
                   onChange={(e) => setTopicTitle(e.target.value)}
