@@ -12,7 +12,11 @@ import {
   Play,
   Library,
   Sparkles,
+  X,
+  Wand2,
+  FileDown,
 } from "lucide-react";
+
 
 type Props = {
   papers: Paper[];
@@ -34,9 +38,10 @@ function readAsDataUrl(file: File) {
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [pending, setPending] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback(
+  const handleInteractive = useCallback(
     async (file: File) => {
       setUploading(true);
       const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
@@ -89,18 +94,84 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
     [onRefresh, userId],
   );
 
+  /** Store the file as-is so it can be opened or downloaded later. */
+  const handleKeepAsPdf = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      const t = toast.loading(`Saving "${file.name}"…`);
+      try {
+        const safe = file.name.replace(/[^\w.\-]+/g, "_");
+        const path = `${userId}/${Date.now()}-${safe}`;
+        const { error: upErr } = await supabase.storage
+          .from("exam-papers")
+          .upload(path, file, { contentType: file.type || "application/pdf", upsert: false });
+        if (upErr) throw upErr;
+
+        const { error } = await supabase.from("exam_papers").insert({
+          owner_id: userId,
+          is_library: false,
+          title: file.name.replace(/\.[^.]+$/, ""),
+          subject: "Uploaded",
+          exam_type: "PDF",
+          description: "Stored as a file — open or download it any time.",
+          file_path: path,
+        });
+        if (error) throw error;
+
+        toast.success("Saved to your uploads", { id: t });
+        onRefresh();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Save failed", { id: t });
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onRefresh, userId],
+  );
+
   async function remove(paper: Paper) {
+    if (paper.file_path) {
+      await supabase.storage.from("exam-papers").remove([paper.file_path]);
+    }
     const { error } = await supabase.from("exam_papers").delete().eq("id", paper.id);
     if (error) return toast.error(error.message);
     toast.success("Paper removed");
     onRefresh();
   }
 
+  async function openPdf(paper: Paper) {
+    if (!paper.file_path) return;
+    const { data, error } = await supabase.storage
+      .from("exam-papers")
+      .createSignedUrl(paper.file_path, 60 * 60);
+    if (error || !data) return toast.error(error?.message ?? "Could not open that file");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
+
   const library = papers.filter((p) => p.is_library);
   const mine = papers.filter((p) => !p.is_library);
 
   return (
     <div className="space-y-8">
+      {pending && (
+        <ImportChoiceDialog
+          file={pending}
+          busy={uploading}
+          onClose={() => setPending(null)}
+          onInteractive={() => {
+            const f = pending;
+            setPending(null);
+            void handleInteractive(f);
+          }}
+          onPdf={() => {
+            const f = pending;
+            setPending(null);
+            void handleKeepAsPdf(f);
+          }}
+        />
+      )}
+
       {/* Uploader */}
       <div
         onDragOver={(e) => {
@@ -112,7 +183,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           e.preventDefault();
           setDragging(false);
           const f = e.dataTransfer.files?.[0];
-          if (f) void handleFile(f);
+          if (f) setPending(f);
         }}
         className={`relative overflow-hidden rounded-2xl border border-dashed p-8 text-center transition-all duration-300 ${
           dragging
@@ -127,7 +198,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void handleFile(f);
+            if (f) setPending(f);
             e.target.value = "";
           }}
         />
@@ -141,8 +212,8 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </div>
           <h3 className="text-lg font-semibold tracking-tight">Upload a past paper</h3>
           <p className="text-sm text-muted-foreground">
-            Drop a PDF, image or text file here and Summit turns it into an interactive quiz with
-            marking criteria and exemplar answers.
+            Drop a PDF, image or text file here — then choose an interactive exam or keep it as a
+            plain PDF.
           </p>
           <Button
             type="button"
@@ -155,6 +226,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </Button>
         </div>
       </div>
+
 
       <Section
         icon={<Library className="h-4 w-4 text-primary" />}
@@ -184,7 +256,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {mine.map((p, i) => (
-              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} />
+              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} onOpenPdf={openPdf} />
             ))}
           </div>
         )}
@@ -233,12 +305,15 @@ function PaperCard({
   index,
   onStart,
   onDelete,
+  onOpenPdf,
 }: {
   paper: Paper;
   index: number;
   onStart: (p: Paper) => void;
   onDelete?: (p: Paper) => void;
+  onOpenPdf?: (p: Paper) => void;
 }) {
+  const isPdf = Boolean(paper.file_path);
   return (
     <article
       className="fade-in-up group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-md purple-glow-hover"
@@ -266,11 +341,92 @@ function PaperCard({
       {paper.description && (
         <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{paper.description}</p>
       )}
-      <Button onClick={() => onStart(paper)} size="sm" className="mt-4 w-full gap-2">
-        <Play className="h-3.5 w-3.5" /> Start paper
-      </Button>
+      {isPdf ? (
+        <Button
+          onClick={() => onOpenPdf?.(paper)}
+          size="sm"
+          variant="outline"
+          className="mt-4 w-full gap-2 border-border bg-surface/60"
+        >
+          <FileDown className="h-3.5 w-3.5 text-yellow" /> Open PDF
+        </Button>
+      ) : (
+        <Button onClick={() => onStart(paper)} size="sm" className="mt-4 w-full gap-2">
+          <Play className="h-3.5 w-3.5" /> Start paper
+        </Button>
+      )}
     </article>
   );
 }
 
+/** Glossy choice sheet shown right after a file lands. */
+function ImportChoiceDialog({
+  file,
+  busy,
+  onClose,
+  onInteractive,
+  onPdf,
+}: {
+  file: File;
+  busy: boolean;
+  onClose: () => void;
+  onInteractive: () => void;
+  onPdf: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <button
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default bg-background/70 backdrop-blur-md"
+      />
+      <div className="scale-in relative w-full max-w-lg overflow-hidden rounded-2xl border border-primary/30 bg-card/80 p-6 shadow-2xl backdrop-blur-2xl">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent"
+        />
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Cancel import"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <h3 className="bg-gradient-to-r from-primary to-yellow bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+          How should this paper be added?
+        </h3>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{file.name}</p>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button
+            disabled={busy}
+            onClick={onInteractive}
+            className="group rounded-xl border border-border bg-surface/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-[0_0_28px_-12px_var(--primary)] disabled:opacity-60"
+          >
+            <Wand2 className="h-5 w-5 text-primary" />
+            <div className="mt-2 text-sm font-medium">Interactive exam</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Summit extracts the questions, marks and criteria so you can sit it and get feedback.
+            </p>
+          </button>
+
+          <button
+            disabled={busy}
+            onClick={onPdf}
+            className="group rounded-xl border border-border bg-surface/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-yellow/60 hover:shadow-[0_0_28px_-12px_var(--yellow)] disabled:opacity-60"
+          >
+            <FileDown className="h-5 w-5 text-yellow" />
+            <div className="mt-2 text-sm font-medium">Just the PDF</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Save the file as-is in your uploads and open it whenever you want.
+            </p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default ExamLibrary;
+

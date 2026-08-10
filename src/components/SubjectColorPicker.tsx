@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Palette } from "lucide-react";
 
 /** Curated glossy accents that all sit well on the dark purple base. */
@@ -39,6 +39,32 @@ function hslToHex(h: number, s: number, l: number) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
+/** Hex -> HSL so the sliders open on the colour already in use. */
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const m = /^#?([0-9a-f]{6}|[0-9a-f]{3})$/i.exec(hex.trim());
+  if (!m) return { h: 280, s: 85, l: 65 };
+  let raw = m[1];
+  if (raw.length === 3) raw = raw.split("").map((c) => c + c).join("");
+  const r = parseInt(raw.slice(0, 2), 16) / 255;
+  const g = parseInt(raw.slice(2, 4), 16) / 255;
+  const b = parseInt(raw.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  let s = 0;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
 type Props = {
   value: string;
   onChange: (hex: string) => void;
@@ -47,22 +73,24 @@ type Props = {
 /** Glossy accent picker: presets, free hue/saturation/lightness and hex entry. */
 export function SubjectColorPicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
-  const [hue, setHue] = useState(280);
-  const [sat, setSat] = useState(85);
-  const [lig, setLig] = useState(65);
+  const init = hexToHsl(value);
+  const [hue, setHue] = useState(init.h);
+  const [sat, setSat] = useState(init.s);
+  const [lig, setLig] = useState(init.l);
   const [hex, setHex] = useState(value);
-  const first = useRef(true);
 
-  useEffect(() => setHex(value), [value]);
-
+  // Only mirror the incoming value — never emit a colour on mount, or every
+  // card would be overwritten with the slider defaults.
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    onChange(hslToHex(hue, sat, lig));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hue, sat, lig]);
+    setHex(value);
+    const p = hexToHsl(value);
+    setHue(p.h);
+    setSat(p.s);
+    setLig(p.l);
+  }, [value]);
+
+  const commit = (h: number, s: number, l: number) => onChange(hslToHex(h, s, l));
+
 
   return (
     <div className="relative">
@@ -117,13 +145,26 @@ export function SubjectColorPicker({ value, onChange }: Props) {
             </div>
 
             <div className="mt-3 space-y-2">
-              <Slider label="Hue" min={0} max={360} value={hue} onChange={setHue} track="linear-gradient(90deg,#f43f5e,#fbbf24,#a3e635,#2dd4bf,#38bdf8,#a855f7,#f43f5e)" />
+              <Slider
+                label="Hue"
+                min={0}
+                max={360}
+                value={hue}
+                onChange={(n) => {
+                  setHue(n);
+                  commit(n, sat, lig);
+                }}
+                track="linear-gradient(90deg,#f43f5e,#fbbf24,#a3e635,#2dd4bf,#38bdf8,#a855f7,#f43f5e)"
+              />
               <Slider
                 label="Saturation"
                 min={0}
                 max={100}
                 value={sat}
-                onChange={setSat}
+                onChange={(n) => {
+                  setSat(n);
+                  commit(hue, n, lig);
+                }}
                 track={`linear-gradient(90deg, ${hslToHex(hue, 0, lig)}, ${hslToHex(hue, 100, lig)})`}
               />
               <Slider
@@ -131,10 +172,14 @@ export function SubjectColorPicker({ value, onChange }: Props) {
                 min={20}
                 max={90}
                 value={lig}
-                onChange={setLig}
+                onChange={(n) => {
+                  setLig(n);
+                  commit(hue, sat, n);
+                }}
                 track={`linear-gradient(90deg, ${hslToHex(hue, sat, 20)}, ${hslToHex(hue, sat, 90)})`}
               />
             </div>
+
 
             <div className="mt-3 flex items-center gap-2">
               <span
