@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Palette } from "lucide-react";
 
 /** Curated glossy accents that all sit well on the dark purple base. */
