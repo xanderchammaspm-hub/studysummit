@@ -190,24 +190,57 @@ export function WeeklyReport() {
             </div>
           </div>
 
-          <div className="relative mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              { k: "Hours", v: `${weekStats.hours.toFixed(1)}h` },
-              { k: "Days", v: `${weekStats.days}/7` },
-              { k: "Green topics", v: `${stats.green}` },
-              { k: "Avg score", v: `${Math.round(stats.avgScore)}%` },
-            ].map((p) => (
-              <div
-                key={p.k}
-                className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/10 to-transparent px-3 py-2"
-              >
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.k}</div>
-                <div className="text-base font-semibold">{p.v}</div>
+          <div className="relative mt-5 grid gap-3 lg:grid-cols-[1.2fr_1fr]">
+            {/* Hours per day */}
+            <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/10 to-transparent p-4">
+              <div className="mb-3 flex items-baseline justify-between">
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Hours per day
+                </span>
+                <span className="text-sm font-semibold tabular-nums gradient-text">
+                  {weekStats.hours.toFixed(1)}h
+                </span>
               </div>
-            ))}
+              <div className="flex h-24 items-end gap-1.5">
+                {weekStats.perDay.map((d, i) => (
+                  <div key={d.label} className="flex flex-1 flex-col items-center gap-1.5">
+                    <div className="flex w-full flex-1 items-end">
+                      <div
+                        title={`${d.label}: ${d.hours.toFixed(1)}h`}
+                        className="w-full rounded-t-md transition-all duration-700 ease-out"
+                        style={{
+                          height: `${Math.max(4, (d.hours / weekStats.peak) * 100)}%`,
+                          animationDelay: `${i * 60}ms`,
+                          background:
+                            "linear-gradient(180deg, oklch(0.86 0.11 82 / 0.9), oklch(0.68 0.22 300))",
+                          boxShadow: d.hours > 0 ? "0 0 18px -8px var(--color-primary)" : "none",
+                        }}
+                      />
+                    </div>
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                      {d.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Score + active days */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <StatDial
+                label="Average score"
+                value={`${Math.round(stats.avgScore)}%`}
+                pct={Math.min(100, Math.round(stats.avgScore))}
+              />
+              <StatDial
+                label="Active days"
+                value={`${weekStats.days}/7`}
+                pct={Math.round((weekStats.days / 7) * 100)}
+              />
+            </div>
           </div>
 
-          <div className="relative mt-4">
+          <div className="relative mt-5">
             {busy && !cached && (
               <div className="space-y-2">
                 {Array.from({ length: 4 }, (_, i) => (
@@ -216,7 +249,7 @@ export function WeeklyReport() {
               </div>
             )}
             {cached ? (
-              <div className="prose prose-invert prose-sm max-w-none prose-headings:text-foreground prose-table:text-xs">
+              <div className="prose prose-invert prose-sm max-w-none rounded-xl border border-border/60 bg-background/30 p-5 prose-headings:mt-5 prose-headings:text-sm prose-headings:uppercase prose-headings:tracking-widest prose-headings:text-primary prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-table:text-xs prose-th:text-foreground">
                 <ReactMarkdown>{cached.text}</ReactMarkdown>
               </div>
             ) : (
