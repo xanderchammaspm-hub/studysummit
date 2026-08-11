@@ -203,25 +203,25 @@ export const parsePaperFile = createServerFn({ method: "POST" })
     const rawQuestions = Array.isArray(parsed["questions"]) ? parsed["questions"] : [];
 
     const questions: ParsedQuestion[] = rawQuestions
-      .slice(0, 25)
+      .slice(0, 40)
       .map((q) => {
         const item = q as Record<string, unknown>;
         const qtypeRaw = String(item["qtype"] ?? "short");
         const qtype: ParsedQuestion["qtype"] =
           qtypeRaw === "mcq" || qtypeRaw === "extended" ? qtypeRaw : "short";
         const options = Array.isArray(item["options"])
-          ? (item["options"] as unknown[]).map((o) => String(o)).slice(0, 6)
+          ? (item["options"] as unknown[]).map((o) => cleanMath(String(o))).slice(0, 6)
           : [];
         const marksNum = Number(item["marks"]);
         const correct = Number(item["correctOption"]);
         return {
           qtype,
-          prompt: String(item["prompt"] ?? "").slice(0, 4000),
+          prompt: cleanMath(String(item["prompt"] ?? "")).slice(0, 4000),
           options,
           correctOption: qtype === "mcq" && Number.isFinite(correct) ? correct : null,
           marks: Number.isFinite(marksNum) && marksNum > 0 ? Math.min(30, Math.round(marksNum)) : 1,
-          criteria: String(item["criteria"] ?? "").slice(0, 3000),
-          exemplar: String(item["exemplar"] ?? "").slice(0, 5000),
+          criteria: cleanMath(String(item["criteria"] ?? "")).slice(0, 3000),
+          exemplar: cleanMath(String(item["exemplar"] ?? "")).slice(0, 5000),
           topic: String(item["topic"] ?? "General").slice(0, 120),
         };
       })
