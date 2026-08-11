@@ -1,7 +1,16 @@
 import { useMemo } from "react";
 import type { Attempt, AnswerRow } from "./types";
 import { pct } from "./types";
-import { Activity, BarChart3, Target, TrendingUp } from "lucide-react";
+import { Activity, BarChart3, ChevronRight, Target, TrendingUp } from "lucide-react";
+
+/** Green / yellow / red gradient for a mastery percentage. */
+function masteryFill(v: number) {
+  return v >= 80
+    ? "linear-gradient(90deg, oklch(0.7 0.17 150), oklch(0.8 0.16 145))"
+    : v >= 50
+      ? "linear-gradient(90deg, oklch(0.75 0.13 82), oklch(0.88 0.12 82))"
+      : "linear-gradient(90deg, oklch(0.6 0.2 20), oklch(0.7 0.22 25))";
+}
 
 export function ExamAnalytics({
   attempts,
