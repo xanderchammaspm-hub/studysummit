@@ -30,6 +30,39 @@ export function ExamAnalytics({
       .sort((a, b) => a.mastery - b.mastery);
   }, [answers]);
 
+  const bySubject = useMemo(() => {
+    const map = new Map<
+      string,
+      { awarded: number; max: number; count: number; topics: Map<string, { a: number; m: number; c: number }> }
+    >();
+    for (const a of answers) {
+      const key = a.subject || "General";
+      const cur =
+        map.get(key) ?? { awarded: 0, max: 0, count: 0, topics: new Map<string, { a: number; m: number; c: number }>() };
+      cur.awarded += Number(a.awarded);
+      cur.max += Number(a.max_marks);
+      cur.count += 1;
+      const tk = a.topic || "General";
+      const t = cur.topics.get(tk) ?? { a: 0, m: 0, c: 0 };
+      t.a += Number(a.awarded);
+      t.m += Number(a.max_marks);
+      t.c += 1;
+      cur.topics.set(tk, t);
+      map.set(key, cur);
+    }
+    return [...map.entries()]
+      .map(([subject, v]) => ({
+        subject,
+        mastery: pct(v.awarded, v.max),
+        count: v.count,
+        papers: completed.filter((c) => c.subject === subject).length,
+        topics: [...v.topics.entries()]
+          .map(([topic, t]) => ({ topic, mastery: pct(t.a, t.m), count: t.c }))
+          .sort((x, y) => x.mastery - y.mastery),
+      }))
+      .sort((a, b) => a.mastery - b.mastery);
+  }, [answers, completed]);
+
   const trend = useMemo(
     () =>
       completed
