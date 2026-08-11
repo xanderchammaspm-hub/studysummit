@@ -132,6 +132,9 @@ export function MistakeVault({
 
                   {open && (
                     <div className="space-y-4 border-t border-border p-5">
+                      <MathMarkdown className="text-sm leading-relaxed text-foreground">
+                        {row.question_prompt}
+                      </MathMarkdown>
                       {row.feedback && (
                         <p className="text-sm leading-relaxed text-muted-foreground">{row.feedback}</p>
                       )}
