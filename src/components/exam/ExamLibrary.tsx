@@ -4,6 +4,7 @@ import { parsePaperFile } from "@/lib/exam.functions";
 import type { Paper } from "./types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { MathMarkdown } from "@/components/MathMarkdown";
 import {
   FileText,
   Loader2,
@@ -15,6 +16,9 @@ import {
   X,
   Wand2,
   FileDown,
+  ChevronRight,
+  FolderOpen,
+  CheckCircle2,
 } from "lucide-react";
 
 
