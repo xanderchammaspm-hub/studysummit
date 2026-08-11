@@ -12,13 +12,13 @@ type ContentBlock =
 
 type Msg = { role: "system" | "user"; content: string | ContentBlock[] };
 
-async function callAI(messages: Msg[]): Promise<string> {
+async function callAI(messages: Msg[], temperature = 0.4): Promise<string> {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: MODEL, messages }),
+    body: JSON.stringify({ model: MODEL, messages, temperature }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
