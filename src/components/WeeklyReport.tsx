@@ -287,4 +287,24 @@ function localStorageChecked() {
   }
 }
 
+
+/** Small glossy meter used for score / active days. */
+function StatDial({ label, value, pct }: { label: string; value: string; pct: number }) {
+  return (
+    <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/10 to-transparent p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/45">
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="mt-1 text-xl font-semibold tabular-nums">{value}</div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface/70">
+        <div
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{
+            width: `${Math.max(2, pct)}%`,
+            background: "linear-gradient(90deg, oklch(0.68 0.22 300), oklch(0.86 0.11 82))",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default WeeklyReport;
