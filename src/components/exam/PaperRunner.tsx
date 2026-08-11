@@ -275,7 +275,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-[11px]">
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="flex-1">{opt}</span>
+                    <MathMarkdown className="flex-1">{opt}</MathMarkdown>
                     {isCorrect && <CircleCheck className="h-4 w-4 text-emerald-400" />}
                     {isWrongPick && <CircleX className="h-4 w-4 text-destructive" />}
                   </button>
