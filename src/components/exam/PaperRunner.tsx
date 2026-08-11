@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
+import { MathMarkdown } from "@/components/MathMarkdown";
 import {
   ArrowLeft,
   ArrowRight,
