@@ -691,28 +691,55 @@ const STATUS_COLOR: Record<TrafficColor, string> = {
 
 
 /** Mastery meter + counts for a subject's traffic-light topics. */
+/** Smoothly animates a number towards its target. */
+function useCountUp(value: number, ms = 650) {
+  const [shown, setShown] = useState(value);
+  const fromRef = useRef(value);
+  useEffect(() => {
+    const from = fromRef.current;
+    if (from === value) return;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / ms);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setShown(Math.round(from + (value - from) * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else fromRef.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, ms]);
+  return shown;
+}
+
 function TrafficStats({ label, topics }: { label: string; topics: Topic[] }) {
   const total = topics.length;
   const green = topics.filter((t) => t.status === "green").length;
   const yellow = topics.filter((t) => t.status === "amber").length;
   const red = topics.filter((t) => t.status === "red").length;
   const pct = total ? Math.round(((green + yellow * 0.5) / total) * 100) : 0;
+  const shownPct = useCountUp(pct);
 
   return (
-    <div className="mb-4 rounded-lg border border-border/60 bg-background/40 px-3.5 py-3 backdrop-blur-sm">
+    <div className="group/stats mb-4 rounded-lg border border-border/60 bg-background/40 px-3.5 py-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] hover:shadow-[0_10px_30px_-18px_var(--acc)]">
       <div className="flex items-baseline justify-between gap-3">
         <span className="truncate text-sm font-medium">{label || "Untitled subject"}</span>
         <span className="font-mono text-sm tabular-nums" style={{ color: "var(--acc)" }}>
-          {pct}%
+          {shownPct}%
         </span>
       </div>
 
-      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-elevated/80 ring-1 ring-inset ring-border/60">
+      <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-elevated/80 ring-1 ring-inset ring-border/60">
         <div className="flex h-full w-full">
           <Seg pct={total ? (green / total) * 100 : 0} color={STATUS_COLOR.green} />
           <Seg pct={total ? (yellow / total) * 100 : 0} color={STATUS_COLOR.amber} />
           <Seg pct={total ? (red / total) * 100 : 0} color={STATUS_COLOR.red} />
         </div>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover/stats:translate-x-[300%]"
+        />
       </div>
 
       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
@@ -720,7 +747,7 @@ function TrafficStats({ label, topics }: { label: string; topics: Topic[] }) {
         <CountPill status="amber" n={yellow} />
         <CountPill status="red" n={red} />
         {total > green + yellow + red && (
-          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground">
+          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground transition-colors duration-200 hover:text-foreground">
             {total - green - yellow - red} untagged
           </span>
         )}
@@ -745,17 +772,19 @@ function Seg({ pct, color }: { pct: number; color: string }) {
 
 function CountPill({ status, n }: { status: TrafficColor; n: number }) {
   const c = STATUS_COLOR[status];
+  const shown = useCountUp(n, 500);
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums transition-transform duration-200 hover:scale-105"
+      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums transition-all duration-200 hover:-translate-y-0.5 hover:scale-105"
       style={{
         borderColor: `color-mix(in oklab, ${c} 45%, transparent)`,
         background: `color-mix(in oklab, ${c} 12%, transparent)`,
         color: `color-mix(in oklab, ${c} 80%, white 20%)`,
+        boxShadow: n > 0 ? `0 0 14px -8px ${c}` : undefined,
       }}
     >
       <span className="h-2 w-2 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}` }} />
-      {n}
+      {shown}
     </span>
   );
 }
