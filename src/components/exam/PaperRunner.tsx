@@ -247,7 +247,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
           )}
         </div>
 
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{q.prompt}</p>
+        <MathMarkdown className="text-[15px] leading-relaxed text-foreground">{q.prompt}</MathMarkdown>
 
         <div className="mt-5">
           {q.qtype === "mcq" ? (
