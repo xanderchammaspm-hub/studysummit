@@ -4,6 +4,7 @@ import { parsePaperFile } from "@/lib/exam.functions";
 import type { Paper } from "./types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { MathMarkdown } from "@/components/MathMarkdown";
 import {
   FileText,
   Loader2,
@@ -15,6 +16,9 @@ import {
   X,
   Wand2,
   FileDown,
+  ChevronRight,
+  FolderOpen,
+  CheckCircle2,
 } from "lucide-react";
 
 
@@ -35,64 +39,85 @@ function readAsDataUrl(file: File) {
   });
 }
 
+type Parsed = Awaited<ReturnType<typeof parsePaperFile>>;
+
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState<File | null>(null);
+  const [preview, setPreview] = useState<{ parsed: Parsed; filename: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleInteractive = useCallback(
-    async (file: File) => {
-      setUploading(true);
-      const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
-      try {
-        const isText = file.type.startsWith("text/") || file.name.endsWith(".txt");
-        const payload = isText
-          ? { filename: file.name, mimeType: file.type || "text/plain", text: await file.text() }
-          : { filename: file.name, mimeType: file.type || "application/pdf", dataUrl: await readAsDataUrl(file) };
+  /** Step 1 — parse the file, then show the confirmation preview. */
+  const handleInteractive = useCallback(async (file: File) => {
+    setUploading(true);
+    const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
+    try {
+      const isText = file.type.startsWith("text/") || file.name.endsWith(".txt");
+      const payload = isText
+        ? { filename: file.name, mimeType: file.type || "text/plain", text: await file.text() }
+        : {
+            filename: file.name,
+            mimeType: file.type || "application/pdf",
+            dataUrl: await readAsDataUrl(file),
+          };
 
-        const parsed = await parsePaperFile({ data: payload });
+      const parsed = await parsePaperFile({ data: payload });
+      toast.success(`${parsed.questions.length} questions found — check the preview`, { id: t });
+      setPreview({ parsed, filename: file.name });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed", { id: t });
+    } finally {
+      setUploading(false);
+    }
+  }, []);
 
-        const { data: paper, error } = await supabase
-          .from("exam_papers")
-          .insert({
-            owner_id: userId,
-            is_library: false,
-            title: parsed.title,
-            subject: parsed.subject,
-            year: parsed.year,
-            exam_type: "Uploaded Paper",
-            description: `${parsed.questions.length} questions extracted from ${file.name}`,
-          })
-          .select()
-          .single();
-        if (error) throw error;
+  /** Step 2 — the student confirmed, so persist the interactive paper. */
+  const savePreview = useCallback(async () => {
+    if (!preview) return;
+    const { parsed, filename } = preview;
+    setUploading(true);
+    const t = toast.loading("Building your interactive paper…");
+    try {
+      const { data: paper, error } = await supabase
+        .from("exam_papers")
+        .insert({
+          owner_id: userId,
+          is_library: false,
+          title: parsed.title,
+          subject: parsed.subject,
+          year: parsed.year,
+          exam_type: "Uploaded Paper",
+          description: `${parsed.questions.length} questions extracted from ${filename}`,
+        })
+        .select()
+        .single();
+      if (error) throw error;
 
-        const rows = parsed.questions.map((q, i) => ({
-          paper_id: (paper as Paper).id,
-          position: i + 1,
-          qtype: q.qtype,
-          prompt: q.prompt,
-          options: q.options,
-          correct_option: q.correctOption,
-          marks: q.marks,
-          criteria: q.criteria,
-          exemplar: q.exemplar,
-          topic: q.topic,
-        }));
-        const { error: qErr } = await supabase.from("exam_questions").insert(rows);
-        if (qErr) throw qErr;
+      const rows = parsed.questions.map((q, i) => ({
+        paper_id: (paper as Paper).id,
+        position: i + 1,
+        qtype: q.qtype,
+        prompt: q.prompt,
+        options: q.options,
+        correct_option: q.correctOption,
+        marks: q.marks,
+        criteria: q.criteria,
+        exemplar: q.exemplar,
+        topic: q.topic,
+      }));
+      const { error: qErr } = await supabase.from("exam_questions").insert(rows);
+      if (qErr) throw qErr;
 
-        toast.success(`${parsed.questions.length} questions ready in "${parsed.title}"`, { id: t });
-        onRefresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Upload failed", { id: t });
-      } finally {
-        setUploading(false);
-      }
-    },
-    [onRefresh, userId],
-  );
+      toast.success(`"${parsed.title}" is ready to sit`, { id: t });
+      setPreview(null);
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save that paper", { id: t });
+    } finally {
+      setUploading(false);
+    }
+  }, [preview, onRefresh, userId]);
 
   /** Store the file as-is so it can be opened or downloaded later. */
   const handleKeepAsPdf = useCallback(
@@ -151,6 +176,15 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
 
   const library = papers.filter((p) => p.is_library);
   const mine = papers.filter((p) => !p.is_library);
+  const mineBySubject = [
+    ...mine
+      .reduce((map, p) => {
+        const key = p.subject || "General";
+        map.set(key, [...(map.get(key) ?? []), p]);
+        return map;
+      }, new Map<string, Paper[]>())
+      .entries(),
+  ].sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
     <div className="space-y-8">
@@ -171,6 +205,16 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           }}
         />
       )}
+
+      {preview && (
+        <InteractivePreviewDialog
+          parsed={preview.parsed}
+          busy={uploading}
+          onCancel={() => setPreview(null)}
+          onConfirm={() => void savePreview()}
+        />
+      )}
+
 
       {/* Uploader */}
       <div
@@ -247,16 +291,42 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
       <Section
         icon={<FileText className="h-4 w-4 text-yellow" />}
         title="My uploads"
-        subtitle="Papers you've added yourself."
+        subtitle="Your own papers, filed by subject."
       >
         {mine.length === 0 ? (
           <p className="rounded-xl border border-border bg-card/40 p-6 text-sm text-muted-foreground">
             Nothing uploaded yet — drop a past paper above to build your own quiz.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {mine.map((p, i) => (
-              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} onOpenPdf={openPdf} />
+          <div className="space-y-3">
+            {mineBySubject.map(([subject, rows], si) => (
+              <details
+                key={subject}
+                open
+                className="fade-in-up group overflow-hidden rounded-2xl border border-border bg-card/50 backdrop-blur-md transition-all duration-300 hover:border-primary/50"
+                style={{ animationDelay: `${si * 60}ms` }}
+              >
+                <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-90 group-open:text-primary" />
+                  <FolderOpen className="h-4 w-4 text-yellow" />
+                  <span className="text-sm font-medium">{subject}</span>
+                  <span className="ml-auto rounded-full border border-border bg-surface/70 px-2.5 py-0.5 text-[11px] text-muted-foreground">
+                    {rows.length} {rows.length === 1 ? "paper" : "papers"}
+                  </span>
+                </summary>
+                <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {rows.map((p, i) => (
+                    <PaperCard
+                      key={p.id}
+                      paper={p}
+                      index={i}
+                      onStart={onStart}
+                      onDelete={remove}
+                      onOpenPdf={openPdf}
+                    />
+                  ))}
+                </div>
+              </details>
             ))}
           </div>
         )}
@@ -428,5 +498,100 @@ function ImportChoiceDialog({
   );
 }
 
+/** Glossy confirmation showing exactly what the interactive exam will contain. */
+function InteractivePreviewDialog({
+  parsed,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  parsed: Parsed;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const totalMarks = parsed.questions.reduce((s, q) => s + q.marks, 0);
+  const mcq = parsed.questions.filter((q) => q.qtype === "mcq").length;
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <button
+        aria-label="Close"
+        onClick={onCancel}
+        className="absolute inset-0 cursor-default bg-background/70 backdrop-blur-md"
+      />
+      <div className="scale-in relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/85 shadow-2xl backdrop-blur-2xl">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent"
+        />
+        <div className="flex items-start justify-between gap-4 p-6 pb-4">
+          <div className="min-w-0">
+            <h3 className="truncate bg-gradient-to-r from-primary to-yellow bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+              {parsed.title}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {parsed.subject}
+              {parsed.year ? ` · ${parsed.year}` : ""} · {parsed.questions.length} questions ·{" "}
+              {totalMarks} marks · {mcq} multiple choice
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Discard"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 pb-4">
+          {parsed.questions.slice(0, 6).map((q, i) => (
+            <div key={i} className="rounded-xl border border-border bg-surface/50 p-4">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Q{i + 1} · {q.qtype === "mcq" ? "Multiple choice" : q.qtype === "extended" ? "Extended" : "Short"}
+                </span>
+                <span className="rounded-full border border-yellow/40 bg-yellow/10 px-2 py-0.5 text-[10px] text-yellow">
+                  {q.marks} {q.marks === 1 ? "mark" : "marks"}
+                </span>
+              </div>
+              <MathMarkdown className="text-sm leading-relaxed text-foreground">
+                {q.prompt}
+              </MathMarkdown>
+              {q.options.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {q.options.map((o, oi) => (
+                    <div key={oi} className="flex gap-2 text-xs text-muted-foreground">
+                      <span>{String.fromCharCode(65 + oi)}.</span>
+                      <MathMarkdown className="flex-1">{o}</MathMarkdown>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          {parsed.questions.length > 6 && (
+            <p className="text-center text-xs text-muted-foreground">
+              + {parsed.questions.length - 6} more questions
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border p-4">
+          <Button variant="ghost" onClick={onCancel} disabled={busy}>
+            Discard
+          </Button>
+          <Button onClick={onConfirm} disabled={busy} className="gap-2">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Create interactive exam
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default ExamLibrary;
+
 

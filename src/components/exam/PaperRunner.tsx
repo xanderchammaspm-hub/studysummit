@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
+import { MathMarkdown } from "@/components/MathMarkdown";
 import {
   ArrowLeft,
   ArrowRight,
@@ -247,7 +248,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
           )}
         </div>
 
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{q.prompt}</p>
+        <MathMarkdown className="text-[15px] leading-relaxed text-foreground">{q.prompt}</MathMarkdown>
 
         <div className="mt-5">
           {q.qtype === "mcq" ? (
@@ -274,7 +275,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-[11px]">
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="flex-1">{opt}</span>
+                    <MathMarkdown className="flex-1">{opt}</MathMarkdown>
                     {isCorrect && <CircleCheck className="h-4 w-4 text-emerald-400" />}
                     {isWrongPick && <CircleX className="h-4 w-4 text-destructive" />}
                   </button>
@@ -399,9 +400,9 @@ function Feedback({ result, marks }: { result: Graded; marks: number }) {
           <summary className="cursor-pointer text-xs font-medium text-primary">
             Show exemplar response
           </summary>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+          <MathMarkdown className="mt-3 text-sm leading-relaxed text-muted-foreground">
             {result.exemplar}
-          </p>
+          </MathMarkdown>
         </details>
       )}
     </div>

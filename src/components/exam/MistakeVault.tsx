@@ -5,7 +5,8 @@ import type { AnswerRow } from "./types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { MathMarkdown } from "@/components/MathMarkdown";
 
 export function MistakeVault({
   mistakes,
@@ -17,6 +18,7 @@ export function MistakeVault({
   const [openId, setOpenId] = useState<string | null>(null);
   const [retry, setRetry] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [closedSubjects, setClosedSubjects] = useState<Record<string, boolean>>({});
   const [retryResult, setRetryResult] = useState<Record<string, { awarded: number; feedback: string }>>({});
 
   const grouped = useMemo(() => {
@@ -82,15 +84,25 @@ export function MistakeVault({
 
   return (
     <div className="space-y-8">
-      {grouped.map(([subject, rows]) => (
+      {grouped.map(([subject, rows]) => {
+        const closed = closedSubjects[subject] ?? false;
+        return (
         <section key={subject} className="space-y-3">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setClosedSubjects((s) => ({ ...s, [subject]: !closed }))}
+            className="group flex w-full items-center gap-2 rounded-xl border border-border bg-card/50 px-4 py-3 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50"
+          >
+            <ChevronRight
+              className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${closed ? "" : "rotate-90 text-primary"}`}
+            />
             <AlertTriangle className="h-4 w-4 text-yellow" />
             <h3 className="text-sm font-semibold tracking-tight">{subject}</h3>
-            <span className="text-xs text-muted-foreground">{rows.length} to revisit</span>
-          </div>
+            <span className="ml-auto rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[11px] text-destructive">
+              {rows.length} to revisit
+            </span>
+          </button>
 
-          <div className="space-y-3">
+          <div className={`space-y-3 ${closed ? "hidden" : ""}`}>
             {rows.map((row, i) => {
               const open = openId === row.id;
               const res = retryResult[row.id];
@@ -120,6 +132,9 @@ export function MistakeVault({
 
                   {open && (
                     <div className="space-y-4 border-t border-border p-5">
+                      <MathMarkdown className="text-sm leading-relaxed text-foreground">
+                        {row.question_prompt}
+                      </MathMarkdown>
                       {row.feedback && (
                         <p className="text-sm leading-relaxed text-muted-foreground">{row.feedback}</p>
                       )}
@@ -186,9 +201,9 @@ export function MistakeVault({
                           <summary className="cursor-pointer text-xs font-medium text-primary">
                             Show exemplar response
                           </summary>
-                          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                          <MathMarkdown className="mt-3 text-sm leading-relaxed text-muted-foreground">
                             {row.exemplar}
-                          </p>
+                          </MathMarkdown>
                         </details>
                       )}
                     </div>
@@ -198,7 +213,8 @@ export function MistakeVault({
             })}
           </div>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

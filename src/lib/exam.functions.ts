@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { cleanMath } from "@/lib/mathClean";
 import { z } from "zod";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -12,13 +13,13 @@ type ContentBlock =
 
 type Msg = { role: "system" | "user"; content: string | ContentBlock[] };
 
-async function callAI(messages: Msg[]): Promise<string> {
+async function callAI(messages: Msg[], temperature = 0.4): Promise<string> {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: MODEL, messages }),
+    body: JSON.stringify({ model: MODEL, messages, temperature }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -147,8 +148,23 @@ export type ParsedPaper = {
   questions: ParsedQuestion[];
 };
 
-const PARSE_SYSTEM =
-  "You convert exam papers into structured interactive quizzes. Reply with ONLY a JSON object, no prose, no code fences. Shape: {\"title\": string, \"subject\": string, \"year\": number|null, \"questions\": [{\"qtype\": \"mcq\"|\"short\"|\"extended\", \"prompt\": string, \"options\": string[], \"correctOption\": number|null, \"marks\": number, \"criteria\": string, \"exemplar\": string, \"topic\": string}]}. Use qtype 'mcq' only when the paper gives choices (options array with the exact choices, correctOption = 0-based index of the correct one). Use 'extended' for responses worth 6+ marks. ALWAYS write a marking criteria breakdown and a full-mark exemplar answer for every non-mcq question, even if the paper does not provide one. Extract up to 25 questions.";
+const PARSE_SYSTEM = [
+  "You are a mathematical text parser and exam converter. Turn raw exam-paper text into a structured interactive quiz with clean markdown + LaTeX.",
+  "Reply with ONLY a JSON object, no prose, no code fences.",
+  'Shape: {"title": string, "subject": string, "year": number|null, "questions": [{"qtype": "mcq"|"short"|"extended", "prompt": string, "options": string[], "correctOption": number|null, "marks": number, "criteria": string, "exemplar": string, "topic": string}]}',
+  "",
+  "FORMATTING RULES (apply to prompt, options, criteria and exemplar):",
+  "1. Inline maths: wrap every variable, function, expression and derivative in single dollar signs, e.g. $g(x)$, $g'(x) = 0$, $x < -3$.",
+  "2. Display maths: wrap stand-alone equations, matrices and multi-line derivations in double dollar signs ($$...$$).",
+  "3. Derivatives and symbols: use proper prime notation such as $g'(x)$ and $f''(x)$, never text ticks or unicode primes. Use \\frac, \\int, \\sqrt, \\le, \\ge, \\times, \\pi, \\theta, \\infty rather than raw glyphs.",
+  "4. Multiple choice: put each option in the options array WITHOUT its A/B/C/D label, with any maths wrapped in single dollar signs.",
+  "5. Preserve structure: keep roman-numeral lists ((i), (ii), (iii)) on their own lines, and keep sub-parts (a), (b), (c) intact. Use markdown line breaks between them.",
+  "6. Strip page headers, footers, page numbers, mark-scheme boilerplate and OCR artefacts. Never emit stray symbols like  or unmatched braces.",
+  "",
+  "Use qtype 'mcq' only when the paper gives choices (correctOption = 0-based index of the correct one; work it out if the paper does not state it). Use 'extended' for responses worth 6+ marks.",
+  "ALWAYS write a marking criteria breakdown and a full-mark exemplar answer for every non-mcq question, even if the paper does not provide one.",
+  "Extract up to 40 questions, in paper order. Be fast and literal — do not rewrite question wording.",
+].join("\n");
 
 export const parsePaperFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -176,34 +192,37 @@ export const parsePaperFile = createServerFn({ method: "POST" })
       throw new Error("No file content supplied");
     }
 
-    const raw = await callAI([
-      { role: "system", content: PARSE_SYSTEM },
-      { role: "user", content: blocks },
-    ]);
+    const raw = await callAI(
+      [
+        { role: "system", content: PARSE_SYSTEM },
+        { role: "user", content: blocks },
+      ],
+      0.1,
+    );
 
     const parsed = extractJson(raw) as Record<string, unknown>;
     const rawQuestions = Array.isArray(parsed["questions"]) ? parsed["questions"] : [];
 
     const questions: ParsedQuestion[] = rawQuestions
-      .slice(0, 25)
+      .slice(0, 40)
       .map((q) => {
         const item = q as Record<string, unknown>;
         const qtypeRaw = String(item["qtype"] ?? "short");
         const qtype: ParsedQuestion["qtype"] =
           qtypeRaw === "mcq" || qtypeRaw === "extended" ? qtypeRaw : "short";
         const options = Array.isArray(item["options"])
-          ? (item["options"] as unknown[]).map((o) => String(o)).slice(0, 6)
+          ? (item["options"] as unknown[]).map((o) => cleanMath(String(o))).slice(0, 6)
           : [];
         const marksNum = Number(item["marks"]);
         const correct = Number(item["correctOption"]);
         return {
           qtype,
-          prompt: String(item["prompt"] ?? "").slice(0, 4000),
+          prompt: cleanMath(String(item["prompt"] ?? "")).slice(0, 4000),
           options,
           correctOption: qtype === "mcq" && Number.isFinite(correct) ? correct : null,
           marks: Number.isFinite(marksNum) && marksNum > 0 ? Math.min(30, Math.round(marksNum)) : 1,
-          criteria: String(item["criteria"] ?? "").slice(0, 3000),
-          exemplar: String(item["exemplar"] ?? "").slice(0, 5000),
+          criteria: cleanMath(String(item["criteria"] ?? "")).slice(0, 3000),
+          exemplar: cleanMath(String(item["exemplar"] ?? "")).slice(0, 5000),
           topic: String(item["topic"] ?? "General").slice(0, 120),
         };
       })

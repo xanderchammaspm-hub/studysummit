@@ -42,19 +42,21 @@ export function AmbientBackground() {
         };
       });
     return [
-      make(120, 1, 0.8, 0.28, 7),
-      make(70, 211, 1.3, 0.45, 5.5),
-      make(28, 617, 2.1, 0.6, 4.5),
+      make(180, 1, 0.9, 0.32, 7),
+      make(96, 211, 1.4, 0.5, 5.5),
+      make(38, 617, 2.3, 0.66, 4.5),
     ];
   }, []);
 
   const shooting = useMemo(
     () =>
       [
-        { id: 0, top: 8, left: -10, delay: 3, dur: 2.2, every: 17, angle: 18 },
-        { id: 1, top: 26, left: -18, delay: 11, dur: 2.8, every: 23, angle: 26 },
-        { id: 2, top: 52, left: -12, delay: 19, dur: 2.4, every: 31, angle: 12 },
-        { id: 3, top: 70, left: -20, delay: 27, dur: 3, every: 41, angle: 22 },
+        { id: 0, top: 8, left: -10, delay: 3, dur: 2.2, every: 13, angle: 18 },
+        { id: 1, top: 26, left: -18, delay: 7, dur: 2.8, every: 17, angle: 26 },
+        { id: 2, top: 52, left: -12, delay: 12, dur: 2.4, every: 21, angle: 12 },
+        { id: 3, top: 70, left: -20, delay: 18, dur: 3, every: 27, angle: 22 },
+        { id: 4, top: 38, left: -14, delay: 24, dur: 2.6, every: 33, angle: 8 },
+        { id: 5, top: 84, left: -16, delay: 31, dur: 2.9, every: 39, angle: 30 },
       ] as const,
     [],
   );
@@ -67,6 +69,11 @@ export function AmbientBackground() {
       <div className="nebula nebula-c" />
       <div className="nebula nebula-d" />
       <div className="nebula nebula-e" />
+
+      {/* Interstellar gas dust */}
+      <div className="gas-dust gas-dust-0" />
+      <div className="gas-dust gas-dust-1" />
+
 
       {/* Star field — three parallax depths */}
       {starLayers.map((layer, li) => (

@@ -1,7 +1,16 @@
 import { useMemo } from "react";
 import type { Attempt, AnswerRow } from "./types";
 import { pct } from "./types";
-import { Activity, BarChart3, Target, TrendingUp } from "lucide-react";
+import { Activity, BarChart3, ChevronRight, Target, TrendingUp } from "lucide-react";
+
+/** Green / yellow / red gradient for a mastery percentage. */
+function masteryFill(v: number) {
+  return v >= 80
+    ? "linear-gradient(90deg, oklch(0.7 0.17 150), oklch(0.8 0.16 145))"
+    : v >= 50
+      ? "linear-gradient(90deg, oklch(0.75 0.13 82), oklch(0.88 0.12 82))"
+      : "linear-gradient(90deg, oklch(0.6 0.2 20), oklch(0.7 0.22 25))";
+}
 
 export function ExamAnalytics({
   attempts,
@@ -30,6 +39,39 @@ export function ExamAnalytics({
       .sort((a, b) => a.mastery - b.mastery);
   }, [answers]);
 
+  const bySubject = useMemo(() => {
+    const map = new Map<
+      string,
+      { awarded: number; max: number; count: number; topics: Map<string, { a: number; m: number; c: number }> }
+    >();
+    for (const a of answers) {
+      const key = a.subject || "General";
+      const cur =
+        map.get(key) ?? { awarded: 0, max: 0, count: 0, topics: new Map<string, { a: number; m: number; c: number }>() };
+      cur.awarded += Number(a.awarded);
+      cur.max += Number(a.max_marks);
+      cur.count += 1;
+      const tk = a.topic || "General";
+      const t = cur.topics.get(tk) ?? { a: 0, m: 0, c: 0 };
+      t.a += Number(a.awarded);
+      t.m += Number(a.max_marks);
+      t.c += 1;
+      cur.topics.set(tk, t);
+      map.set(key, cur);
+    }
+    return [...map.entries()]
+      .map(([subject, v]) => ({
+        subject,
+        mastery: pct(v.awarded, v.max),
+        count: v.count,
+        papers: completed.filter((c) => c.subject === subject).length,
+        topics: [...v.topics.entries()]
+          .map(([topic, t]) => ({ topic, mastery: pct(t.a, t.m), count: t.c }))
+          .sort((x, y) => x.mastery - y.mastery),
+      }))
+      .sort((a, b) => a.mastery - b.mastery);
+  }, [answers, completed]);
+
   const trend = useMemo(
     () =>
       completed
@@ -53,16 +95,74 @@ export function ExamAnalytics({
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={<Target className="h-4 w-4 text-primary" />} label="Overall mastery" value={`${overall}%`} />
-        <Metric icon={<Activity className="h-4 w-4 text-yellow" />} label="Papers completed" value={String(completed.length)} />
-        <Metric icon={<BarChart3 className="h-4 w-4 text-primary" />} label="Questions marked" value={String(answers.length)} />
-        <Metric
-          icon={<TrendingUp className="h-4 w-4 text-emerald-400" />}
-          label="Marks earned"
-          value={`${Math.round(totalAwarded)}/${Math.round(totalPossible)}`}
-        />
+      <div className="rounded-2xl border border-primary/25 bg-card/60 p-6 backdrop-blur-md">
+        <p className="mb-4 text-[11px] uppercase tracking-widest text-muted-foreground">
+          All subjects combined
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Metric icon={<Target className="h-4 w-4 text-primary" />} label="Overall mastery" value={`${overall}%`} />
+          <Metric icon={<Activity className="h-4 w-4 text-yellow" />} label="Papers completed" value={String(completed.length)} />
+          <Metric icon={<BarChart3 className="h-4 w-4 text-primary" />} label="Questions marked" value={String(answers.length)} />
+          <Metric
+            icon={<TrendingUp className="h-4 w-4 text-emerald-400" />}
+            label="Marks earned"
+            value={`${Math.round(totalAwarded)}/${Math.round(totalPossible)}`}
+          />
+        </div>
       </div>
+
+      {/* Per-subject folders */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold tracking-tight">By subject</h3>
+        {bySubject.map((s, si) => (
+          <details
+            key={s.subject}
+            className="fade-in-up group overflow-hidden rounded-2xl border border-border bg-card/60 backdrop-blur-md transition-all duration-300 hover:border-primary/50"
+            style={{ animationDelay: `${si * 60}ms` }}
+          >
+            <summary className="flex cursor-pointer list-none items-center gap-3 p-5">
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-90 group-open:text-primary" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">{s.subject}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {s.papers} {s.papers === 1 ? "paper" : "papers"} · {s.count}{" "}
+                  {s.count === 1 ? "question" : "questions"}
+                </span>
+              </span>
+              <span className="hidden h-2 w-32 overflow-hidden rounded-full bg-surface sm:block">
+                <span
+                  className="bar-fill-anim block h-full rounded-full"
+                  style={{ width: `${s.mastery}%`, background: masteryFill(s.mastery) }}
+                />
+              </span>
+              <span className="shrink-0 text-sm font-semibold tabular-nums gradient-text">{s.mastery}%</span>
+            </summary>
+            <div className="space-y-4 border-t border-border p-5">
+              {s.topics.map((t, i) => (
+                <div key={t.topic}>
+                  <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                    <span className="text-sm">{t.topic}</span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {t.mastery}% · {t.count}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-surface">
+                    <div
+                      className="bar-fill-anim h-full rounded-full"
+                      style={{
+                        width: `${t.mastery}%`,
+                        animationDelay: `${i * 60}ms`,
+                        background: masteryFill(t.mastery),
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
+      </section>
+
 
       {/* Trend */}
       {trend.length > 1 && (
