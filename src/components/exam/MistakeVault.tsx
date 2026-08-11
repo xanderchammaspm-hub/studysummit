@@ -18,6 +18,7 @@ export function MistakeVault({
   const [openId, setOpenId] = useState<string | null>(null);
   const [retry, setRetry] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [closedSubjects, setClosedSubjects] = useState<Record<string, boolean>>({});
   const [retryResult, setRetryResult] = useState<Record<string, { awarded: number; feedback: string }>>({});
 
   const grouped = useMemo(() => {
