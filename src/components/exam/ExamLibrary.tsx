@@ -287,16 +287,42 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
       <Section
         icon={<FileText className="h-4 w-4 text-yellow" />}
         title="My uploads"
-        subtitle="Papers you've added yourself."
+        subtitle="Your own papers, filed by subject."
       >
         {mine.length === 0 ? (
           <p className="rounded-xl border border-border bg-card/40 p-6 text-sm text-muted-foreground">
             Nothing uploaded yet — drop a past paper above to build your own quiz.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {mine.map((p, i) => (
-              <PaperCard key={p.id} paper={p} index={i} onStart={onStart} onDelete={remove} onOpenPdf={openPdf} />
+          <div className="space-y-3">
+            {mineBySubject.map(([subject, rows], si) => (
+              <details
+                key={subject}
+                open
+                className="fade-in-up group overflow-hidden rounded-2xl border border-border bg-card/50 backdrop-blur-md transition-all duration-300 hover:border-primary/50"
+                style={{ animationDelay: `${si * 60}ms` }}
+              >
+                <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-90 group-open:text-primary" />
+                  <FolderOpen className="h-4 w-4 text-yellow" />
+                  <span className="text-sm font-medium">{subject}</span>
+                  <span className="ml-auto rounded-full border border-border bg-surface/70 px-2.5 py-0.5 text-[11px] text-muted-foreground">
+                    {rows.length} {rows.length === 1 ? "paper" : "papers"}
+                  </span>
+                </summary>
+                <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {rows.map((p, i) => (
+                    <PaperCard
+                      key={p.id}
+                      paper={p}
+                      index={i}
+                      onStart={onStart}
+                      onDelete={remove}
+                      onOpenPdf={openPdf}
+                    />
+                  ))}
+                </div>
+              </details>
             ))}
           </div>
         )}
