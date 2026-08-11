@@ -201,9 +201,9 @@ export function MistakeVault({
                           <summary className="cursor-pointer text-xs font-medium text-primary">
                             Show exemplar response
                           </summary>
-                          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                          <MathMarkdown className="mt-3 text-sm leading-relaxed text-muted-foreground">
                             {row.exemplar}
-                          </p>
+                          </MathMarkdown>
                         </details>
                       )}
                     </div>
