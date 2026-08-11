@@ -172,6 +172,15 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
 
   const library = papers.filter((p) => p.is_library);
   const mine = papers.filter((p) => !p.is_library);
+  const mineBySubject = [
+    ...mine
+      .reduce((map, p) => {
+        const key = p.subject || "General";
+        map.set(key, [...(map.get(key) ?? []), p]);
+        return map;
+      }, new Map<string, Paper[]>())
+      .entries(),
+  ].sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
     <div className="space-y-8">
@@ -192,6 +201,16 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           }}
         />
       )}
+
+      {preview && (
+        <InteractivePreviewDialog
+          parsed={preview.parsed}
+          busy={uploading}
+          onCancel={() => setPreview(null)}
+          onConfirm={() => void savePreview()}
+        />
+      )}
+
 
       {/* Uploader */}
       <div
