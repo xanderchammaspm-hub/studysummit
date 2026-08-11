@@ -1,5 +1,5 @@
 import { normalizeUrl } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   FileText,
