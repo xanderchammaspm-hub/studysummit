@@ -66,9 +66,20 @@ export function WeeklyReport() {
     start.setDate(now.getDate() - 6);
     const iso = (d: Date) => d.toISOString().slice(0, 10);
     const inWeek = logs.filter((l) => l.date >= iso(start) && l.date <= iso(now));
+    const perDay = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start);
+      day.setDate(start.getDate() + i);
+      const key = iso(day);
+      return {
+        label: day.toLocaleDateString(undefined, { weekday: "narrow" }),
+        hours: inWeek.filter((l) => l.date === key).reduce((s, l) => s + l.hours, 0),
+      };
+    });
     return {
       hours: inWeek.reduce((s, l) => s + l.hours, 0),
       days: new Set(inWeek.map((l) => l.date)).size,
+      perDay,
+      peak: Math.max(1, ...perDay.map((d) => d.hours)),
     };
   }, [logs]);
 
