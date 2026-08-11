@@ -84,7 +84,6 @@ export function MistakeVault({
 
   return (
     <div className="space-y-8">
-      {grouped.map(([subject, rows]) => (
       {grouped.map(([subject, rows]) => {
         const closed = closedSubjects[subject] ?? false;
         return (
