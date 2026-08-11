@@ -211,7 +211,8 @@ export function MistakeVault({
             })}
           </div>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
