@@ -498,5 +498,100 @@ function ImportChoiceDialog({
   );
 }
 
+/** Glossy confirmation showing exactly what the interactive exam will contain. */
+function InteractivePreviewDialog({
+  parsed,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  parsed: Parsed;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const totalMarks = parsed.questions.reduce((s, q) => s + q.marks, 0);
+  const mcq = parsed.questions.filter((q) => q.qtype === "mcq").length;
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <button
+        aria-label="Close"
+        onClick={onCancel}
+        className="absolute inset-0 cursor-default bg-background/70 backdrop-blur-md"
+      />
+      <div className="scale-in relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/85 shadow-2xl backdrop-blur-2xl">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent"
+        />
+        <div className="flex items-start justify-between gap-4 p-6 pb-4">
+          <div className="min-w-0">
+            <h3 className="truncate bg-gradient-to-r from-primary to-yellow bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+              {parsed.title}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {parsed.subject}
+              {parsed.year ? ` · ${parsed.year}` : ""} · {parsed.questions.length} questions ·{" "}
+              {totalMarks} marks · {mcq} multiple choice
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Discard"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 pb-4">
+          {parsed.questions.slice(0, 6).map((q, i) => (
+            <div key={i} className="rounded-xl border border-border bg-surface/50 p-4">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Q{i + 1} · {q.qtype === "mcq" ? "Multiple choice" : q.qtype === "extended" ? "Extended" : "Short"}
+                </span>
+                <span className="rounded-full border border-yellow/40 bg-yellow/10 px-2 py-0.5 text-[10px] text-yellow">
+                  {q.marks} {q.marks === 1 ? "mark" : "marks"}
+                </span>
+              </div>
+              <MathMarkdown className="text-sm leading-relaxed text-foreground">
+                {q.prompt}
+              </MathMarkdown>
+              {q.options.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {q.options.map((o, oi) => (
+                    <div key={oi} className="flex gap-2 text-xs text-muted-foreground">
+                      <span>{String.fromCharCode(65 + oi)}.</span>
+                      <MathMarkdown className="flex-1">{o}</MathMarkdown>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          {parsed.questions.length > 6 && (
+            <p className="text-center text-xs text-muted-foreground">
+              + {parsed.questions.length - 6} more questions
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border p-4">
+          <Button variant="ghost" onClick={onCancel} disabled={busy}>
+            Discard
+          </Button>
+          <Button onClick={onConfirm} disabled={busy} className="gap-2">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Create interactive exam
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default ExamLibrary;
+
 
