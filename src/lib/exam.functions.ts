@@ -147,8 +147,23 @@ export type ParsedPaper = {
   questions: ParsedQuestion[];
 };
 
-const PARSE_SYSTEM =
-  "You convert exam papers into structured interactive quizzes. Reply with ONLY a JSON object, no prose, no code fences. Shape: {\"title\": string, \"subject\": string, \"year\": number|null, \"questions\": [{\"qtype\": \"mcq\"|\"short\"|\"extended\", \"prompt\": string, \"options\": string[], \"correctOption\": number|null, \"marks\": number, \"criteria\": string, \"exemplar\": string, \"topic\": string}]}. Use qtype 'mcq' only when the paper gives choices (options array with the exact choices, correctOption = 0-based index of the correct one). Use 'extended' for responses worth 6+ marks. ALWAYS write a marking criteria breakdown and a full-mark exemplar answer for every non-mcq question, even if the paper does not provide one. Extract up to 25 questions.";
+const PARSE_SYSTEM = [
+  "You are a mathematical text parser and exam converter. Turn raw exam-paper text into a structured interactive quiz with clean markdown + LaTeX.",
+  "Reply with ONLY a JSON object, no prose, no code fences.",
+  'Shape: {"title": string, "subject": string, "year": number|null, "questions": [{"qtype": "mcq"|"short"|"extended", "prompt": string, "options": string[], "correctOption": number|null, "marks": number, "criteria": string, "exemplar": string, "topic": string}]}',
+  "",
+  "FORMATTING RULES (apply to prompt, options, criteria and exemplar):",
+  "1. Inline maths: wrap every variable, function, expression and derivative in single dollar signs, e.g. $g(x)$, $g'(x) = 0$, $x < -3$.",
+  "2. Display maths: wrap stand-alone equations, matrices and multi-line derivations in double dollar signs ($$...$$).",
+  "3. Derivatives and symbols: use proper prime notation such as $g'(x)$ and $f''(x)$, never text ticks or unicode primes. Use \\frac, \\int, \\sqrt, \\le, \\ge, \\times, \\pi, \\theta, \\infty rather than raw glyphs.",
+  "4. Multiple choice: put each option in the options array WITHOUT its A/B/C/D label, with any maths wrapped in single dollar signs.",
+  "5. Preserve structure: keep roman-numeral lists ((i), (ii), (iii)) on their own lines, and keep sub-parts (a), (b), (c) intact. Use markdown line breaks between them.",
+  "6. Strip page headers, footers, page numbers, mark-scheme boilerplate and OCR artefacts. Never emit stray symbols like  or unmatched braces.",
+  "",
+  "Use qtype 'mcq' only when the paper gives choices (correctOption = 0-based index of the correct one; work it out if the paper does not state it). Use 'extended' for responses worth 6+ marks.",
+  "ALWAYS write a marking criteria breakdown and a full-mark exemplar answer for every non-mcq question, even if the paper does not provide one.",
+  "Extract up to 40 questions, in paper order. Be fast and literal — do not rewrite question wording.",
+].join("\n");
 
 export const parsePaperFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -176,10 +191,13 @@ export const parsePaperFile = createServerFn({ method: "POST" })
       throw new Error("No file content supplied");
     }
 
-    const raw = await callAI([
-      { role: "system", content: PARSE_SYSTEM },
-      { role: "user", content: blocks },
-    ]);
+    const raw = await callAI(
+      [
+        { role: "system", content: PARSE_SYSTEM },
+        { role: "user", content: blocks },
+      ],
+      0.1,
+    );
 
     const parsed = extractJson(raw) as Record<string, unknown>;
     const rawQuestions = Array.isArray(parsed["questions"]) ? parsed["questions"] : [];
