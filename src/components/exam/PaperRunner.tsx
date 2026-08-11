@@ -399,9 +399,9 @@ function Feedback({ result, marks }: { result: Graded; marks: number }) {
           <summary className="cursor-pointer text-xs font-medium text-primary">
             Show exemplar response
           </summary>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+          <MathMarkdown className="mt-3 text-sm leading-relaxed text-muted-foreground">
             {result.exemplar}
-          </p>
+          </MathMarkdown>
         </details>
       )}
     </div>
