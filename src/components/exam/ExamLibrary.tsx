@@ -35,64 +35,85 @@ function readAsDataUrl(file: File) {
   });
 }
 
+type Parsed = Awaited<ReturnType<typeof parsePaperFile>>;
+
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState<File | null>(null);
+  const [preview, setPreview] = useState<{ parsed: Parsed; filename: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleInteractive = useCallback(
-    async (file: File) => {
-      setUploading(true);
-      const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
-      try {
-        const isText = file.type.startsWith("text/") || file.name.endsWith(".txt");
-        const payload = isText
-          ? { filename: file.name, mimeType: file.type || "text/plain", text: await file.text() }
-          : { filename: file.name, mimeType: file.type || "application/pdf", dataUrl: await readAsDataUrl(file) };
+  /** Step 1 — parse the file, then show the confirmation preview. */
+  const handleInteractive = useCallback(async (file: File) => {
+    setUploading(true);
+    const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
+    try {
+      const isText = file.type.startsWith("text/") || file.name.endsWith(".txt");
+      const payload = isText
+        ? { filename: file.name, mimeType: file.type || "text/plain", text: await file.text() }
+        : {
+            filename: file.name,
+            mimeType: file.type || "application/pdf",
+            dataUrl: await readAsDataUrl(file),
+          };
 
-        const parsed = await parsePaperFile({ data: payload });
+      const parsed = await parsePaperFile({ data: payload });
+      toast.success(`${parsed.questions.length} questions found — check the preview`, { id: t });
+      setPreview({ parsed, filename: file.name });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed", { id: t });
+    } finally {
+      setUploading(false);
+    }
+  }, []);
 
-        const { data: paper, error } = await supabase
-          .from("exam_papers")
-          .insert({
-            owner_id: userId,
-            is_library: false,
-            title: parsed.title,
-            subject: parsed.subject,
-            year: parsed.year,
-            exam_type: "Uploaded Paper",
-            description: `${parsed.questions.length} questions extracted from ${file.name}`,
-          })
-          .select()
-          .single();
-        if (error) throw error;
+  /** Step 2 — the student confirmed, so persist the interactive paper. */
+  const savePreview = useCallback(async () => {
+    if (!preview) return;
+    const { parsed, filename } = preview;
+    setUploading(true);
+    const t = toast.loading("Building your interactive paper…");
+    try {
+      const { data: paper, error } = await supabase
+        .from("exam_papers")
+        .insert({
+          owner_id: userId,
+          is_library: false,
+          title: parsed.title,
+          subject: parsed.subject,
+          year: parsed.year,
+          exam_type: "Uploaded Paper",
+          description: `${parsed.questions.length} questions extracted from ${filename}`,
+        })
+        .select()
+        .single();
+      if (error) throw error;
 
-        const rows = parsed.questions.map((q, i) => ({
-          paper_id: (paper as Paper).id,
-          position: i + 1,
-          qtype: q.qtype,
-          prompt: q.prompt,
-          options: q.options,
-          correct_option: q.correctOption,
-          marks: q.marks,
-          criteria: q.criteria,
-          exemplar: q.exemplar,
-          topic: q.topic,
-        }));
-        const { error: qErr } = await supabase.from("exam_questions").insert(rows);
-        if (qErr) throw qErr;
+      const rows = parsed.questions.map((q, i) => ({
+        paper_id: (paper as Paper).id,
+        position: i + 1,
+        qtype: q.qtype,
+        prompt: q.prompt,
+        options: q.options,
+        correct_option: q.correctOption,
+        marks: q.marks,
+        criteria: q.criteria,
+        exemplar: q.exemplar,
+        topic: q.topic,
+      }));
+      const { error: qErr } = await supabase.from("exam_questions").insert(rows);
+      if (qErr) throw qErr;
 
-        toast.success(`${parsed.questions.length} questions ready in "${parsed.title}"`, { id: t });
-        onRefresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Upload failed", { id: t });
-      } finally {
-        setUploading(false);
-      }
-    },
-    [onRefresh, userId],
-  );
+      toast.success(`"${parsed.title}" is ready to sit`, { id: t });
+      setPreview(null);
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save that paper", { id: t });
+    } finally {
+      setUploading(false);
+    }
+  }, [preview, onRefresh, userId]);
 
   /** Store the file as-is so it can be opened or downloaded later. */
   const handleKeepAsPdf = useCallback(
