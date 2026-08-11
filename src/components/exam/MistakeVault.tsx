@@ -5,7 +5,8 @@ import type { AnswerRow } from "./types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { MathMarkdown } from "@/components/MathMarkdown";
 
 export function MistakeVault({
   mistakes,
