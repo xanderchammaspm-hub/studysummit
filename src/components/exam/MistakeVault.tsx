@@ -85,14 +85,25 @@ export function MistakeVault({
   return (
     <div className="space-y-8">
       {grouped.map(([subject, rows]) => (
+      {grouped.map(([subject, rows]) => {
+        const closed = closedSubjects[subject] ?? false;
+        return (
         <section key={subject} className="space-y-3">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setClosedSubjects((s) => ({ ...s, [subject]: !closed }))}
+            className="group flex w-full items-center gap-2 rounded-xl border border-border bg-card/50 px-4 py-3 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50"
+          >
+            <ChevronRight
+              className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${closed ? "" : "rotate-90 text-primary"}`}
+            />
             <AlertTriangle className="h-4 w-4 text-yellow" />
             <h3 className="text-sm font-semibold tracking-tight">{subject}</h3>
-            <span className="text-xs text-muted-foreground">{rows.length} to revisit</span>
-          </div>
+            <span className="ml-auto rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[11px] text-destructive">
+              {rows.length} to revisit
+            </span>
+          </button>
 
-          <div className="space-y-3">
+          <div className={`space-y-3 ${closed ? "hidden" : ""}`}>
             {rows.map((row, i) => {
               const open = openId === row.id;
               const res = retryResult[row.id];
