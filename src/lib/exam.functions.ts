@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { cleanMath } from "@/lib/mathClean";
 import { z } from "zod";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
