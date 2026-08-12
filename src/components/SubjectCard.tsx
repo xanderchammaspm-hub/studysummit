@@ -43,13 +43,8 @@ type Props = {
   defaultOpen?: boolean;
 };
 
-const EMOJI_CHOICES = [
-  "📘", "📗", "📕", "📙", "📓", "🧪", "🧮", "🔬", "⚗️", "🧬",
-  "🖥️", "💻", "📐", "📏", "🧠", "🌍", "🗺️", "🏛️", "🎨", "🎼",
-  "🎭", "⚙️", "🔧", "🧾", "📊", "📈", "✒️", "📝", "🔭", "🧲",
-  "⚽", "🏀", "🎾", "🏈", "🎯", "♟️", "🎲", "🎹", "🎸", "🥁",
-  "💡", "🚀", "🛰️", "🌱", "🍎", "🐛", "🦴", "❤️", "⭐", "🔥",
-];
+
+
 
 export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
