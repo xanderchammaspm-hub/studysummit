@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { parsePaperFile } from "@/lib/exam.functions";
 import type { Paper } from "./types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MathMarkdown } from "@/components/MathMarkdown";
+import { ImportTray } from "./ImportTray";
+import { useImportQueue, type ImportJob } from "@/hooks/useImportQueue";
 import {
   FileText,
   Loader2,
@@ -21,6 +23,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+const PdfViewerDialog = lazy(() =>
+  import("./PdfViewerDialog").then((m) => ({ default: m.PdfViewerDialog })),
+);
 
 type Props = {
   papers: Paper[];
@@ -42,41 +47,85 @@ function readAsDataUrl(file: File) {
 type Parsed = Awaited<ReturnType<typeof parsePaperFile>>;
 
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
-  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState<File | null>(null);
-  const [preview, setPreview] = useState<{ parsed: Parsed; filename: string } | null>(null);
+  const [preview, setPreview] = useState<{ parsed: Parsed; filename: string; jobId: string } | null>(
+    null,
+  );
+  const [viewing, setViewing] = useState<{ url: string; paper: Paper } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /** Step 1 — parse the file, then show the confirmation preview. */
-  const handleInteractive = useCallback(async (file: File) => {
-    setUploading(true);
-    const t = toast.loading(`Reading "${file.name}" — extracting questions…`);
-    try {
-      const isText = file.type.startsWith("text/") || file.name.endsWith(".txt");
+  /** Background worker for every queued import. */
+  const runJob = useCallback(
+    async (job: ImportJob, { setPct, setStage }: { setPct: (n: number) => void; setStage: (s: ImportJob["stage"]) => void }) => {
+      if (job.mode === "pdf") {
+        setStage("uploading");
+        setPct(20);
+        const safe = job.file.name.replace(/[^\w.\-]+/g, "_");
+        const path = `${userId}/${Date.now()}-${safe}`;
+        const { error: upErr } = await supabase.storage
+          .from("exam-papers")
+          .upload(path, job.file, {
+            contentType: job.file.type || "application/pdf",
+            upsert: false,
+          });
+        if (upErr) throw upErr;
+        setPct(80);
+
+        const { error } = await supabase.from("exam_papers").insert({
+          owner_id: userId,
+          is_library: false,
+          title: job.file.name.replace(/\.[^.]+$/, ""),
+          subject: "Uploaded",
+          exam_type: "PDF",
+          description: "Stored as a file — open or download it any time.",
+          file_path: path,
+        });
+        if (error) throw error;
+        onRefresh();
+        return null;
+      }
+
+      // Interactive: read → extract, with a smooth stage-based bar.
+      setStage("extracting");
+      setPct(10);
+      const isText = job.file.type.startsWith("text/") || job.file.name.endsWith(".txt");
       const payload = isText
-        ? { filename: file.name, mimeType: file.type || "text/plain", text: await file.text() }
+        ? {
+            filename: job.file.name,
+            mimeType: job.file.type || "text/plain",
+            text: await job.file.text(),
+          }
         : {
-            filename: file.name,
-            mimeType: file.type || "application/pdf",
-            dataUrl: await readAsDataUrl(file),
+            filename: job.file.name,
+            mimeType: job.file.type || "application/pdf",
+            dataUrl: await readAsDataUrl(job.file),
           };
+      setPct(25);
 
-      const parsed = await parsePaperFile({ data: payload });
-      toast.success(`${parsed.questions.length} questions found — check the preview`, { id: t });
-      setPreview({ parsed, filename: file.name });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed", { id: t });
-    } finally {
-      setUploading(false);
-    }
-  }, []);
+      let crawl = 25;
+      const timer = setInterval(() => {
+        crawl = Math.min(95, crawl + Math.max(0.6, (95 - crawl) * 0.06));
+        setPct(crawl);
+      }, 500);
+      try {
+        return await parsePaperFile({ data: payload });
+      } finally {
+        clearInterval(timer);
+      }
+    },
+    [onRefresh, userId],
+  );
 
-  /** Step 2 — the student confirmed, so persist the interactive paper. */
+  const { jobs, enqueue, dismiss, retry, patch } = useImportQueue(runJob);
+
+  /** The student reviewed the extraction and wants the interactive paper. */
   const savePreview = useCallback(async () => {
     if (!preview) return;
-    const { parsed, filename } = preview;
-    setUploading(true);
+    const { parsed, filename, jobId } = preview;
+    setSaving(true);
+    patch(jobId, { stage: "saving", pct: 60 });
     const t = toast.loading("Building your interactive paper…");
     try {
       const { data: paper, error } = await supabase
@@ -111,48 +160,15 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
 
       toast.success(`"${parsed.title}" is ready to sit`, { id: t });
       setPreview(null);
+      dismiss(jobId);
       onRefresh();
     } catch (err) {
+      patch(jobId, { stage: "ready", pct: 100 });
       toast.error(err instanceof Error ? err.message : "Could not save that paper", { id: t });
     } finally {
-      setUploading(false);
+      setSaving(false);
     }
-  }, [preview, onRefresh, userId]);
-
-  /** Store the file as-is so it can be opened or downloaded later. */
-  const handleKeepAsPdf = useCallback(
-    async (file: File) => {
-      setUploading(true);
-      const t = toast.loading(`Saving "${file.name}"…`);
-      try {
-        const safe = file.name.replace(/[^\w.\-]+/g, "_");
-        const path = `${userId}/${Date.now()}-${safe}`;
-        const { error: upErr } = await supabase.storage
-          .from("exam-papers")
-          .upload(path, file, { contentType: file.type || "application/pdf", upsert: false });
-        if (upErr) throw upErr;
-
-        const { error } = await supabase.from("exam_papers").insert({
-          owner_id: userId,
-          is_library: false,
-          title: file.name.replace(/\.[^.]+$/, ""),
-          subject: "Uploaded",
-          exam_type: "PDF",
-          description: "Stored as a file — open or download it any time.",
-          file_path: path,
-        });
-        if (error) throw error;
-
-        toast.success("Saved to your uploads", { id: t });
-        onRefresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Save failed", { id: t });
-      } finally {
-        setUploading(false);
-      }
-    },
-    [onRefresh, userId],
-  );
+  }, [preview, onRefresh, userId, patch, dismiss]);
 
   async function remove(paper: Paper) {
     if (paper.file_path) {
@@ -170,7 +186,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
       .from("exam-papers")
       .createSignedUrl(paper.file_path, 60 * 60);
     if (error || !data) return toast.error(error?.message ?? "Could not open that file");
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    setViewing({ url: data.signedUrl, paper });
   }
 
 
@@ -191,29 +207,55 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
       {pending && (
         <ImportChoiceDialog
           file={pending}
-          busy={uploading}
+          busy={false}
           onClose={() => setPending(null)}
           onInteractive={() => {
             const f = pending;
             setPending(null);
-            void handleInteractive(f);
+            enqueue(f, "interactive");
+            toast.info("Extracting in the background — keep working.");
           }}
           onPdf={() => {
             const f = pending;
             setPending(null);
-            void handleKeepAsPdf(f);
+            enqueue(f, "pdf");
           }}
         />
+      )}
+
+      <ImportTray
+        jobs={jobs}
+        onDismiss={dismiss}
+        onRetry={retry}
+        onReview={(job) =>
+          setPreview({
+            parsed: job.result as Parsed,
+            filename: job.file.name,
+            jobId: job.id,
+          })
+        }
+      />
+
+      {viewing && (
+        <Suspense fallback={null}>
+          <PdfViewerDialog
+            url={viewing.url}
+            title={viewing.paper.title}
+            subject={viewing.paper.subject}
+            onClose={() => setViewing(null)}
+          />
+        </Suspense>
       )}
 
       {preview && (
         <InteractivePreviewDialog
           parsed={preview.parsed}
-          busy={uploading}
+          busy={saving}
           onCancel={() => setPreview(null)}
           onConfirm={() => void savePreview()}
         />
       )}
+
 
 
       {/* Uploader */}
