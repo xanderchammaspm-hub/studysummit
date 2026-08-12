@@ -290,7 +290,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
         />
         <div className="mx-auto flex max-w-md flex-col items-center gap-3">
           <div className="rounded-xl border border-border bg-surface/70 p-3 pulse-glow">
-            {uploading ? (
+            {jobs.some((j) => j.stage === "uploading" || j.stage === "extracting") ? (
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             ) : (
               <Upload className="h-6 w-6 text-primary" />
@@ -304,7 +304,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           <Button
             type="button"
             variant="outline"
-            disabled={uploading}
+            disabled={false}
             onClick={() => inputRef.current?.click()}
             className="gap-2 border-border bg-surface/60"
           >
