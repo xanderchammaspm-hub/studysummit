@@ -159,47 +159,15 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               <span>{subject.emoji || "📘"}</span>
             </button>
             {pickerOpen && (
-              <>
-                <button
-                  className="fixed inset-0 z-40 cursor-default"
-                  onClick={() => setPickerOpen(false)}
-                  tabIndex={-1}
-                  aria-label="Close emoji picker"
-                />
-                <div className="absolute z-50 mt-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-xl">
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="Type or paste any emoji…"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        const v = (e.target as HTMLInputElement).value.trim();
-                        if (v) {
-                          updateSubject({ emoji: [...v][0] ?? v });
-                          setPickerOpen(false);
-                        }
-                      }
-                      if (e.key === "Escape") setPickerOpen(false);
-                    }}
-                    className="w-full mb-2 rounded-md border border-border bg-background/60 px-2 py-1.5 text-sm outline-none focus:border-primary"
-                  />
-                  <div className="grid grid-cols-6 gap-1 max-h-56 overflow-y-auto">
-                    {EMOJI_CHOICES.map((em) => (
-                      <button
-                        key={em}
-                        onClick={() => {
-                          updateSubject({ emoji: em });
-                          setPickerOpen(false);
-                        }}
-                        className="flex h-9 w-9 items-center justify-center rounded hover:bg-primary/20 text-lg"
-                      >
-                        {em}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
+              <EmojiPicker
+                onPick={(em) => {
+                  updateSubject({ emoji: em });
+                  setPickerOpen(false);
+                }}
+                onClose={() => setPickerOpen(false)}
+              />
             )}
+
           </div>
           <SubjectColorPicker value={accent} onChange={(hex) => updateSubject({ color: hex })} />
           <div className="min-w-0 flex-1">
