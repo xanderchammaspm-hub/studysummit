@@ -239,6 +239,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
       {viewing && (
         <Suspense fallback={null}>
           <PdfViewerDialog
+            paperId={viewing.paper.id}
             url={viewing.url}
             title={viewing.paper.title}
             subject={viewing.paper.subject}
