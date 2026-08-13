@@ -58,6 +58,42 @@ export type Attempt = {
   total_marks: number;
 };
 
+/** Normalised rectangle (0-1 relative to the rendered page box). */
+export type NormRect = { x: number; y: number; w: number; h: number };
+
+export type HighlightColour = "purple" | "gold" | "green" | "red";
+
+export type Highlight = {
+  id: string;
+  page: number;
+  rects: NormRect[];
+  colour: HighlightColour;
+  text: string;
+  createdAt: number;
+};
+
+export type PaperNote = {
+  id: string;
+  page: number;
+  /** Normalised 0-1 position on the page. */
+  x: number;
+  y: number;
+  body: string;
+  createdAt: number;
+};
+
+export type PaperAnnotations = {
+  highlights: Highlight[];
+  notes: PaperNote[];
+};
+
+export const HIGHLIGHT_COLOURS: Record<HighlightColour, string> = {
+  purple: "oklch(0.72 0.2 300)",
+  gold: "oklch(0.85 0.16 90)",
+  green: "oklch(0.78 0.16 145)",
+  red: "oklch(0.7 0.2 25)",
+};
+
 export const SUBJECT_ACCENT: Record<string, string> = {
   "English Advanced": "oklch(0.72 0.2 300)",
   "Mathematics Advanced": "oklch(0.8 0.14 200)",
