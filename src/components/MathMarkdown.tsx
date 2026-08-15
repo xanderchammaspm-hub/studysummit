@@ -1,8 +1,69 @@
+import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
-import rehypeKatex from "rehype-katex";
+import katex from "katex";
 import "katex/dist/katex.min.css";
+
+type Token = { type: "text" | "math"; value: string; display?: boolean };
+
+/** Normalise the LaTeX delimiters models and PDF extractors emit. */
+function normalise(src: string): string {
+  return src
+    .replace(/\\\\(frac|sqrt|int|sum|times|cdot|le|ge|neq|pi|theta|alpha|beta|infty|left|right|begin|end|text|mathrm|approx|pm)/g, "\\$1")
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, inner) => `$$${inner}$$`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, inner) => `$${inner}$`);
+}
+
+/**
+ * Split a string into plain-markdown and maths tokens. Done by hand rather than
+ * through a remark plugin so maths always renders, in every build.
+ */
+function tokenise(src: string): Token[] {
+  const out: Token[] = [];
+  let buf = "";
+  let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === "\\" && (src[i + 1] === "$")) {
+      buf += "$";
+      i += 2;
+      continue;
+    }
+    if (ch === "$") {
+      const display = src[i + 1] === "$";
+      const open = display ? 2 : 1;
+      const close = src.indexOf(display ? "$$" : "$", i + open);
+      if (close > i + open - 1) {
+        const inner = src.slice(i + open, close);
+        // A lone dollar (prices etc.) shouldn't swallow the rest of the line.
+        if (inner.trim() && (display || !/\n\s*\n/.test(inner))) {
+          if (buf) out.push({ type: "text", value: buf });
+          buf = "";
+          out.push({ type: "math", value: inner, display });
+          i = close + open;
+          continue;
+        }
+      }
+    }
+    buf += ch;
+    i += 1;
+  }
+  if (buf) out.push({ type: "text", value: buf });
+  return out;
+}
+
+function renderMath(value: string, display: boolean): string {
+  try {
+    return katex.renderToString(value, {
+      displayMode: display,
+      throwOnError: false,
+      strict: false,
+      output: "html",
+    });
+  } catch {
+    return "";
+  }
+}
 
 /**
  * Markdown + LaTeX renderer used everywhere exam text is displayed.
@@ -15,14 +76,34 @@ export function MathMarkdown({
   children: string;
   className?: string;
 }) {
+  const tokens = useMemo(() => tokenise(normalise(children ?? "")), [children]);
+
   return (
     <div className={`math-md ${className}`}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: false }]]}
-      >
-        {children}
-      </ReactMarkdown>
+      {tokens.map((t, i) => {
+        if (t.type === "math") {
+          const html = renderMath(t.value, !!t.display);
+          if (!html) {
+            return (
+              <code key={i} className="whitespace-pre-wrap">
+                {t.value}
+              </code>
+            );
+          }
+          return (
+            <span
+              key={i}
+              className={t.display ? "block my-3 text-center" : "inline"}
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          );
+        }
+        return (
+          <span key={i} className="math-md-text">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.value}</ReactMarkdown>
+          </span>
+        );
+      })}
     </div>
   );
 }
