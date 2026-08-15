@@ -876,6 +876,10 @@ input[type="range"]::-moz-range-thumb {
 .math-md > :first-child { margin-top: 0; }
 .math-md > :last-child { margin-bottom: 0; }
 .math-md p { margin: 0 0 0.6em; }
+/* Text runs sit between inline maths, so keep their paragraphs in flow. */
+.math-md-text { display: inline; }
+.math-md-text > p:only-child { display: inline; margin: 0; }
+.math-md-text > :last-child { margin-bottom: 0; }
 .math-md ol,
 .math-md ul { margin: 0 0 0.6em 1.15em; list-style: revert; }
 .math-md li { margin: 0.2em 0; }
