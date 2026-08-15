@@ -109,5 +109,3 @@ export function MathMarkdown({
 }
 
 export default MathMarkdown;
-
-export default MathMarkdown;
