@@ -98,9 +98,14 @@ export function MathMarkdown({
             />
           );
         }
+        // Markdown trims edge whitespace, so re-add it around inline maths.
+        const lead = /^[ \t]/.test(t.value) ? " " : "";
+        const trail = /[ \t]$/.test(t.value) ? " " : "";
         return (
           <span key={i} className="math-md-text">
+            {lead}
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.value}</ReactMarkdown>
+            {trail}
           </span>
         );
       })}
