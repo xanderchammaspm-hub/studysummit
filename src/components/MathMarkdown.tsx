@@ -109,3 +109,9 @@ export function MathMarkdown({
 }
 
 export default MathMarkdown;
+      })}
+    </div>
+  );
+}
+
+export default MathMarkdown;
