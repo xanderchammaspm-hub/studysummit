@@ -387,7 +387,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               icon={<BellRing className="h-4 w-4" />}
               title="Assessment Notifications"
             >
-              <div className="grid gap-2 mb-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto]">
+              <div className="mb-3 grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,150px)_auto]">
                 <input
                   value={aTitle}
                   onChange={(e) => setATitle(e.target.value)}
