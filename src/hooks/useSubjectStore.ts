@@ -48,16 +48,17 @@ export const TERM_LABEL: Record<TermKey, string> = {
   T4: "Term 4",
 };
 
-const emptyTerm: TermState = { papers: [], topics: [], assessments: [], syllabus: [] };
+const emptyTerm = (): TermState => ({ papers: [], topics: [], assessments: [], syllabus: [] });
 
 /** Terms for a subject, migrating any legacy top-level content into Term 1. */
 export function subjectTerms(raw?: SubjectState): Record<TermKey, TermState> {
   const base: Record<TermKey, TermState> = {
-    T1: { ...emptyTerm },
-    T2: { ...emptyTerm },
-    T3: { ...emptyTerm },
-    T4: { ...emptyTerm },
+    T1: emptyTerm(),
+    T2: emptyTerm(),
+    T3: emptyTerm(),
+    T4: emptyTerm(),
   };
+
   if (!raw) return base;
   if (raw.terms) {
     for (const k of Object.keys(base) as TermKey[]) {
