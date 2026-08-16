@@ -313,18 +313,18 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setPaperTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addPaper()}
                   placeholder="Paper title (e.g. 2023 Paper 1)"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   value={paperUrl}
                   onChange={(e) => setPaperUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addPaper()}
                   placeholder="Link (optional)"
-                  className="sm:w-40 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="sm:w-56 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addPaper}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -391,24 +391,24 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setATitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addAssessment()}
                   placeholder="Assessment (e.g. Trial Exam)"
-                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   value={aUrl}
                   onChange={(e) => setAUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addAssessment()}
                   placeholder="Notification link"
-                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   type="date"
                   value={aDue}
                   onChange={(e) => setADue(e.target.value)}
-                  className="rounded-md border border-border bg-background/60 px-2 py-1.5 text-sm outline-none focus:border-primary text-muted-foreground"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30 text-muted-foreground"
                 />
                 <button
                   onClick={addAssessment}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -485,11 +485,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setTopicTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTopic()}
                   placeholder="Topic name"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addTopic}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -559,11 +559,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setDotText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addDot()}
                   placeholder="Paste a NESA dot point"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addDot}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -973,7 +973,7 @@ function NotesDocInput({
             if (e.key === "Escape") setEditing(false);
           }}
           placeholder="https://docs.google.com/document/…"
-          className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+          className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
         />
         <button
           onClick={save}
