@@ -552,7 +552,19 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
             </Section>
 
             {/* Syllabus dot points */}
-            <Section icon={<ListChecks className="h-4 w-4" />} title="Syllabus Dot Points">
+            <Section
+              icon={<ListChecks className="h-4 w-4" />}
+              title="Syllabus Dot Points"
+              collapsible
+              sectionKey={`${id}:${term}:syllabus`}
+              defaultOpen={state.syllabus.length <= 6}
+              summary={
+                <span className="rounded-full border border-border/70 bg-background/50 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+                  {state.syllabus.filter((p) => p.done).length}/{state.syllabus.length} covered · {dotPct}%
+                </span>
+              }
+            >
+
               <div className="flex gap-2 mb-3">
                 <input
                   value={dotText}
