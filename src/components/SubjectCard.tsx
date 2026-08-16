@@ -476,7 +476,19 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               icon={<TrafficLightIcon size={14} />}
               title="Traffic Light System"
               accent
+              collapsible
+              sectionKey={`${id}:${term}:traffic`}
+              defaultOpen={state.topics.length <= 6}
+              summary={
+                <span className="flex items-center gap-1.5 rounded-full border border-border/70 bg-background/50 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+                  <span style={{ color: "var(--acc)" }}>{trafficPct}%</span>
+                  <span style={{ color: STATUS_COLOR.green }}>🟢{greenCount}</span>
+                  <span style={{ color: STATUS_COLOR.amber }}>🟡{yellowCount}</span>
+                  <span style={{ color: STATUS_COLOR.red }}>🔴{redCount}</span>
+                </span>
+              }
             >
+
               <TrafficStats label={label} topics={state.topics} />
               <div className="flex gap-2 mb-3">
 
