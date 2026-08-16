@@ -374,9 +374,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               title="Notes Doc"
             >
               <NotesDocInput
+                key={`${id}:${term}`}
                 url={state.notesUrl}
                 onChange={(notesUrl) => update({ notesUrl })}
               />
+
             </Section>
 
 
