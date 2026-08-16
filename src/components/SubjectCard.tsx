@@ -67,6 +67,26 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [aDue, setADue] = useState("");
   const [dotText, setDotText] = useState("");
 
+  // Switching terms must never carry half-typed drafts across.
+  useEffect(() => {
+    setPaperTitle("");
+    setPaperUrl("");
+    setTopicTitle("");
+    setATitle("");
+    setAUrl("");
+    setADue("");
+    setDotText("");
+  }, [term, id]);
+
+  const greenCount = state.topics.filter((t) => t.status === "green").length;
+  const yellowCount = state.topics.filter((t) => t.status === "amber").length;
+  const redCount = state.topics.filter((t) => t.status === "red").length;
+  const trafficPct = state.topics.length
+    ? Math.round(((greenCount + yellowCount * 0.5) / state.topics.length) * 100)
+    : 0;
+
+
+
   const dotPct =
     state.syllabus.length === 0
       ? 0
