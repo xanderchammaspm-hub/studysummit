@@ -67,6 +67,26 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
   const [aDue, setADue] = useState("");
   const [dotText, setDotText] = useState("");
 
+  // Switching terms must never carry half-typed drafts across.
+  useEffect(() => {
+    setPaperTitle("");
+    setPaperUrl("");
+    setTopicTitle("");
+    setATitle("");
+    setAUrl("");
+    setADue("");
+    setDotText("");
+  }, [term, id]);
+
+  const greenCount = state.topics.filter((t) => t.status === "green").length;
+  const yellowCount = state.topics.filter((t) => t.status === "amber").length;
+  const redCount = state.topics.filter((t) => t.status === "red").length;
+  const trafficPct = state.topics.length
+    ? Math.round(((greenCount + yellowCount * 0.5) / state.topics.length) * 100)
+    : 0;
+
+
+
   const dotPct =
     state.syllabus.length === 0
       ? 0
@@ -293,18 +313,18 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setPaperTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addPaper()}
                   placeholder="Paper title (e.g. 2023 Paper 1)"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   value={paperUrl}
                   onChange={(e) => setPaperUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addPaper()}
                   placeholder="Link (optional)"
-                  className="sm:w-40 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="sm:w-56 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addPaper}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -354,9 +374,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               title="Notes Doc"
             >
               <NotesDocInput
+                key={`${id}:${term}`}
                 url={state.notesUrl}
                 onChange={(notesUrl) => update({ notesUrl })}
               />
+
             </Section>
 
 
@@ -365,30 +387,30 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               icon={<BellRing className="h-4 w-4" />}
               title="Assessment Notifications"
             >
-              <div className="grid gap-2 mb-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto]">
+              <div className="mb-3 grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,150px)_auto]">
                 <input
                   value={aTitle}
                   onChange={(e) => setATitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addAssessment()}
                   placeholder="Assessment (e.g. Trial Exam)"
-                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   value={aUrl}
                   onChange={(e) => setAUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addAssessment()}
                   placeholder="Notification link"
-                  className="rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <input
                   type="date"
                   value={aDue}
                   onChange={(e) => setADue(e.target.value)}
-                  className="rounded-md border border-border bg-background/60 px-2 py-1.5 text-sm outline-none focus:border-primary text-muted-foreground"
+                  className="min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30 text-muted-foreground"
                 />
                 <button
                   onClick={addAssessment}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -456,7 +478,19 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
               icon={<TrafficLightIcon size={14} />}
               title="Traffic Light System"
               accent
+              collapsible
+              sectionKey={`${id}:${term}:traffic`}
+              defaultOpen={state.topics.length <= 6}
+              summary={
+                <span className="flex items-center gap-1.5 rounded-full border border-border/70 bg-background/50 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+                  <span style={{ color: "var(--acc)" }}>{trafficPct}%</span>
+                  <span style={{ color: STATUS_COLOR.green }}>🟢{greenCount}</span>
+                  <span style={{ color: STATUS_COLOR.amber }}>🟡{yellowCount}</span>
+                  <span style={{ color: STATUS_COLOR.red }}>🔴{redCount}</span>
+                </span>
+              }
             >
+
               <TrafficStats label={label} topics={state.topics} />
               <div className="flex gap-2 mb-3">
 
@@ -465,11 +499,11 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   onChange={(e) => setTopicTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTopic()}
                   placeholder="Topic name"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addTopic}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -532,18 +566,30 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
             </Section>
 
             {/* Syllabus dot points */}
-            <Section icon={<ListChecks className="h-4 w-4" />} title="Syllabus Dot Points">
+            <Section
+              icon={<ListChecks className="h-4 w-4" />}
+              title="Syllabus Dot Points"
+              collapsible
+              sectionKey={`${id}:${term}:syllabus`}
+              defaultOpen={state.syllabus.length <= 6}
+              summary={
+                <span className="rounded-full border border-border/70 bg-background/50 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+                  {state.syllabus.filter((p) => p.done).length}/{state.syllabus.length} covered · {dotPct}%
+                </span>
+              }
+            >
+
               <div className="flex gap-2 mb-3">
                 <input
                   value={dotText}
                   onChange={(e) => setDotText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addDot()}
                   placeholder="Paste a NESA dot point"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   onClick={addDot}
-                  className="flex items-center justify-center gap-1 rounded-md border border-primary/60 bg-primary/20 px-3 py-1.5 text-sm text-foreground hover:bg-primary/30"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/30"
                 >
                   <Plus className="h-4 w-4" /> Add
                 </button>
@@ -807,36 +853,111 @@ function QuickChips({
   );
 }
 
+const SECTIONS_KEY = "study-hub-sections-v1";
+
+function readSections(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(SECTIONS_KEY) || "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+/** Remembers a collapsible section's open state per subject + term. */
+function useSectionOpen(key: string, fallback: boolean) {
+  const [open, setOpen] = useState(fallback);
+  useEffect(() => {
+    const saved = readSections()[key];
+    setOpen(typeof saved === "boolean" ? saved : fallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const toggle = () => {
+    setOpen((o) => {
+      const next = !o;
+      try {
+        localStorage.setItem(SECTIONS_KEY, JSON.stringify({ ...readSections(), [key]: next }));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+  return [open, toggle] as const;
+}
+
 function Section({
   icon,
   title,
   accent = false,
   children,
+  collapsible = false,
+  sectionKey,
+  defaultOpen = true,
+  summary,
 }: {
   icon: React.ReactNode;
   title: string;
   accent?: boolean;
   children: React.ReactNode;
+  collapsible?: boolean;
+  sectionKey?: string;
+  defaultOpen?: boolean;
+  summary?: React.ReactNode;
 }) {
-  return (
-    <div className="rounded-lg border border-border/70 bg-surface/60 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-primary">{icon}</span>
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-foreground">
-          {title}
-        </h3>
+  const [open, toggle] = useSectionOpen(sectionKey ?? title, defaultOpen);
+  const isOpen = collapsible ? open : true;
+
+  const header = (
+    <div className="flex items-center gap-2">
+      <span className="text-primary shrink-0">{icon}</span>
+      <h3 className="text-sm font-semibold tracking-wide uppercase text-foreground truncate">
+        {title}
+      </h3>
+      <span className="ml-auto flex items-center gap-2 shrink-0">
+        {collapsible && !isOpen && summary}
         {accent && (
-          <span className="ml-auto flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5">
             <StatusDot status="red" />
             <StatusDot status="amber" />
             <StatusDot status="green" />
           </span>
         )}
+        {collapsible && (
+          <ChevronDown
+            className={`h-4 w-4 text-primary transition-transform duration-300 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        )}
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="rounded-lg border border-border/70 bg-surface/60 p-4">
+      {collapsible ? (
+        <button
+          onClick={toggle}
+          aria-expanded={isOpen}
+          className="w-full text-left transition-colors hover:opacity-90"
+        >
+          {header}
+        </button>
+      ) : (
+        header
+      )}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
+          isOpen ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">{children}</div>
       </div>
-      {children}
     </div>
   );
 }
+
 
 function NotesDocInput({
   url,
@@ -878,7 +999,7 @@ function NotesDocInput({
             if (e.key === "Escape") setEditing(false);
           }}
           placeholder="https://docs.google.com/document/…"
-          className="flex-1 rounded-md border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary"
+          className="flex-1 min-w-0 w-full rounded-lg border border-border bg-background/60 px-3.5 py-2.5 text-[15px] outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
         />
         <button
           onClick={save}
