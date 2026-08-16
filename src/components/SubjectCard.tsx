@@ -827,36 +827,111 @@ function QuickChips({
   );
 }
 
+const SECTIONS_KEY = "study-hub-sections-v1";
+
+function readSections(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(SECTIONS_KEY) || "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+/** Remembers a collapsible section's open state per subject + term. */
+function useSectionOpen(key: string, fallback: boolean) {
+  const [open, setOpen] = useState(fallback);
+  useEffect(() => {
+    const saved = readSections()[key];
+    setOpen(typeof saved === "boolean" ? saved : fallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const toggle = () => {
+    setOpen((o) => {
+      const next = !o;
+      try {
+        localStorage.setItem(SECTIONS_KEY, JSON.stringify({ ...readSections(), [key]: next }));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+  return [open, toggle] as const;
+}
+
 function Section({
   icon,
   title,
   accent = false,
   children,
+  collapsible = false,
+  sectionKey,
+  defaultOpen = true,
+  summary,
 }: {
   icon: React.ReactNode;
   title: string;
   accent?: boolean;
   children: React.ReactNode;
+  collapsible?: boolean;
+  sectionKey?: string;
+  defaultOpen?: boolean;
+  summary?: React.ReactNode;
 }) {
-  return (
-    <div className="rounded-lg border border-border/70 bg-surface/60 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-primary">{icon}</span>
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-foreground">
-          {title}
-        </h3>
+  const [open, toggle] = useSectionOpen(sectionKey ?? title, defaultOpen);
+  const isOpen = collapsible ? open : true;
+
+  const header = (
+    <div className="flex items-center gap-2">
+      <span className="text-primary shrink-0">{icon}</span>
+      <h3 className="text-sm font-semibold tracking-wide uppercase text-foreground truncate">
+        {title}
+      </h3>
+      <span className="ml-auto flex items-center gap-2 shrink-0">
+        {collapsible && !isOpen && summary}
         {accent && (
-          <span className="ml-auto flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5">
             <StatusDot status="red" />
             <StatusDot status="amber" />
             <StatusDot status="green" />
           </span>
         )}
+        {collapsible && (
+          <ChevronDown
+            className={`h-4 w-4 text-primary transition-transform duration-300 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        )}
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="rounded-lg border border-border/70 bg-surface/60 p-4">
+      {collapsible ? (
+        <button
+          onClick={toggle}
+          aria-expanded={isOpen}
+          className="w-full text-left transition-colors hover:opacity-90"
+        >
+          {header}
+        </button>
+      ) : (
+        header
+      )}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
+          isOpen ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">{children}</div>
       </div>
-      {children}
     </div>
   );
 }
+
 
 function NotesDocInput({
   url,
