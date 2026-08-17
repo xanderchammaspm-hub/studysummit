@@ -34,6 +34,9 @@ export function EssayStructureBoard({
   // Reload whenever the workspace changes so lists never bleed across modes.
   useEffect(() => {
     setSteps(load(modeId));
+    const onRemote = () => setSteps(load(modeId));
+    window.addEventListener("summit-remote-sync", onRemote);
+    return () => window.removeEventListener("summit-remote-sync", onRemote);
   }, [modeId]);
 
   const commit = useCallback(
