@@ -182,6 +182,18 @@ function setSubjectsStore(
 
 const defaultState: SubjectState = { emoji: "📘", papers: [], topics: [], assessments: [] };
 
+/** When the account copy lands from another device, re-read every cache. */
+if (typeof window !== "undefined") {
+  window.addEventListener("summit-remote-sync", () => {
+    stateCache = loadState();
+    subjectsCache = loadSubjects();
+    linksCache = loadLinks();
+    stateListeners.forEach((l) => l());
+    subjectListeners.forEach((l) => l());
+    linkListeners.forEach((l) => l());
+  });
+}
+
 export function useAllSubjectStates() {
   const [, setTick] = useState(0);
   useEffect(() => {

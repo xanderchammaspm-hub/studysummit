@@ -153,6 +153,8 @@ function watchRealtime(uid: string) {
         if (pending.has(row.key)) return;
         if (localStorage.getItem(row.key) === row.value.d) return;
         localStorage.setItem(row.key, row.value.d);
+        // Module-level caches must re-read the freshly pulled value.
+        window.dispatchEvent(new CustomEvent("summit-remote-sync", { detail: row.key }));
       },
     )
     .subscribe();

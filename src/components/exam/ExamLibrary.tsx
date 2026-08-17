@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { parsePaperFile } from "@/lib/exam.functions";
 import type { Paper } from "./types";
@@ -46,15 +46,35 @@ function readAsDataUrl(file: File) {
 
 type Parsed = Awaited<ReturnType<typeof parsePaperFile>>;
 
+type ImportPref = "ask" | "interactive" | "pdf";
+const IMPORT_PREF_KEY = "summit-exam-import-mode";
+
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState<File | null>(null);
+  const [importPref, setImportPref] = useState<ImportPref>("ask");
   const [preview, setPreview] = useState<{ parsed: Parsed; filename: string; jobId: string } | null>(
     null,
   );
   const [viewing, setViewing] = useState<{ url: string; paper: Paper } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Remember the student's upload preference across sessions and devices.
+  useEffect(() => {
+    const saved = localStorage.getItem(IMPORT_PREF_KEY) as ImportPref | null;
+    if (saved === "ask" || saved === "interactive" || saved === "pdf") setImportPref(saved);
+  }, []);
+
+  const choosePref = (next: ImportPref) => {
+    setImportPref(next);
+    try {
+      localStorage.setItem(IMPORT_PREF_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
+
 
   /** Background worker for every queued import. */
   const runJob = useCallback(
@@ -119,6 +139,18 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
   );
 
   const { jobs, enqueue, dismiss, retry, patch } = useImportQueue(runJob);
+
+  /** Route an uploaded file through the student's standing choice. */
+  const handleFile = useCallback(
+    (file: File) => {
+      if (importPref === "ask") return setPending(file);
+      enqueue(file, importPref);
+      if (importPref === "interactive") toast.info("Extracting in the background — keep working.");
+    },
+    [importPref, enqueue],
+  );
+
+
 
   /** The student reviewed the extraction and wants the interactive paper. */
   const savePreview = useCallback(async () => {
@@ -270,7 +302,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           e.preventDefault();
           setDragging(false);
           const f = e.dataTransfer.files?.[0];
-          if (f) setPending(f);
+          if (f) handleFile(f);
         }}
         className={`relative overflow-hidden rounded-2xl border border-dashed p-8 text-center transition-all duration-300 ${
           dragging
@@ -285,7 +317,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) setPending(f);
+            if (f) handleFile(f);
             e.target.value = "";
           }}
         />
@@ -299,9 +331,37 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </div>
           <h3 className="text-lg font-semibold tracking-tight">Upload a past paper</h3>
           <p className="text-sm text-muted-foreground">
-            Drop a PDF, image or text file here — then choose an interactive exam or keep it as a
-            plain PDF.
+            Drop a PDF, image or text file here — your choice below decides what happens next.
           </p>
+
+          {/* Always-visible import choice */}
+          <div className="mt-1 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-border/70 bg-surface/50 p-1.5 backdrop-blur">
+            {(
+              [
+                { id: "ask", label: "Ask each time", icon: <Sparkles className="h-3.5 w-3.5" /> },
+                {
+                  id: "interactive",
+                  label: "Interactive exam",
+                  icon: <Wand2 className="h-3.5 w-3.5" />,
+                },
+                { id: "pdf", label: "PDF view", icon: <FileDown className="h-3.5 w-3.5" /> },
+              ] as { id: ImportPref; label: string; icon: React.ReactNode }[]
+            ).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => choosePref(o.id)}
+                className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-all duration-300 ${
+                  importPref === o.id
+                    ? "bg-primary/20 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
+                    : "text-muted-foreground hover:bg-surface/80 hover:text-foreground"
+                }`}
+              >
+                {o.icon} {o.label}
+              </button>
+            ))}
+          </div>
+
           <Button
             type="button"
             variant="outline"
@@ -312,6 +372,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
             <Sparkles className="h-4 w-4 text-yellow" /> Choose file
           </Button>
         </div>
+
       </div>
 
 

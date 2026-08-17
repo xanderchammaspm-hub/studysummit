@@ -7,6 +7,7 @@ import { ShortAnswerMark } from "@/components/ShortAnswerMark";
 import { AtlasSectionChat } from "@/components/AtlasSectionChat";
 import { MODES, type DocSection } from "@/data/englishFormula";
 import { useEnglishFormula } from "@/hooks/useEnglishFormula";
+import { EssayStructureBoard } from "@/components/EssayStructureBoard";
 
 const EDITOR_PREFIX = "summit-english-formula-v1:";
 
@@ -185,6 +186,7 @@ export function EnglishFormula() {
                   <Plus className="h-3.5 w-3.5" /> Add section
                 </button>
               )}
+              <EssayStructureBoard modeId={mode.id} modeLabel={mode.label} />
             </aside>
 
             {/* Workspace */}
