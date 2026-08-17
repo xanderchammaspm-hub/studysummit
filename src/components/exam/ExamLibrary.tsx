@@ -140,6 +140,18 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
 
   const { jobs, enqueue, dismiss, retry, patch } = useImportQueue(runJob);
 
+  /** Route an uploaded file through the student's standing choice. */
+  const handleFile = useCallback(
+    (file: File) => {
+      if (importPref === "ask") return setPending(file);
+      enqueue(file, importPref);
+      if (importPref === "interactive") toast.info("Extracting in the background — keep working.");
+    },
+    [importPref, enqueue],
+  );
+
+
+
   /** The student reviewed the extraction and wants the interactive paper. */
   const savePreview = useCallback(async () => {
     if (!preview) return;
