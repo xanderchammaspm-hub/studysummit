@@ -118,10 +118,14 @@ export function MathMarkdown({
         if (t.type === "math") {
           const html = renderMath(t.value, !!t.display);
           if (!html) {
+            // Never show raw LaTeX — degrade to readable plain maths.
             return (
-              <code key={i} className="whitespace-pre-wrap">
-                {t.value}
-              </code>
+              <span
+                key={i}
+                className={t.display ? "block my-2 text-center font-medium" : "inline font-medium"}
+              >
+                {plainMath(t.value)}
+              </span>
             );
           }
           return (
@@ -135,13 +139,17 @@ export function MathMarkdown({
         // Markdown trims edge whitespace, so re-add it around inline maths.
         const lead = /^[ \t]/.test(t.value) ? " " : "";
         const trail = /[ \t]$/.test(t.value) ? " " : "";
+        // Any LaTeX left outside delimiters (unbalanced $, stray commands) is
+        // cleaned up so a bad extraction still reads properly.
+        const safe = /\\[a-zA-Z]{2,}|\\\(|\\\[/.test(t.value) ? plainMath(t.value) : t.value;
         return (
           <span key={i} className="math-md-text">
             {lead}
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.value}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{safe}</ReactMarkdown>
             {trail}
           </span>
         );
+
       })}
     </div>
   );
