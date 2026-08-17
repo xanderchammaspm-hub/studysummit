@@ -290,7 +290,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           e.preventDefault();
           setDragging(false);
           const f = e.dataTransfer.files?.[0];
-          if (f) setPending(f);
+          if (f) handleFile(f);
         }}
         className={`relative overflow-hidden rounded-2xl border border-dashed p-8 text-center transition-all duration-300 ${
           dragging
@@ -305,7 +305,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) setPending(f);
+            if (f) handleFile(f);
             e.target.value = "";
           }}
         />
@@ -319,9 +319,37 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
           </div>
           <h3 className="text-lg font-semibold tracking-tight">Upload a past paper</h3>
           <p className="text-sm text-muted-foreground">
-            Drop a PDF, image or text file here — then choose an interactive exam or keep it as a
-            plain PDF.
+            Drop a PDF, image or text file here — your choice below decides what happens next.
           </p>
+
+          {/* Always-visible import choice */}
+          <div className="mt-1 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-border/70 bg-surface/50 p-1.5 backdrop-blur">
+            {(
+              [
+                { id: "ask", label: "Ask each time", icon: <Sparkles className="h-3.5 w-3.5" /> },
+                {
+                  id: "interactive",
+                  label: "Interactive exam",
+                  icon: <Wand2 className="h-3.5 w-3.5" />,
+                },
+                { id: "pdf", label: "PDF view", icon: <FileDown className="h-3.5 w-3.5" /> },
+              ] as { id: ImportPref; label: string; icon: React.ReactNode }[]
+            ).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => choosePref(o.id)}
+                className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-all duration-300 ${
+                  importPref === o.id
+                    ? "bg-primary/20 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
+                    : "text-muted-foreground hover:bg-surface/80 hover:text-foreground"
+                }`}
+              >
+                {o.icon} {o.label}
+              </button>
+            ))}
+          </div>
+
           <Button
             type="button"
             variant="outline"
@@ -332,6 +360,7 @@ export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Pro
             <Sparkles className="h-4 w-4 text-yellow" /> Choose file
           </Button>
         </div>
+
       </div>
 
 
