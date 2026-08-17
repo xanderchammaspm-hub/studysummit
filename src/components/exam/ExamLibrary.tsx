@@ -46,15 +46,35 @@ function readAsDataUrl(file: File) {
 
 type Parsed = Awaited<ReturnType<typeof parsePaperFile>>;
 
+type ImportPref = "ask" | "interactive" | "pdf";
+const IMPORT_PREF_KEY = "summit-exam-import-mode";
+
 export function ExamLibrary({ papers, loading, onStart, onRefresh, userId }: Props) {
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pending, setPending] = useState<File | null>(null);
+  const [importPref, setImportPref] = useState<ImportPref>("ask");
   const [preview, setPreview] = useState<{ parsed: Parsed; filename: string; jobId: string } | null>(
     null,
   );
   const [viewing, setViewing] = useState<{ url: string; paper: Paper } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Remember the student's upload preference across sessions and devices.
+  useEffect(() => {
+    const saved = localStorage.getItem(IMPORT_PREF_KEY) as ImportPref | null;
+    if (saved === "ask" || saved === "interactive" || saved === "pdf") setImportPref(saved);
+  }, []);
+
+  const choosePref = (next: ImportPref) => {
+    setImportPref(next);
+    try {
+      localStorage.setItem(IMPORT_PREF_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
+
 
   /** Background worker for every queued import. */
   const runJob = useCallback(
