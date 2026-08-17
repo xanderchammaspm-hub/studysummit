@@ -52,6 +52,39 @@ function tokenise(src: string): Token[] {
   return out;
 }
 
+/** Last-resort: turn LaTeX source into readable plain maths, never raw markup. */
+export function plainMath(src: string): string {
+  let out = src;
+  for (let i = 0; i < 4; i++) {
+    out = out
+      .replace(/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "($1)/($2)")
+      .replace(/\\sqrt\s*\[([^\]]*)\]\s*\{([^{}]*)\}/g, "$1√($2)")
+      .replace(/\\sqrt\s*\{([^{}]*)\}/g, "√($1)")
+      .replace(/\\(text|mathrm|mathbf|operatorname)\s*\{([^{}]*)\}/g, "$2");
+  }
+  return out
+    .replace(/\\left|\\right/g, "")
+    .replace(/\\times/g, "×")
+    .replace(/\\cdot/g, "·")
+    .replace(/\\div/g, "÷")
+    .replace(/\\pm/g, "±")
+    .replace(/\\leq?\b/g, "≤")
+    .replace(/\\geq?\b/g, "≥")
+    .replace(/\\neq\b/g, "≠")
+    .replace(/\\approx\b/g, "≈")
+    .replace(/\\infty\b/g, "∞")
+    .replace(/\\pi\b/g, "π")
+    .replace(/\\theta\b/g, "θ")
+    .replace(/\\alpha\b/g, "α")
+    .replace(/\\beta\b/g, "β")
+    .replace(/\\degree\b|\^\\circ/g, "°")
+    .replace(/\\begin\{[^}]*\}|\\end\{[^}]*\}/g, " ")
+    .replace(/\\[a-zA-Z]+/g, "")
+    .replace(/[{}]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function renderMath(value: string, display: boolean): string {
   try {
     return katex.renderToString(value, {
@@ -64,6 +97,7 @@ function renderMath(value: string, display: boolean): string {
     return "";
   }
 }
+
 
 /**
  * Markdown + LaTeX renderer used everywhere exam text is displayed.
