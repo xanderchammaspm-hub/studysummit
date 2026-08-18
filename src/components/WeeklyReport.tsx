@@ -214,7 +214,7 @@ export function WeeklyReport() {
               </div>
               <div className="flex h-24 items-end gap-1.5">
                 {weekStats.perDay.map((d, i) => (
-                  <div key={d.label} className="flex flex-1 flex-col items-center gap-1.5">
+                  <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
                     <div className="flex w-full flex-1 items-end">
                       <div
                         title={`${d.label}: ${d.hours.toFixed(1)}h`}
