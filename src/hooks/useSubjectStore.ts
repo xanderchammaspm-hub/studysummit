@@ -194,16 +194,21 @@ if (typeof window !== "undefined") {
   });
 }
 
+const emptyState: Store = {};
+
 export function useAllSubjectStates() {
   const [, setTick] = useState(0);
+  // First render must match the server output, so hold defaults until mount.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
+    setHydrated(true);
     const l = () => setTick((n) => n + 1);
     stateListeners.add(l);
     return () => {
       stateListeners.delete(l);
     };
   }, []);
-  return getState();
+  return hydrated ? getState() : emptyState;
 }
 
 export function useSubject(id: string) {
