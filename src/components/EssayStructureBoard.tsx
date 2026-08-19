@@ -81,7 +81,7 @@ export function EssayStructureBoard({
         </div>
       </header>
 
-      <ol className="relative mt-3 space-y-2">
+      <ol className="relative mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
         {steps.map((s, i) => (
           <li
             key={s.id}
@@ -118,7 +118,7 @@ export function EssayStructureBoard({
         ))}
 
         {steps.length === 0 && (
-          <li className="rounded-xl border border-dashed border-border/60 p-3 text-center text-[11px] text-muted-foreground">
+          <li className="rounded-xl border border-dashed border-border/60 p-3 text-center text-[11px] text-muted-foreground md:col-span-2 xl:col-span-3">
             Nothing yet — add your first step.
           </li>
         )}
