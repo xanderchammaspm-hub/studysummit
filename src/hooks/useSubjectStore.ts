@@ -373,14 +373,18 @@ function setLinks(updater: (prev: QuickLink[]) => QuickLink[]) {
 
 export function useQuickLinks() {
   const [, setTick] = useState(0);
+  // Saved links (and dropped icons) only exist in the browser — hold the
+  // defaults until mount so SSR and the first client render agree.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
+    setHydrated(true);
     const l = () => setTick((n) => n + 1);
     linkListeners.add(l);
     return () => {
       linkListeners.delete(l);
     };
   }, []);
-  return getLinks();
+  return hydrated ? getLinks() : defaultLinks;
 }
 
 export function updateQuickLink(id: string, patch: Partial<QuickLink>) {
