@@ -186,7 +186,6 @@ export function EnglishFormula() {
                   <Plus className="h-3.5 w-3.5" /> Add section
                 </button>
               )}
-              <EssayStructureBoard modeId={mode.id} modeLabel={mode.label} />
             </aside>
 
             {/* Workspace */}
@@ -350,6 +349,11 @@ export function EnglishFormula() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Full-width structure board */}
+          <div className="mt-4">
+            <EssayStructureBoard modeId={mode.id} modeLabel={mode.label} />
           </div>
         </div>
       )}
