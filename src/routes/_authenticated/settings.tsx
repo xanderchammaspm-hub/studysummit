@@ -137,7 +137,26 @@ function SettingsPage() {
     toast.success("Backup downloaded");
   }
 
+  function exportStudyBundle(format: "json" | "csv") {
+    if (studyDataCount() === 0) {
+      toast.info("Nothing to export yet — add some highlights, notes or essay steps first.");
+      return;
+    }
+    const stamp = new Date().toISOString().slice(0, 10);
+    if (format === "json") {
+      downloadFile(
+        `summit-study-data-${stamp}.json`,
+        JSON.stringify(buildStudyBundle(), null, 2),
+        "application/json",
+      );
+    } else {
+      downloadFile(`summit-study-data-${stamp}.csv`, buildStudyCsv(), "text/csv");
+    }
+    toast.success(`Study data exported as ${format.toUpperCase()}`);
+  }
+
   async function importData(file?: File) {
+
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text()) as Record<string, unknown>;
