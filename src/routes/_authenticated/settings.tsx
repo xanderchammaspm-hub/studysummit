@@ -20,6 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import {
+  buildStudyBundle,
+  buildStudyCsv,
+  downloadFile,
+  studyDataCount,
+} from "@/lib/exportStudyData";
+
 
 const GRADIENT_KEY = "study-hub-gradient-intensity-v1";
 const MOTION_KEY = "summit-reduce-motion-v1";
