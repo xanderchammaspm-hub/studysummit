@@ -387,6 +387,24 @@ function SettingsPage() {
             />
           </div>
 
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
+            <div className="min-w-0">
+              <div className="font-medium">Highlights, notes &amp; essay structures</div>
+              <p className="text-xs text-muted-foreground">
+                Export your per-paper highlights and notes plus every essay structure board as JSON or CSV.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => exportStudyBundle("json")} className="gap-2">
+                <Download className="h-4 w-4" /> JSON
+              </Button>
+              <Button variant="outline" onClick={() => exportStudyBundle("csv")} className="gap-2">
+                <Download className="h-4 w-4" /> CSV
+              </Button>
+            </div>
+          </div>
+
+
           <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
             <div>
               <div className="font-medium">Clear this device</div>
