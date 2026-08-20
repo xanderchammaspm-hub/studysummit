@@ -20,6 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import {
+  buildStudyBundle,
+  buildStudyCsv,
+  downloadFile,
+  studyDataCount,
+} from "@/lib/exportStudyData";
+
 
 const GRADIENT_KEY = "study-hub-gradient-intensity-v1";
 const MOTION_KEY = "summit-reduce-motion-v1";
@@ -130,7 +137,26 @@ function SettingsPage() {
     toast.success("Backup downloaded");
   }
 
+  function exportStudyBundle(format: "json" | "csv") {
+    if (studyDataCount() === 0) {
+      toast.info("Nothing to export yet — add some highlights, notes or essay steps first.");
+      return;
+    }
+    const stamp = new Date().toISOString().slice(0, 10);
+    if (format === "json") {
+      downloadFile(
+        `summit-study-data-${stamp}.json`,
+        JSON.stringify(buildStudyBundle(), null, 2),
+        "application/json",
+      );
+    } else {
+      downloadFile(`summit-study-data-${stamp}.csv`, buildStudyCsv(), "text/csv");
+    }
+    toast.success(`Study data exported as ${format.toUpperCase()}`);
+  }
+
   async function importData(file?: File) {
+
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text()) as Record<string, unknown>;
@@ -386,6 +412,24 @@ function SettingsPage() {
               onChange={(e) => void importData(e.target.files?.[0])}
             />
           </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
+            <div className="min-w-0">
+              <div className="font-medium">Highlights, notes &amp; essay structures</div>
+              <p className="text-xs text-muted-foreground">
+                Export your per-paper highlights and notes plus every essay structure board as JSON or CSV.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => exportStudyBundle("json")} className="gap-2">
+                <Download className="h-4 w-4" /> JSON
+              </Button>
+              <Button variant="outline" onClick={() => exportStudyBundle("csv")} className="gap-2">
+                <Download className="h-4 w-4" /> CSV
+              </Button>
+            </div>
+          </div>
+
 
           <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
             <div>
