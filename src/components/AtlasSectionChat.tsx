@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Send, Sparkles, Trash2 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { AtlasMarkdown } from "@/components/AtlasMarkdown";
+import { usePacedText } from "@/hooks/usePacedText";
 import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
