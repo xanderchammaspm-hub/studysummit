@@ -121,9 +121,7 @@ export function RichEditor({ storageKey, placeholder, minHeight = 220 }: Props) 
           <ListOrdered className="h-3.5 w-3.5" />
         </ToolButton>
         <Divider />
-        <ToolButton onClick={insertTable} label="Insert table">
-          <TableIcon className="h-3.5 w-3.5" />
-        </ToolButton>
+        <TablePicker onPick={insertTable} />
         <ToolButton
           onClick={() => cmd("foreColor", "oklch(0.86 0.11 82)")}
           label="Highlight text"
