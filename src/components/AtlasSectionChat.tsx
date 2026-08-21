@@ -135,9 +135,7 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
               }`}
             >
               {m.role === "assistant" ? (
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
-                </div>
+                <AtlasAnswer content={m.content} streaming={busy} />
               ) : (
                 <span className="whitespace-pre-wrap">{m.content}</span>
               )}
