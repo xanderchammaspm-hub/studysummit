@@ -10,9 +10,11 @@ export type FormulaStore = {
   parts: Record<string, Record<string, PartOverride>>;
   /** modeId -> extra sidebar sections */
   sections: Record<string, DocSection[]>;
+  /** modeId -> ordered list of section ids (built-in + custom) */
+  order?: Record<string, string[]>;
 };
 
-const EMPTY: FormulaStore = { parts: {}, sections: {} };
+const EMPTY: FormulaStore = { parts: {}, sections: {}, order: {} };
 
 function read(): FormulaStore {
   if (typeof window === "undefined") return EMPTY;
@@ -93,5 +95,23 @@ export function useEnglishFormula() {
     [store, commit],
   );
 
-  return { store, updatePart, addSection, renameSection, removeSection };
+  const setOrder = useCallback(
+    (modeId: string, ids: string[]) => {
+      commit({ ...store, order: { ...(store.order ?? {}), [modeId]: ids } });
+    },
+    [store, commit],
+  );
+
+  const moveSection = useCallback(
+    (modeId: string, ids: string[], from: number, to: number) => {
+      if (to < 0 || to >= ids.length || from === to) return;
+      const next = [...ids];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      setOrder(modeId, next);
+    },
+    [setOrder],
+  );
+
+  return { store, updatePart, addSection, renameSection, removeSection, setOrder, moveSection };
 }
