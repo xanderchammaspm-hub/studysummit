@@ -74,17 +74,15 @@ export function RichEditor({ storageKey, placeholder, minHeight = 220 }: Props) 
     persist();
   };
 
-  const insertTable = () => {
-    const rows = 3;
-    const cols = 2;
-    let html =
+  const insertTable = (rows: number, cols: number, header: boolean) => {
+    const html =
       '<table class="ef-table"><tbody>' +
       Array.from({ length: rows })
         .map(
           (_, r) =>
             "<tr>" +
             Array.from({ length: cols })
-              .map(() => (r === 0 ? "<th>&nbsp;</th>" : "<td>&nbsp;</td>"))
+              .map(() => (header && r === 0 ? "<th>&nbsp;</th>" : "<td>&nbsp;</td>"))
               .join("") +
             "</tr>",
         )
