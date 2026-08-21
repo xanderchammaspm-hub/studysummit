@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { AtlasMarkdown } from "@/components/AtlasMarkdown";
 import { Loader2, RefreshCw, CalendarCheck, Trash2, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -260,8 +260,8 @@ export function WeeklyReport() {
               </div>
             )}
             {cached ? (
-              <div className="prose prose-invert prose-sm max-w-none rounded-xl border border-border/60 bg-background/30 p-5 prose-headings:mt-5 prose-headings:text-sm prose-headings:uppercase prose-headings:tracking-widest prose-headings:text-primary prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-table:text-xs prose-th:text-foreground">
-                <ReactMarkdown>{cached.text}</ReactMarkdown>
+              <div className="rounded-xl border border-border/60 bg-background/30 p-5">
+                <AtlasMarkdown>{cached.text}</AtlasMarkdown>
               </div>
             ) : (
               !busy && (

@@ -16,7 +16,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { AtlasMarkdown } from "@/components/AtlasMarkdown";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Sheet,
@@ -415,9 +415,7 @@ function Bubble({ msg, thinking }: { msg: Message; thinking: boolean }) {
           </div>
         ) : (
           <>
-            <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary prose-p:my-2 prose-headings:my-3 prose-ul:my-2 prose-ol:my-2">
-              <ReactMarkdown>{msg.content}</ReactMarkdown>
-            </div>
+            <AtlasMarkdown>{msg.content}</AtlasMarkdown>
             {msg.content && (
               <button
                 onClick={copy}
@@ -595,9 +593,7 @@ function StudyKitPanel() {
               Working through it…
             </div>
           ) : (
-            <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary">
-              <ReactMarkdown>{result}</ReactMarkdown>
-            </div>
+            <AtlasMarkdown>{result}</AtlasMarkdown>
           )}
         </div>
       )}

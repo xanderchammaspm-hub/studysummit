@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Maximize2, PenLine, Plus, Sparkles, Star, Trash2, X } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
@@ -22,11 +22,20 @@ export function EnglishFormula() {
   const [newLabel, setNewLabel] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const { store, updatePart, addSection, renameSection, removeSection } = useEnglishFormula();
+  const { store, updatePart, addSection, renameSection, removeSection, moveSection } =
+    useEnglishFormula();
 
   const mode = MODES.find((m) => m.id === modeId) ?? MODES[0];
   const custom = store.sections[mode.id] ?? [];
-  const allSections: DocSection[] = [...mode.sections, ...custom];
+  const baseSections: DocSection[] = [...mode.sections, ...custom];
+  const savedOrder = store.order?.[mode.id] ?? [];
+  const allSections: DocSection[] = [
+    ...savedOrder
+      .map((id) => baseSections.find((s) => s.id === id))
+      .filter((s): s is DocSection => Boolean(s)),
+    ...baseSections.filter((s) => !savedOrder.includes(s.id)),
+  ];
+  const orderIds = allSections.map((s) => s.id);
 
   const basePart = mode.parts.find((p) => p.id === activePart) ?? null;
   const override = activePart ? store.parts[mode.id]?.[activePart] : undefined;
@@ -132,11 +141,17 @@ export function EnglishFormula() {
                 {hasSkeleton ? "Skeleton Blueprint" : "Overview"}
               </SideItem>
 
-              {allSections.map((s) => (
+              {allSections.map((s, i) => (
                 <SideItem
                   key={s.id}
                   active={section === s.id}
                   onClick={() => setSection(s.id)}
+                  onMoveUp={i > 0 ? () => moveSection(mode.id, orderIds, i, i - 1) : undefined}
+                  onMoveDown={
+                    i < allSections.length - 1
+                      ? () => moveSection(mode.id, orderIds, i, i + 1)
+                      : undefined
+                  }
                   onDelete={
                     custom.some((c) => c.id === s.id)
                       ? () => {
@@ -339,6 +354,7 @@ export function EnglishFormula() {
                     />
                   </div>
                 )}
+                <MemoriseBlock storageKey={`${mode.id}-memorise-${section}`} />
                 <div className="mt-4">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
@@ -420,11 +436,15 @@ function SideItem({
   active,
   onClick,
   onDelete,
+  onMoveUp,
+  onMoveDown,
   children,
 }: {
   active: boolean;
   onClick: () => void;
   onDelete?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
   children: React.ReactNode;
 }) {
   return (
@@ -439,6 +459,26 @@ function SideItem({
       >
         {children}
       </button>
+      {(onMoveUp || onMoveDown) && (
+        <span className={`absolute ${onDelete ? "right-8" : "right-1.5"} flex items-center opacity-0 transition-opacity group-hover/side:opacity-100`}>
+          <button
+            onClick={onMoveUp}
+            disabled={!onMoveUp}
+            aria-label="Move section up"
+            className="cursor-pointer rounded-md p-0.5 text-muted-foreground hover:text-primary disabled:opacity-30"
+          >
+            <ChevronUp className="h-3 w-3" />
+          </button>
+          <button
+            onClick={onMoveDown}
+            disabled={!onMoveDown}
+            aria-label="Move section down"
+            className="cursor-pointer rounded-md p-0.5 text-muted-foreground hover:text-primary disabled:opacity-30"
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </span>
+      )}
       {onDelete && (
         <button
           onClick={onDelete}
@@ -447,6 +487,34 @@ function SideItem({
         >
           <Trash2 className="h-3 w-3" />
         </button>
+      )}
+    </div>
+  );
+}
+
+/** Collapsible "Memorise By Heart" board inside every sidebar section. */
+function MemoriseBlock({ storageKey }: { storageKey: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-yellow/35 bg-yellow/[0.04]">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-yellow transition-colors hover:bg-yellow/[0.07]"
+      >
+        <Star className="h-3.5 w-3.5" />
+        Memorise By Heart
+        <ChevronDown
+          className={`ml-auto h-4 w-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="border-t border-yellow/25 p-3 fade-in-up">
+          <RichEditor
+            storageKey={storageKey}
+            placeholder="Quotes, thesis lines and scaffolds to lock in for this section…"
+            minHeight={180}
+          />
+        </div>
       )}
     </div>
   );

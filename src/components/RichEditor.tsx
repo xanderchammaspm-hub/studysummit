@@ -74,17 +74,15 @@ export function RichEditor({ storageKey, placeholder, minHeight = 220 }: Props) 
     persist();
   };
 
-  const insertTable = () => {
-    const rows = 3;
-    const cols = 2;
-    let html =
+  const insertTable = (rows: number, cols: number, header: boolean) => {
+    const html =
       '<table class="ef-table"><tbody>' +
       Array.from({ length: rows })
         .map(
           (_, r) =>
             "<tr>" +
             Array.from({ length: cols })
-              .map(() => (r === 0 ? "<th>&nbsp;</th>" : "<td>&nbsp;</td>"))
+              .map(() => (header && r === 0 ? "<th>&nbsp;</th>" : "<td>&nbsp;</td>"))
               .join("") +
             "</tr>",
         )
@@ -123,9 +121,7 @@ export function RichEditor({ storageKey, placeholder, minHeight = 220 }: Props) 
           <ListOrdered className="h-3.5 w-3.5" />
         </ToolButton>
         <Divider />
-        <ToolButton onClick={insertTable} label="Insert table">
-          <TableIcon className="h-3.5 w-3.5" />
-        </ToolButton>
+        <TablePicker onPick={insertTable} />
         <ToolButton
           onClick={() => cmd("foreColor", "oklch(0.86 0.11 82)")}
           label="Highlight text"
@@ -190,4 +186,76 @@ function ToolButton({
 
 function Divider() {
   return <span className="mx-1 h-4 w-px bg-border/60" />;
+}
+
+/** Google-Docs style hover grid for choosing table size. */
+function TablePicker({ onPick }: { onPick: (rows: number, cols: number, header: boolean) => void }) {
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState({ r: 0, c: 0 });
+  const [header, setHeader] = useState(true);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  const N = 8;
+  return (
+    <div ref={wrap} className="relative">
+      <ToolButton onClick={() => setOpen((o) => !o)} label="Insert table">
+        <TableIcon className="h-3.5 w-3.5" />
+      </ToolButton>
+      {open && (
+        <div className="absolute left-0 top-9 z-50 w-max rounded-xl border border-primary/40 bg-card/95 p-3 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+          <div
+            className="grid gap-[3px]"
+            style={{ gridTemplateColumns: `repeat(${N}, 1rem)` }}
+            onMouseLeave={() => setHover({ r: 0, c: 0 })}
+          >
+            {Array.from({ length: N * N }, (_, i) => {
+              const r = Math.floor(i / N) + 1;
+              const c = (i % N) + 1;
+              const on = r <= hover.r && c <= hover.c;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onMouseEnter={() => setHover({ r, c })}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    onPick(r, c, header);
+                    setOpen(false);
+                  }}
+                  className={`h-4 w-4 rounded-[3px] border transition-colors ${
+                    on
+                      ? "border-primary bg-primary/50"
+                      : "border-border/60 bg-surface/60 hover:border-primary/50"
+                  }`}
+                />
+              );
+            })}
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
+            <span className="tabular-nums">
+              {hover.r > 0 ? `${hover.c} × ${hover.r}` : "Pick a size"}
+            </span>
+            <label className="flex cursor-pointer items-center gap-1.5">
+              <input
+                type="checkbox"
+                checked={header}
+                onChange={(e) => setHeader(e.target.checked)}
+                className="accent-[var(--primary)]"
+              />
+              Header row
+            </label>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

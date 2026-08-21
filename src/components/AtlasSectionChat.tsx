@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Send, Sparkles, Trash2 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { AtlasMarkdown } from "@/components/AtlasMarkdown";
+import { usePacedText } from "@/hooks/usePacedText";
 import { ATLAS_SYSTEM_PROMPT } from "@/lib/atlasPrompt";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
@@ -134,9 +135,7 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
               }`}
             >
               {m.role === "assistant" ? (
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
-                </div>
+                <AtlasAnswer content={m.content} streaming={busy} />
               ) : (
                 <span className="whitespace-pre-wrap">{m.content}</span>
               )}
@@ -170,4 +169,10 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
       </div>
     </div>
   );
+}
+
+function AtlasAnswer({ content, streaming }: { content: string; streaming: boolean }) {
+  const live = streaming && !content.endsWith("\u0000");
+  const shown = usePacedText(content, live);
+  return <AtlasMarkdown caret={live && shown.length < content.length}>{shown || "…"}</AtlasMarkdown>;
 }
