@@ -93,12 +93,98 @@ export function collectStructureBoards(): StructureRow[] {
   return rows.sort((a, b) => a.board.localeCompare(b.board) || a.index - b.index);
 }
 
+/* ------------------------ subject / term content ------------------------- */
+
+export type SubjectRow = {
+  kind: "paper" | "notes-doc" | "assessment" | "traffic-light" | "syllabus";
+  year: string;
+  subject: string;
+  term: string;
+  title: string;
+  detail: string;
+};
+
+const STATE_KEY = "study-hub-state-v1";
+const SUBJECTS_KEY = "study-hub-subjects-v1";
+const TERM_LABELS: Record<string, string> = {
+  T1: "Term 1",
+  T2: "Term 2",
+  T3: "Term 3",
+  T4: "Term 4",
+};
+
+type AnyTerm = {
+  papers?: { title?: string; url?: string }[];
+  topics?: { title?: string; status?: string }[];
+  assessments?: { title?: string; url?: string; due?: string }[];
+  syllabus?: { text?: string; done?: boolean }[];
+  notesUrl?: string;
+};
+type AnySubject = AnyTerm & { terms?: Record<string, AnyTerm> };
+
+export function collectSubjectContent(): SubjectRow[] {
+  if (typeof window === "undefined") return [];
+  const state = safeParse<Record<string, AnySubject>>(localStorage.getItem(STATE_KEY)) ?? {};
+  const subjects =
+    safeParse<Record<string, { id: string; name: string }[]>>(
+      localStorage.getItem(SUBJECTS_KEY),
+    ) ?? {};
+
+  const names = new Map<string, { year: string; name: string }>();
+  for (const [year, list] of Object.entries(subjects)) {
+    for (const s of list ?? []) names.set(s.id, { year, name: s.name || s.id });
+  }
+
+  const rows: SubjectRow[] = [];
+  const push = (
+    id: string,
+    termKey: string,
+    t: AnyTerm,
+  ) => {
+    const meta = names.get(id) ?? { year: "", name: id };
+    if (!meta.name) return;
+    const term = TERM_LABELS[termKey] ?? termKey;
+    const base = { year: meta.year, subject: meta.name, term };
+    for (const p of t.papers ?? [])
+      rows.push({ ...base, kind: "paper", title: p.title ?? "", detail: p.url ?? "" });
+    if (t.notesUrl)
+      rows.push({ ...base, kind: "notes-doc", title: "Notes doc", detail: t.notesUrl });
+    for (const a of t.assessments ?? [])
+      rows.push({
+        ...base,
+        kind: "assessment",
+        title: a.title ?? "",
+        detail: [a.due ? `due ${a.due}` : "", a.url ?? ""].filter(Boolean).join(" • "),
+      });
+    for (const tp of t.topics ?? [])
+      rows.push({ ...base, kind: "traffic-light", title: tp.title ?? "", detail: tp.status ?? "none" });
+    for (const s of t.syllabus ?? [])
+      rows.push({
+        ...base,
+        kind: "syllabus",
+        title: s.text ?? "",
+        detail: s.done ? "done" : "not done",
+      });
+  };
+
+  for (const [id, subject] of Object.entries(state)) {
+    if (!subject) continue;
+    if (subject.terms) {
+      for (const [k, t] of Object.entries(subject.terms)) if (t) push(id, k, t);
+    } else {
+      push(id, "T1", subject);
+    }
+  }
+  return rows;
+}
+
 export function buildStudyBundle() {
   return {
     exportedAt: new Date().toISOString(),
     app: "Summit",
     annotations: collectAnnotations(),
     structureBoards: collectStructureBoards(),
+    subjects: collectSubjectContent(),
   };
 }
 
@@ -108,16 +194,38 @@ function csvCell(v: string | number) {
 }
 
 export function buildStudyCsv() {
-  const header = ["kind", "source", "page_or_step", "title_or_colour", "text", "created"];
+  const header = [
+    "kind",
+    "year",
+    "subject",
+    "term",
+    "source",
+    "page_or_step",
+    "title_or_colour",
+    "text",
+    "created",
+  ];
   const lines = [header.join(",")];
   for (const a of collectAnnotations()) {
-    lines.push([a.kind, a.paperId, a.page, a.colour, a.text, a.created].map(csvCell).join(","));
+    lines.push(
+      [a.kind, "", "", "", a.paperId, a.page, a.colour, a.text, a.created].map(csvCell).join(","),
+    );
   }
   for (const s of collectStructureBoards()) {
-    lines.push([s.kind, s.board, s.index, s.title, s.detail, ""].map(csvCell).join(","));
+    lines.push(
+      [s.kind, "", "", "", s.board, s.index, s.title, s.detail, ""].map(csvCell).join(","),
+    );
+  }
+  for (const r of collectSubjectContent()) {
+    lines.push(
+      [r.kind, r.year, r.subject, r.term, r.subject, "", r.title, r.detail, ""]
+        .map(csvCell)
+        .join(","),
+    );
   }
   return lines.join("\n");
 }
+
 
 export function downloadFile(name: string, contents: string, mime: string) {
   const blob = new Blob([contents], { type: mime });
