@@ -238,5 +238,7 @@ export function downloadFile(name: string, contents: string, mime: string) {
 
 /** Count of exportable rows, for the settings blurb. */
 export function studyDataCount() {
-  return collectAnnotations().length + collectStructureBoards().length;
+  return (
+    collectAnnotations().length + collectStructureBoards().length + collectSubjectContent().length
+  );
 }
