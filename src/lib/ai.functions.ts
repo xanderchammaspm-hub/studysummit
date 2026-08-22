@@ -207,3 +207,52 @@ Keep the whole report under 300 words.`;
     ]);
     return { text };
   });
+
+/* ---------------------- Question bank answer marking --------------------- */
+
+const MarkInput = z.object({
+  question: z.string().min(1).max(4000),
+  rubric: z.string().max(4000).default(""),
+  marks: z.number().min(1).max(40),
+  answer: z.string().min(1).max(8000),
+  subject: z.string().max(120).optional(),
+});
+
+export const markAnswer = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => MarkInput.parse(d))
+  .handler(async ({ data }) => {
+    const system = `${SYSTEM_BASE}
+
+You are marking one HSC-style response. Reply with RAW JSON ONLY — no prose, no markdown fences.
+Schema: {"awarded":number,"feedback":string}
+"awarded" is the mark out of ${data.marks} (may be a whole number or .5).
+"feedback" is markdown with exactly these sections, blank line between each:
+## Marks awarded
+one short line explaining the mark
+## What earned marks
+2-4 bullets
+## What was missing
+2-4 bullets
+## Model answer
+a concise band 6 response`;
+
+    const user = `${data.subject ? `Subject: ${data.subject}\n` : ""}Question (${data.marks} marks):\n${data.question}\n\nMarking rubric:\n${data.rubric || "(none supplied — use NESA standards)"}\n\nStudent answer:\n${data.answer}`;
+
+    const raw = await callAI([
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ]);
+    const cleaned = raw.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    try {
+      const parsed = JSON.parse(start >= 0 ? cleaned.slice(start, end + 1) : cleaned);
+      const shape = z.object({
+        awarded: z.number().min(0).max(data.marks).catch(0),
+        feedback: z.string().min(1),
+      });
+      return shape.parse(parsed);
+    } catch {
+      return { awarded: 0, feedback: raw || "Atlas couldn't mark that — try again." };
+    }
+  });
