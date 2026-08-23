@@ -131,31 +131,82 @@ export function AICoach() {
   );
 }
 
-function ChatPanel() {
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = localStorage.getItem(CHAT_KEY);
-      const parsed = raw ? (JSON.parse(raw) as Message[]) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
+type Thread = { id: string; title: string; ts: number; messages: Message[] };
+const THREADS_KEY = "atlas-ai-threads-v1";
+
+function titleFrom(messages: Message[]) {
+  const first = messages.find((m) => m.role === "user")?.content.trim() ?? "";
+  if (!first) return "New chat";
+  return first.length > 42 ? `${first.slice(0, 42)}…` : first;
+}
+
+function loadThreads(): Thread[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(THREADS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Thread[];
+      if (Array.isArray(parsed)) return parsed;
     }
-  });
+    // migrate the single legacy thread
+    const legacy = localStorage.getItem(CHAT_KEY);
+    const msgs = legacy ? (JSON.parse(legacy) as Message[]) : [];
+    if (Array.isArray(msgs) && msgs.length) {
+      return [{ id: makeId(), title: titleFrom(msgs), ts: Date.now(), messages: msgs }];
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function ChatPanel() {
+  const [threads, setThreads] = useState<Thread[]>(loadThreads);
+  const [activeId, setActiveId] = useState<string | null>(() => loadThreads()[0]?.id ?? null);
+  const [railOpen, setRailOpen] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Persist thread
+  const messages = threads.find((t) => t.id === activeId)?.messages ?? [];
+
+  const updateThread = (
+    id: string,
+    update: Message[] | ((prev: Message[]) => Message[]),
+  ) => {
+    setThreads((prev) => {
+      const existing = prev.find((t) => t.id === id);
+      const next =
+        typeof update === "function"
+          ? (update as (p: Message[]) => Message[])(existing?.messages ?? [])
+          : update;
+      if (!existing) {
+        return [{ id, title: titleFrom(next), ts: Date.now(), messages: next }, ...prev];
+      }
+      return prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              messages: next,
+              title: !t.title || t.title === "New chat" ? titleFrom(next) : t.title,
+            }
+          : t,
+      );
+    });
+  };
+
+
+  // Persist all threads
   useEffect(() => {
     try {
-      localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
+      localStorage.setItem(THREADS_KEY, JSON.stringify(threads));
     } catch {
       // ignore quota errors
     }
-  }, [messages]);
+  }, [threads]);
+
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -175,6 +226,13 @@ function ChatPanel() {
   const send = async (override?: string) => {
     const text = (override ?? input).trim();
     if (!text || busy) return;
+    let tid = activeId;
+    if (!tid || !threads.some((t) => t.id === tid)) {
+      tid = makeId();
+      setActiveId(tid);
+    }
+    const setMessages = (u: Message[] | ((prev: Message[]) => Message[])) =>
+      updateThread(tid as string, u);
     const userMsg: Message = { id: makeId(), role: "user", content: text, ts: Date.now() };
     const asstMsg: Message = { id: makeId(), role: "assistant", content: "", ts: Date.now() };
     const nextHistory = [...messages, userMsg];
@@ -184,6 +242,7 @@ function ChatPanel() {
 
     const controller = new AbortController();
     abortRef.current = controller;
+
 
     try {
       const res = await fetch("/api/chat", {
@@ -269,14 +328,31 @@ function ChatPanel() {
   const stop = () => abortRef.current?.abort();
   const newChat = () => {
     if (busy) return;
-    setMessages([]);
+    setActiveId(null);
     setInput("");
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+  const deleteThread = (id: string) => {
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (id === activeId) setActiveId(null);
   };
 
   const empty = messages.length === 0;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full">
+      <HistoryRail
+        open={railOpen}
+        onToggle={() => setRailOpen((o) => !o)}
+        items={threads.map((t) => ({ id: t.id, title: t.title || "New chat", ts: t.ts }))}
+        activeId={activeId}
+        onSelect={(id) => setActiveId(id)}
+        onNew={newChat}
+        onDelete={deleteThread}
+        newLabel="New chat"
+        title="Conversations"
+      />
+      <div className="flex h-full min-w-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-background/40">
         <span className="text-[11px] text-muted-foreground">
           {empty
@@ -288,11 +364,12 @@ function ChatPanel() {
         <button
           onClick={newChat}
           disabled={busy || empty}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary disabled:opacity-40 transition-colors"
+          className="flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:text-primary disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
         >
           <Plus className="h-3 w-3" /> New chat
         </button>
       </div>
+
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
         {empty ? (
@@ -380,7 +457,9 @@ function ChatPanel() {
           important facts.
         </div>
       </div>
+      </div>
     </div>
+
   );
 }
 
