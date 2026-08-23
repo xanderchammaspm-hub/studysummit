@@ -457,7 +457,9 @@ function ChatPanel() {
           important facts.
         </div>
       </div>
+      </div>
     </div>
+
   );
 }
 
