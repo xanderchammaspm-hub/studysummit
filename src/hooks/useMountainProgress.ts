@@ -17,8 +17,8 @@ export type ExamDates = Record<CampKey, string>;
 // Class of 2028 — Year 11 starts in 2027, HSC in October 2028.
 export const DEFAULT_DATES: ExamDates = {
   base: "2027-01-28",
-  c1: "2027-06-21",
-  c2: "2027-09-13",
+  c1: "2027-09-13",
+  c2: "2027-10-09",
   c3: "2028-04-03",
   c4: "2028-08-01",
   summit: "2028-10-12",
@@ -26,8 +26,8 @@ export const DEFAULT_DATES: ExamDates = {
 
 export const CAMPS: Camp[] = [
   { key: "base", name: "Base Camp", emoji: "🏕", pct: 0, desc: "Year 11 begins — the climb starts here." },
-  { key: "c1", name: "Camp 1", emoji: "⛰", pct: 20, desc: "Year 11 course — build the foundations." },
-  { key: "c2", name: "Camp 2", emoji: "🏔", pct: 40, desc: "Preliminary exams — first real altitude." },
+  { key: "c1", name: "Camp 1", emoji: "⛰", pct: 20, desc: "Year 11 Prelims — first real altitude." },
+  { key: "c2", name: "Camp 2", emoji: "🏔", pct: 40, desc: "Year 12 begins — the HSC year opens." },
   { key: "c3", name: "Camp 3", emoji: "🗻", pct: 60, desc: "Half Yearly exams — the air thins out." },
   { key: "c4", name: "Camp 4", emoji: "🧗", pct: 80, desc: "HSC Trials — the final ascent begins." },
   { key: "summit", name: "Summit", emoji: "👑", pct: 100, desc: "HSC — you reached the top." },
@@ -35,8 +35,8 @@ export const CAMPS: Camp[] = [
 
 export const CAMP_LABEL: Record<CampKey, string> = {
   base: "Year 11 begins",
-  c1: "Year 11",
-  c2: "Prelims",
+  c1: "Year 11 Prelims",
+  c2: "Year 12 begins",
   c3: "Half Yearly",
   c4: "HSC Trials",
   summit: "HSC",

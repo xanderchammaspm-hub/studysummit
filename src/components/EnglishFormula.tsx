@@ -354,7 +354,7 @@ export function EnglishFormula() {
                     />
                   </div>
                 )}
-                <MemoriseBlock storageKey={`${mode.id}-memorise-${section}`} />
+                
                 <div className="mt-4">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
@@ -492,30 +492,4 @@ function SideItem({
   );
 }
 
-/** Collapsible "Memorise By Heart" board inside every sidebar section. */
-function MemoriseBlock({ storageKey }: { storageKey: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="mt-4 overflow-hidden rounded-xl border border-yellow/35 bg-yellow/[0.04]">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-yellow transition-colors hover:bg-yellow/[0.07]"
-      >
-        <Star className="h-3.5 w-3.5" />
-        Memorise By Heart
-        <ChevronDown
-          className={`ml-auto h-4 w-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      {open && (
-        <div className="border-t border-yellow/25 p-3 fade-in-up">
-          <RichEditor
-            storageKey={storageKey}
-            placeholder="Quotes, thesis lines and scaffolds to lock in for this section…"
-            minHeight={180}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+
