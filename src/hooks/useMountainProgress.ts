@@ -42,7 +42,7 @@ export const CAMP_LABEL: Record<CampKey, string> = {
   summit: "HSC",
 };
 
-const DATES_KEY = "summit-exam-dates-v1";
+const DATES_KEY = "summit-exam-dates-v2";
 
 export function useExamDates() {
   const [dates, setDates] = useState<ExamDates>(DEFAULT_DATES);

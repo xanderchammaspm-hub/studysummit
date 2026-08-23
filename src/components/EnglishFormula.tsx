@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronUp, Maximize2, PenLine, Plus, Sparkles, Star, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
