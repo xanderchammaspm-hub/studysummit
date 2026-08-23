@@ -226,6 +226,13 @@ function ChatPanel() {
   const send = async (override?: string) => {
     const text = (override ?? input).trim();
     if (!text || busy) return;
+    let tid = activeId;
+    if (!tid || !threads.some((t) => t.id === tid)) {
+      tid = makeId();
+      setActiveId(tid);
+    }
+    const setMessages = (u: Message[] | ((prev: Message[]) => Message[])) =>
+      updateThread(tid as string, u);
     const userMsg: Message = { id: makeId(), role: "user", content: text, ts: Date.now() };
     const asstMsg: Message = { id: makeId(), role: "assistant", content: "", ts: Date.now() };
     const nextHistory = [...messages, userMsg];
@@ -235,6 +242,7 @@ function ChatPanel() {
 
     const controller = new AbortController();
     abortRef.current = controller;
+
 
     try {
       const res = await fetch("/api/chat", {
