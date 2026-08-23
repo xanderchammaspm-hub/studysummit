@@ -172,34 +172,31 @@ function ChatPanel() {
 
   const messages = threads.find((t) => t.id === activeId)?.messages ?? [];
 
-  const setMessages = (update: Message[] | ((prev: Message[]) => Message[])) => {
+  const updateThread = (
+    id: string,
+    update: Message[] | ((prev: Message[]) => Message[]),
+  ) => {
     setThreads((prev) => {
-      const id = activeId;
       const existing = prev.find((t) => t.id === id);
       const next =
         typeof update === "function"
           ? (update as (p: Message[]) => Message[])(existing?.messages ?? [])
           : update;
       if (!existing) {
-        const created: Thread = {
-          id: id ?? makeId(),
-          title: titleFrom(next),
-          ts: Date.now(),
-          messages: next,
-        };
-        return [created, ...prev];
+        return [{ id, title: titleFrom(next), ts: Date.now(), messages: next }, ...prev];
       }
       return prev.map((t) =>
         t.id === id
           ? {
               ...t,
               messages: next,
-              title: t.title === "New chat" || !t.title ? titleFrom(next) : t.title,
+              title: !t.title || t.title === "New chat" ? titleFrom(next) : t.title,
             }
           : t,
       );
     });
   };
+
 
   // Persist all threads
   useEffect(() => {
