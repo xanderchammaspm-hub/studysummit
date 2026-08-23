@@ -50,7 +50,9 @@ export const MODES: WritingMode[] = [
       bone("limbs", "Arms & Legs", "Climax Shift", "The turn — action, revelation, change in the character."),
       bone("feet", "Feet", "Motif Echo", "Close by returning to the opening image, transformed."),
     ],
-    sections: [],
+    sections: [
+      { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
+    ],
   },
   {
     id: "discursive",
@@ -63,7 +65,9 @@ export const MODES: WritingMode[] = [
       bone("limbs", "Arms & Legs", "Exploration & Anecdote", "Analogy, evidence and lived detail widening the lens."),
       bone("feet", "Feet", "Philosophical Synthesis", "Not resolution — an earned, open-ended insight."),
     ],
-    sections: [],
+    sections: [
+      { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
+    ],
   },
   {
     id: "persuasive",
@@ -76,7 +80,9 @@ export const MODES: WritingMode[] = [
       bone("limbs", "Arms & Legs", "Counter-Argument Dismantler", "Concede, then dismantle with evidence."),
       bone("feet", "Feet", "Call to Action", "The demand — specific, urgent, achievable."),
     ],
-    sections: [],
+    sections: [
+      { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
+    ],
   },
   {
     id: "reflection",
@@ -89,7 +95,9 @@ export const MODES: WritingMode[] = [
       bone("limbs", "Arms & Legs", "Prescribed Text Links", "How Module C authors shaped each decision."),
       bone("feet", "Feet", "Final Evaluation", "Honest judgement of what worked and what you refined."),
     ],
-    sections: [],
+    sections: [
+      { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
+    ],
   },
   {
     id: "short-answer",
@@ -101,6 +109,7 @@ export const MODES: WritingMode[] = [
       { id: "mark-allocation", label: "Mark Allocation", blurb: "What each mark band expects, line by line." },
       { id: "exemplars", label: "Exemplar Responses", blurb: "Annotated model answers and why they score." },
       { id: "notes", label: "Notes", blurb: "Free-form working space." },
+      { id: "memorisation", label: "Memorise By Heart", blurb: "Quotes, thesis lines and scaffolds to lock in.", vault: true },
     ],
   },
 ];
