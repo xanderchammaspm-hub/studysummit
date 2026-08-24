@@ -1,18 +1,19 @@
 import { normalizeUrl } from "@/lib/utils";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
-const AICoach = lazy(() => import("@/components/AICoach").then((m) => ({ default: m.AICoach })));
-const MountainProgress = lazy(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
-const StudyCalendar = lazy(() => import("@/components/StudyCalendar").then((m) => ({ default: m.StudyCalendar })));
+const AICoach = lazyWithRetry(() => import("@/components/AICoach").then((m) => ({ default: m.AICoach })));
+const MountainProgress = lazyWithRetry(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
+const StudyCalendar = lazyWithRetry(() => import("@/components/StudyCalendar").then((m) => ({ default: m.StudyCalendar })));
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo, SUMMIT_LOGO_SRC } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
-const EnglishFormula = lazy(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
-const UpcomingExams = lazy(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
-const WeeklyReport = lazy(() => import("@/components/WeeklyReport").then((m) => ({ default: m.WeeklyReport })));
-const DailyPlan = lazy(() => import("@/components/DailyPlan").then((m) => ({ default: m.DailyPlan })));
+const EnglishFormula = lazyWithRetry(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
+const UpcomingExams = lazyWithRetry(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
+const WeeklyReport = lazyWithRetry(() => import("@/components/WeeklyReport").then((m) => ({ default: m.WeeklyReport })));
+const DailyPlan = lazyWithRetry(() => import("@/components/DailyPlan").then((m) => ({ default: m.DailyPlan })));
 import { AccountMenu, SaveIndicator } from "@/components/AccountMenu";
 
 
