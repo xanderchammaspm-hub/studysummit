@@ -24,7 +24,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const PdfViewerDialog = lazy(() =>
+const PdfViewerDialog = lazyWithRetry(() =>
   import("./PdfViewerDialog").then((m) => ({ default: m.PdfViewerDialog })),
 );
 
