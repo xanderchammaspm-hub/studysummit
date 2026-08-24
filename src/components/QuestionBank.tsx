@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { generateQuestions, markAnswer } from "@/lib/ai.functions";
 import { Textarea } from "@/components/ui/textarea";
 import { AtlasMarkdown } from "@/components/AtlasMarkdown";
+import { HistoryRail } from "@/components/AtlasHistory";
 
 type Difficulty = "Easy" | "Medium" | "Hard" | "HSC";
 type Question = { n: number; difficulty: Difficulty; marks: number; question: string; rubric: string };
@@ -12,6 +13,7 @@ type Result = { awarded: number; feedback: string };
 
 const BANDS: Difficulty[] = ["Easy", "Medium", "Hard", "HSC"];
 const STORE_KEY = "summit-question-bank-v1";
+const SETS_KEY = "summit-question-sets-v1";
 
 const BAND_STYLE: Record<Difficulty, string> = {
   Easy: "border-emerald-400/40 text-emerald-300 bg-emerald-400/10",
@@ -20,14 +22,44 @@ const BAND_STYLE: Record<Difficulty, string> = {
   HSC: "border-primary/50 text-primary bg-primary/15",
 };
 
-type Saved = {
+type QSet = {
+  id: string;
+  title: string;
+  ts: number;
   topic: string;
   questions: Question[];
   answers: Record<number, string>;
   results: Record<number, Result>;
 };
 
-/** 28 AI-generated HSC-style questions with answering, marking and a difficulty filter. */
+const scoreTone = (pct: number) =>
+  pct >= 80
+    ? "border-emerald-400/50 bg-emerald-400/10 text-emerald-300"
+    : pct >= 50
+      ? "border-yellow/50 bg-yellow/10 text-yellow"
+      : "border-rose-400/50 bg-rose-400/10 text-rose-300";
+
+function ConfettiBurst() {
+  const bits = Array.from({ length: 18 }, (_, i) => i);
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+      {bits.map((i) => (
+        <span
+          key={i}
+          className="absolute left-1/2 top-1/3 h-1.5 w-1.5 rounded-[2px]"
+          style={{
+            background: i % 3 === 0 ? "hsl(var(--yellow))" : i % 3 === 1 ? "hsl(var(--primary))" : "#fff",
+            ["--dx" as string]: `${(Math.random() - 0.5) * 380}px`,
+            ["--dy" as string]: `${-120 - Math.random() * 220}px`,
+            animation: `confettiFly 1500ms cubic-bezier(0.16,0.9,0.3,1) ${i * 22}ms both`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** 28 AI-generated HSC-style questions with answering, marking, saved sets and a difficulty filter. */
 export function QuestionBankPanel() {
   const run = useServerFn(generateQuestions);
   const mark = useServerFn(markAnswer);
@@ -41,12 +73,21 @@ export function QuestionBankPanel() {
   const [results, setResults] = useState<Record<number, Result>>({});
   const [marking, setMarking] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [sets, setSets] = useState<QSet[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [railOpen, setRailOpen] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   useEffect(() => {
     try {
+      const rawSets = localStorage.getItem(SETS_KEY);
+      if (rawSets) {
+        const s = JSON.parse(rawSets) as QSet[];
+        if (Array.isArray(s)) setSets(s);
+      }
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
-        const s = JSON.parse(raw) as Saved;
+        const s = JSON.parse(raw) as Omit<QSet, "id" | "title" | "ts">;
         setTopic(s.topic ?? "");
         setQuestions(s.questions ?? []);
         setAnswers(s.answers ?? {});
@@ -62,26 +103,71 @@ export function QuestionBankPanel() {
     if (!hydrated) return;
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({ topic, questions, answers, results }));
+      localStorage.setItem(SETS_KEY, JSON.stringify(sets));
     } catch {
       // ignore quota errors
     }
-  }, [hydrated, topic, questions, answers, results]);
+  }, [hydrated, topic, questions, answers, results, sets]);
+
+  // Keep the active saved set in sync with the working answers/results.
+  useEffect(() => {
+    if (!hydrated || !activeId) return;
+    setSets((prev) =>
+      prev.map((s) => (s.id === activeId ? { ...s, answers, results, questions, topic } : s)),
+    );
+  }, [hydrated, activeId, answers, results, questions, topic]);
 
   const generate = async () => {
     if (!topic.trim() || busy) return;
     setBusy(true);
     try {
       const res = await run({ data: { topic: topic.trim(), focus } });
-      setQuestions(res.questions as Question[]);
+      const qs = res.questions as Question[];
+      const id = `set_${Date.now()}`;
+      setQuestions(qs);
       setOpen(new Set());
       setAnswers({});
       setResults({});
-      toast.success(`${res.questions.length} questions ready`);
+      setActiveId(id);
+      setSets((prev) => [
+        { id, title: topic.trim().slice(0, 60), ts: Date.now(), topic: topic.trim(), questions: qs, answers: {}, results: {} },
+        ...prev,
+      ].slice(0, 30));
+      toast.success(`${qs.length} questions ready`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't generate questions");
     } finally {
       setBusy(false);
     }
+  };
+
+  const selectSet = (id: string) => {
+    const s = sets.find((x) => x.id === id);
+    if (!s) return;
+    setActiveId(id);
+    setTopic(s.topic);
+    setQuestions(s.questions);
+    setAnswers(s.answers ?? {});
+    setResults(s.results ?? {});
+    setOpen(new Set());
+  };
+
+  const deleteSet = (id: string) => {
+    setSets((prev) => prev.filter((s) => s.id !== id));
+    if (id === activeId) {
+      setActiveId(null);
+      setQuestions([]);
+      setAnswers({});
+      setResults({});
+    }
+  };
+
+  const newSet = () => {
+    setActiveId(null);
+    setQuestions([]);
+    setAnswers({});
+    setResults({});
+    setTopic("");
   };
 
   const submit = async (q: Question) => {
@@ -92,8 +178,13 @@ export function QuestionBankPanel() {
       const res = await mark({
         data: { question: q.question, rubric: q.rubric ?? "", marks: q.marks, answer },
       });
-      setResults((prev) => ({ ...prev, [q.n]: res as Result }));
-      toast.success(`Marked ${res.awarded}/${q.marks}`);
+      const r = res as Result;
+      setResults((prev) => ({ ...prev, [q.n]: r }));
+      toast.success(`Marked ${r.awarded}/${q.marks}`);
+      if (r.awarded >= q.marks) {
+        setCelebrate(true);
+        setTimeout(() => setCelebrate(false), 1700);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't mark that answer");
     } finally {
@@ -123,11 +214,24 @@ export function QuestionBankPanel() {
       total += q.marks;
       done += 1;
     }
-    return { awarded, total, done };
+    return { awarded, total, done, pct: total ? (awarded / total) * 100 : 0 };
   }, [questions, results]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full">
+      {celebrate && <ConfettiBurst />}
+      <HistoryRail
+        open={railOpen}
+        onToggle={() => setRailOpen((o) => !o)}
+        items={sets.map((s) => ({ id: s.id, title: s.title || "Question set", ts: s.ts }))}
+        activeId={activeId}
+        onSelect={selectSet}
+        onNew={newSet}
+        onDelete={deleteSet}
+        newLabel="New set"
+        title="Question sets"
+      />
+      <div className="flex h-full min-w-0 flex-1 flex-col">
       <div className="border-b border-border/50 bg-background/40 p-3">
         <Textarea
           value={topic}
@@ -144,7 +248,7 @@ export function QuestionBankPanel() {
             <button
               key={b}
               onClick={() => setFocus(b)}
-              className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+              className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
                 focus === b
                   ? "border-primary/70 bg-primary/20 text-foreground"
                   : "border-border/60 bg-surface/50 text-muted-foreground hover:border-primary/40"
@@ -156,7 +260,7 @@ export function QuestionBankPanel() {
           <button
             onClick={generate}
             disabled={busy || !topic.trim()}
-            className="ml-auto flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+            className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity disabled:opacity-40"
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
             Generate 28
@@ -170,7 +274,7 @@ export function QuestionBankPanel() {
             <button
               key={b}
               onClick={() => setFilter(b)}
-              className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+              className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
                 filter === b
                   ? "border-primary/70 bg-primary/20 text-foreground"
                   : "border-border/60 bg-surface/50 text-muted-foreground hover:border-primary/40"
@@ -183,8 +287,10 @@ export function QuestionBankPanel() {
             </button>
           ))}
           {score.done > 0 && (
-            <span className="rounded-full border border-primary/50 bg-primary/15 px-2.5 py-0.5 text-[11px] text-foreground">
-              {score.awarded}/{score.total} marked ({score.done})
+            <span
+              className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${scoreTone(score.pct)}`}
+            >
+              {score.awarded}/{score.total} · {Math.round(score.pct)}% ({score.done} marked)
             </span>
           )}
           <span className="ml-auto text-[11px] text-muted-foreground">
@@ -238,7 +344,9 @@ export function QuestionBankPanel() {
                     </span>
                     <span className="text-[11px] text-muted-foreground">{q.marks} marks</span>
                     {result && (
-                      <span className="flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-2 py-0.5 text-[10px] text-emerald-300">
+                      <span
+                        className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] ${scoreTone((result.awarded / q.marks) * 100)}`}
+                      >
                         <CheckCircle2 className="h-3 w-3" />
                         {result.awarded}/{q.marks}
                       </span>
@@ -253,7 +361,7 @@ export function QuestionBankPanel() {
                             return next;
                           })
                         }
-                        className="ml-auto flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary"
+                        className="ml-auto flex cursor-pointer items-center gap-1 text-[11px] text-muted-foreground hover:text-primary"
                       >
                         Rubric
                         <ChevronDown
@@ -279,7 +387,7 @@ export function QuestionBankPanel() {
                     <button
                       onClick={() => submit(q)}
                       disabled={marking !== null || !(answers[q.n] ?? "").trim()}
-                      className="flex items-center gap-1.5 rounded-lg border border-primary/50 bg-primary/15 px-3 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
+                      className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-primary/50 bg-primary/15 px-3 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
                     >
                       {marking === q.n ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -305,6 +413,7 @@ export function QuestionBankPanel() {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
