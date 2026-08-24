@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { supabase } from "@/integrations/supabase/client";
 import { parsePaperFile } from "@/lib/exam.functions";
 import type { Paper } from "./types";
@@ -23,7 +24,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const PdfViewerDialog = lazy(() =>
+const PdfViewerDialog = lazyWithRetry(() =>
   import("./PdfViewerDialog").then((m) => ({ default: m.PdfViewerDialog })),
 );
 
