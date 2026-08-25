@@ -276,6 +276,151 @@ export type Database = {
         }
         Relationships: []
       }
+      recall_folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recall_folders_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "recall_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recall_materials: {
+        Row: {
+          content: string
+          created_at: string
+          folder_id: string
+          id: string
+          kind: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          folder_id: string
+          id?: string
+          kind?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          folder_id?: string
+          id?: string
+          kind?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recall_materials_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "recall_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recall_sessions: {
+        Row: {
+          created_at: string
+          folder_id: string | null
+          id: string
+          mode: string
+          payload: Json
+          score: number
+          subject_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          mode: string
+          payload?: Json
+          score?: number
+          subject_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          mode?: string
+          payload?: Json
+          score?: number
+          subject_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recall_sessions_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "recall_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recall_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "recall_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recall_subjects: {
+        Row: {
+          color: string | null
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
