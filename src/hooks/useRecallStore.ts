@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import type {
   BlurtPayload,
@@ -48,6 +49,55 @@ export type OverallStats = {
   needsReview: string[];
   delta: number | null; // avg of last 5 sessions minus the 5 before that
 };
+
+
+/* ------------------------- Type-safe row mappers ------------------------- */
+
+function mapSubject(row: Tables<"recall_subjects">): RecallSubject {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    emoji: row.emoji,
+    color: row.color,
+    created_at: row.created_at,
+  };
+}
+
+function mapFolder(row: Tables<"recall_folders">): RecallFolder {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    subject_id: row.subject_id,
+    name: row.name,
+    created_at: row.created_at,
+  };
+}
+
+function mapMaterial(row: Tables<"recall_materials">): RecallMaterial {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    folder_id: row.folder_id,
+    name: row.name,
+    kind: row.kind,
+    content: row.content,
+    created_at: row.created_at,
+  };
+}
+
+function mapSession(row: Tables<"recall_sessions">): RecallSession {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    subject_id: row.subject_id,
+    folder_id: row.folder_id,
+    mode: row.mode,
+    score: row.score,
+    payload: (row.payload ?? {}) as RecallSession["payload"],
+    created_at: row.created_at,
+  };
+}
 
 function quickMissing(p: QuickRecallPayload): string[] {
   const out: string[] = [];
@@ -107,10 +157,10 @@ export function useRecallStore() {
       supabase.from("recall_materials").select("*").order("created_at", { ascending: true }),
       supabase.from("recall_sessions").select("*").order("created_at", { ascending: false }),
     ]);
-    setSubjects((s.data ?? []) as unknown as RecallSubject[]);
-    setFolders((f.data ?? []) as unknown as RecallFolder[]);
-    setMaterials((m.data ?? []) as unknown as RecallMaterial[]);
-    setSessions((se.data ?? []) as unknown as RecallSession[]);
+    setSubjects((s.data ?? []).map(mapSubject));
+    setFolders((f.data ?? []).map(mapFolder));
+    setMaterials((m.data ?? []).map(mapMaterial));
+    setSessions((se.data ?? []).map(mapSession));
     setLoading(false);
   }, [userId]);
 
@@ -128,8 +178,8 @@ export function useRecallStore() {
         .insert({ user_id: userId, name: name.trim(), emoji })
         .select("*")
         .single();
-      if (error) return null;
-      const row = data as unknown as RecallSubject;
+      if (error || !data) return null;
+      const row = mapSubject(data);
       setSubjects((prev) => [...prev, row]);
       return row;
     },
@@ -137,7 +187,7 @@ export function useRecallStore() {
   );
 
   const renameSubject = useCallback(async (id: string, name: string, emoji?: string) => {
-    const patch: Record<string, unknown> = { name: name.trim() };
+    const patch: TablesUpdate<"recall_subjects"> = { name: name.trim() };
     if (emoji) patch.emoji = emoji;
     setSubjects((prev) => prev.map((s) => (s.id === id ? { ...s, name: name.trim(), emoji: emoji ?? s.emoji } : s)));
     await supabase.from("recall_subjects").update(patch).eq("id", id);
@@ -166,8 +216,8 @@ export function useRecallStore() {
         .insert({ user_id: userId, subject_id: subjectId, name: name.trim() })
         .select("*")
         .single();
-      if (error) return null;
-      const row = data as unknown as RecallFolder;
+      if (error || !data) return null;
+      const row = mapFolder(data);
       setFolders((prev) => [...prev, row]);
       return row;
     },
@@ -199,8 +249,8 @@ export function useRecallStore() {
         .insert({ user_id: userId, folder_id: folderId, name: name.trim(), kind, content })
         .select("*")
         .single();
-      if (error) return null;
-      const row = data as unknown as RecallMaterial;
+      if (error || !data) return null;
+      const row = mapMaterial(data);
       setMaterials((prev) => [...prev, row]);
       return row;
     },
@@ -241,11 +291,11 @@ export function useRecallStore() {
           folder_id: input.folderId,
           mode: input.mode,
           score: Math.round(input.score),
-          payload: input.payload as never,
+          payload: input.payload as unknown as Tables<"recall_sessions">["payload"],
         })
         .select("*")
         .single();
-      if (data) setSessions((prev) => [data as unknown as RecallSession, ...prev]);
+      if (data) setSessions((prev) => [mapSession(data), ...prev]);
     },
     [userId],
   );
