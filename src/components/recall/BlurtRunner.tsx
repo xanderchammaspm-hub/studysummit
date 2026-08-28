@@ -4,7 +4,6 @@ import {
   Brain,
   CheckCircle2,
   Clock,
-  Loader2,
   Pause,
   Play,
   RefreshCw,
