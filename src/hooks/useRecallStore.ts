@@ -13,6 +13,7 @@ import type {
 
 export type RecentActivity = {
   id: string;
+  folderId: string | null;
   mode: string;
   score: number;
   folderName: string;
@@ -342,6 +343,7 @@ export function useRecallStore() {
         needsReview: topMissing(ss),
         recent: ss.slice(0, 3).map((s) => ({
           id: s.id,
+          folderId: s.folder_id,
           mode: s.mode,
           score: s.score,
           folderName: subjectFolders.find((f) => f.id === s.folder_id)?.name ?? "—",

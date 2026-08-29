@@ -241,6 +241,12 @@ function Home() {
               <ExamEngineLogo size={26} />
               Exam Engine
             </Link>
+            <Link
+              to="/recall"
+              className="hidden md:inline-flex items-center gap-2 rounded-full purple-outline purple-glow-hover bg-surface/60 px-4 py-1.5 text-sm transition-transform hover:scale-[1.03]"
+            >
+              ⚡ Quick Recall
+            </Link>
 
             <nav className="hidden sm:flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60">
 

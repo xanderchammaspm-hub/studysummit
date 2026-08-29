@@ -10,6 +10,8 @@ type Props = {
   sessions: RecallSession[];
   overall: OverallStats;
   statsFor: (subjectId: string) => SubjectStats;
+  onOpenSubject?: (subjectId: string) => void;
+  onOpenFolder?: (subjectId: string, folderId: string) => void;
 };
 
 /* ------------------------------ Sparkline ------------------------------- */
@@ -85,7 +87,7 @@ function SplitBar({ recall, blurt }: { recall: number | null; blurt: number | nu
   );
 }
 
-export function RecallAnalytics({ subjects, sessions, overall, statsFor }: Props) {
+export function RecallAnalytics({ subjects, sessions, overall, statsFor, onOpenSubject, onOpenFolder }: Props) {
   const trend = useMemo(() => sessions.slice(0, 14).map((s) => s.score).reverse(), [sessions]);
   const recallAvg = useMemo(() => {
     const xs = sessions.filter((s) => s.mode === "quick_recall").map((s) => s.score);
@@ -185,7 +187,23 @@ export function RecallAnalytics({ subjects, sessions, overall, statsFor }: Props
               return (
                 <div
                   key={s.id}
-                  className="group rounded-3xl purple-outline bg-card/60 p-5 backdrop-blur-xl transition-all duration-500 hover:-translate-y-0.5 hover:border-primary/60"
+                  role={onOpenSubject ? "button" : undefined}
+                  tabIndex={onOpenSubject ? 0 : undefined}
+                  onClick={onOpenSubject ? () => onOpenSubject(s.id) : undefined}
+                  onKeyDown={
+                    onOpenSubject
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onOpenSubject(s.id);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={cn(
+                    "group rounded-3xl purple-outline bg-card/60 p-5 backdrop-blur-xl transition-all duration-500 hover:-translate-y-0.5 hover:border-primary/60",
+                    onOpenSubject && "cursor-pointer",
+                  )}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -222,7 +240,21 @@ export function RecallAnalytics({ subjects, sessions, overall, statsFor }: Props
                   {st.recent.length ? (
                     <ul className="mt-4 space-y-1.5 border-t border-border/50 pt-3">
                       {st.recent.map((r) => (
-                        <li key={r.id} className="flex items-center justify-between gap-2 text-[11px]">
+                        <li
+                          key={r.id}
+                          onClick={
+                            onOpenFolder && r.folderId
+                              ? (e) => {
+                                  e.stopPropagation();
+                                  onOpenFolder(s.id, r.folderId!);
+                                }
+                              : undefined
+                          }
+                          className={cn(
+                            "flex items-center justify-between gap-2 rounded-lg px-1 py-0.5 text-[11px]",
+                            onOpenFolder && r.folderId && "cursor-pointer hover:bg-primary/10",
+                          )}
+                        >
                           <span className="truncate text-muted-foreground">
                             {r.mode === "quick_recall" ? "⚡" : "🧠"} {r.folderName}
                           </span>
