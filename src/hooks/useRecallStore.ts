@@ -172,11 +172,11 @@ export function useRecallStore() {
   /* ------------------------------- Subjects ------------------------------ */
 
   const createSubject = useCallback(
-    async (name: string, emoji: string): Promise<RecallSubject | null> => {
+    async (name: string, emoji: string, color?: string | null): Promise<RecallSubject | null> => {
       if (!userId || !name.trim()) return null;
       const { data, error } = await supabase
         .from("recall_subjects")
-        .insert({ user_id: userId, name: name.trim(), emoji })
+        .insert({ user_id: userId, name: name.trim(), emoji, color: color ?? null })
         .select("*")
         .single();
       if (error || !data) return null;
@@ -187,12 +187,26 @@ export function useRecallStore() {
     [userId],
   );
 
-  const renameSubject = useCallback(async (id: string, name: string, emoji?: string) => {
-    const patch: TablesUpdate<"recall_subjects"> = { name: name.trim() };
-    if (emoji) patch.emoji = emoji;
-    setSubjects((prev) => prev.map((s) => (s.id === id ? { ...s, name: name.trim(), emoji: emoji ?? s.emoji } : s)));
-    await supabase.from("recall_subjects").update(patch).eq("id", id);
-  }, []);
+  const updateSubject = useCallback(
+    async (id: string, patch: { name?: string; emoji?: string; color?: string | null }) => {
+      const update: TablesUpdate<"recall_subjects"> = {};
+      if (patch.name != null && patch.name.trim()) update.name = patch.name.trim();
+      if (patch.emoji) update.emoji = patch.emoji;
+      if (patch.color !== undefined) update.color = patch.color;
+      if (!Object.keys(update).length) return;
+      setSubjects((prev) => prev.map((s) => (s.id === id ? { ...s, ...update } : s)));
+      await supabase.from("recall_subjects").update(update).eq("id", id);
+    },
+    [],
+  );
+
+  const renameSubject = useCallback(
+    async (id: string, name: string, emoji?: string) => {
+      await updateSubject(id, { name, ...(emoji ? { emoji } : {}) });
+    },
+    [updateSubject],
+  );
+
 
   const deleteSubject = useCallback(async (id: string) => {
     const folderIds = folders.filter((f) => f.subject_id === id).map((f) => f.id);
@@ -392,6 +406,7 @@ export function useRecallStore() {
     reload: load,
     createSubject,
     renameSubject,
+    updateSubject,
     deleteSubject,
     createFolder,
     renameFolder,
