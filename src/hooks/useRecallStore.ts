@@ -406,6 +406,7 @@ export function useRecallStore() {
     reload: load,
     createSubject,
     renameSubject,
+    updateSubject,
     deleteSubject,
     createFolder,
     renameFolder,
