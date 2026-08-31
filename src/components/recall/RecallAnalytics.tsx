@@ -101,8 +101,8 @@ export function RecallAnalytics({ subjects, sessions, overall, statsFor, onOpenS
   return (
     <div className="space-y-6 fade-in-up">
       <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
-        <div className="flex flex-col items-center justify-center gap-3 rounded-3xl purple-outline bg-card/60 px-8 py-7 backdrop-blur-xl">
-          <ScoreRing value={overall.avgScore ?? 0} label="Overall mastery" size={150} />
+        <div className="flex flex-col items-center justify-center gap-3 rounded-3xl purple-outline bg-card/60 px-4 py-6 backdrop-blur-xl sm:px-8 sm:py-7">
+          <ScoreRing value={overall.avgScore ?? 0} label="Overall mastery" size={128} />
           {overall.delta != null ? (
             <span
               className={cn(
@@ -119,7 +119,7 @@ export function RecallAnalytics({ subjects, sessions, overall, statsFor, onOpenS
         </div>
 
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
             <StatTile icon={<Flame className="h-3.5 w-3.5 text-yellow" />} label="Sessions" value={overall.sessions} />
             <StatTile icon={<Layers className="h-3.5 w-3.5 text-primary" />} label="Materials" value={overall.materials} />
             <StatTile
@@ -181,7 +181,7 @@ export function RecallAnalytics({ subjects, sessions, overall, statsFor, onOpenS
             Add a subject to start tracking mastery.
           </p>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
             {subjects.map((s) => {
               const st = statsFor(s.id);
               return (
