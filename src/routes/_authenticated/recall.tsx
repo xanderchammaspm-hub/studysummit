@@ -201,8 +201,8 @@ function RecallPage() {
               setSubjectId(id);
               setFolderId(null);
             }}
-            onCreate={(name, emoji) => void store.createSubject(name, emoji)}
-            onRename={(id, name, emoji) => void store.renameSubject(id, name, emoji)}
+            onCreate={(name, emoji, color) => void store.createSubject(name, emoji, color)}
+            onUpdate={(id, patch) => void store.updateSubject(id, patch)}
             onDelete={(id) => {
               void store.deleteSubject(id);
               if (subjectId === id) setSubjectId(null);
