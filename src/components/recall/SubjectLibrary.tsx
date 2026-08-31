@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, Check, FolderOpen, Palette, Pencil, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmojiPicker } from "@/components/EmojiPicker";
@@ -48,7 +49,7 @@ function ColorPicker({
   return (
     <>
       <button className="fixed inset-0 z-40 cursor-default" onClick={onClose} tabIndex={-1} aria-label="Close colours" />
-      <div className="absolute right-0 z-50 mt-2 w-60 rounded-2xl border border-primary/25 bg-popover/90 p-3 shadow-[0_24px_60px_-30px_var(--primary)] backdrop-blur-2xl">
+      <div className="absolute left-0 z-50 w-72 max-w-full rounded-2xl border border-primary/25 bg-popover/90 p-3 shadow-[0_24px_60px_-30px_var(--primary)] backdrop-blur-2xl">
         <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Subject colour</div>
         <div className="grid grid-cols-6 gap-2">
           {SUBJECT_SWATCHES.map((c) => (
@@ -78,6 +79,22 @@ function ColorPicker({
         </label>
       </div>
     </>
+  );
+}
+
+/** Renders a picker in a top-level overlay so card overflow never clips it. */
+function PickerModal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-background/70 px-4 pb-10 pt-20 backdrop-blur-sm sm:pt-28"
+      onClick={onClose}
+    >
+      <div className="relative w-72 max-w-full" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -141,6 +158,7 @@ export function SubjectLibrary({
               {emoji}
             </button>
             {panel === "new-emoji" ? (
+              <PickerModal onClose={() => setPanel(null)}>
               <EmojiPicker
                 onPick={(c) => {
                   setEmoji(c);
@@ -148,6 +166,7 @@ export function SubjectLibrary({
                 }}
                 onClose={() => setPanel(null)}
               />
+              </PickerModal>
             ) : null}
           </div>
 
@@ -162,7 +181,9 @@ export function SubjectLibrary({
               <Palette className="h-4 w-4 text-white/90" />
             </button>
             {panel === "new-color" ? (
-              <ColorPicker value={color} onPick={(c) => setColor(c)} onClose={() => setPanel(null)} />
+              <PickerModal onClose={() => setPanel(null)}>
+                <ColorPicker value={color} onPick={(c) => setColor(c)} onClose={() => setPanel(null)} />
+              </PickerModal>
             ) : null}
           </div>
 
@@ -230,13 +251,15 @@ export function SubjectLibrary({
                         {s.emoji}
                       </button>
                       {panel === `${s.id}-emoji` ? (
-                        <EmojiPicker
-                          onPick={(e) => {
-                            onUpdate(s.id, { emoji: e });
-                            setPanel(null);
-                          }}
-                          onClose={() => setPanel(null)}
-                        />
+                        <PickerModal onClose={() => setPanel(null)}>
+                          <EmojiPicker
+                            onPick={(e) => {
+                              onUpdate(s.id, { emoji: e });
+                              setPanel(null);
+                            }}
+                            onClose={() => setPanel(null)}
+                          />
+                        </PickerModal>
                       ) : null}
                     </div>
 
@@ -282,11 +305,13 @@ export function SubjectLibrary({
                         <Palette className="h-3.5 w-3.5" />
                       </button>
                       {panel === `${s.id}-color` ? (
-                        <ColorPicker
-                          value={c}
-                          onPick={(col) => onUpdate(s.id, { color: col })}
-                          onClose={() => setPanel(null)}
-                        />
+                        <PickerModal onClose={() => setPanel(null)}>
+                          <ColorPicker
+                            value={c}
+                            onPick={(col) => onUpdate(s.id, { color: col })}
+                            onClose={() => setPanel(null)}
+                          />
+                        </PickerModal>
                       ) : null}
                     </div>
                     <button
