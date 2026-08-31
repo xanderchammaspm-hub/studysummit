@@ -285,7 +285,7 @@ export function BlurtRunner({ subjectName, folderName, materials, previous, onEx
             value={blurt}
             onChange={(e) => setBlurt(e.target.value)}
             placeholder={`Everything you remember about ${folderName} — no notes, no peeking. Structure it however it comes out.`}
-            className="min-h-[42vh] w-full resize-y rounded-[1.35rem] bg-transparent px-5 py-4 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50"
+            className="min-h-[45vh] w-full resize-y rounded-[1.35rem] bg-transparent px-3.5 py-3.5 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground/50 sm:px-5 sm:py-4 sm:text-sm"
           />
         </div>
 
@@ -333,7 +333,7 @@ export function BlurtRunner({ subjectName, folderName, materials, previous, onEx
         ) : null}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <ConceptList title="Remembered" items={analysis.remembered} tone="good" icon={<CheckCircle2 className="h-3.5 w-3.5" />} />
         <ConceptList title="Missing" items={analysis.missing} tone="warn" icon={<Brain className="h-3.5 w-3.5" />} />
         <ConceptList title="Needs correcting" items={analysis.incorrect} tone="bad" icon={<TriangleAlert className="h-3.5 w-3.5" />} />
