@@ -1,4 +1,4 @@
-import summiAsset from "@/assets/summi-mascot.png.asset.json";
+import summiAsset from "@/assets/summi-mascot-transparent.png.asset.json";
 
 export type MascotMood = "idle" | "thinking" | "happy" | "celebrate" | "encourage";
 

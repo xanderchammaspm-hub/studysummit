@@ -137,6 +137,7 @@ function RecallPage() {
           </div>
         ) : runner === "quick_recall" && subject && folder ? (
           <QuickRecallRunner
+            folderId={folder.id}
             subjectName={subject.name}
             folderName={folder.name}
             materials={folderMaterials}
@@ -145,6 +146,7 @@ function RecallPage() {
           />
         ) : runner === "blurt" && subject && folder ? (
           <BlurtRunner
+            folderId={folder.id}
             subjectName={subject.name}
             folderName={folder.name}
             materials={folderMaterials}

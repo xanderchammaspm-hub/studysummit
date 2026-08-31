@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2, Plus, RefreshCw, Sparkles, TriangleAlert } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, History, Loader2, Plus, RefreshCw, Sparkles, TriangleAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   generateRecallSet,
@@ -12,9 +12,19 @@ import {
 import type { QuickRecallPayload, RecallMaterial } from "@/components/recall/types";
 import { LoadingStages, ScoreRing } from "@/components/recall/RecallShared";
 import { RecallMascot, type MascotMood } from "@/components/recall/RecallMascot";
+import { clearDraft, readDraft, useAutosaveDraft } from "@/hooks/useRecallDraft";
 import { cn } from "@/lib/utils";
 
+type QuickRecallDraft = {
+  selected: string[];
+  questions: RecallQuestion[];
+  idx: number;
+  answer: string;
+  grades: RecallGrade[];
+};
+
 type Props = {
+  folderId: string;
   subjectName: string;
   folderName: string;
   materials: RecallMaterial[];
