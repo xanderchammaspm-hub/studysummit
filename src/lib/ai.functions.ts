@@ -128,6 +128,8 @@ const QuestionsInput = z.object({
   topic: z.string().min(1).max(500),
   subject: z.string().max(120).optional(),
   focus: z.enum(["Mixed", "Easy", "Medium", "Hard", "HSC"]).default("Mixed"),
+  /** Optional study material (Quick Recall notes) to ground the questions in. */
+  source: z.string().max(45000).optional(),
 });
 
 export const generateQuestions = createServerFn({ method: "POST" })
@@ -144,7 +146,11 @@ You are generating an exam question bank. Reply with RAW JSON ONLY — no prose,
 Schema: {"questions":[{"n":1,"difficulty":"Easy"|"Medium"|"Hard"|"HSC","marks":number,"question":string,"rubric":string}]}
 Return EXACTLY 28 questions. "rubric" is a compact NESA-style marking guide (2-4 short lines, may use "•").`;
 
-    const user = `${data.subject ? `Subject: ${data.subject}\n` : ""}Topic: ${data.topic}\n${focusLine}`;
+    const user = `${data.subject ? `Subject: ${data.subject}\n` : ""}Topic: ${data.topic}\n${focusLine}${
+      data.source
+        ? `\n\nBase every question strictly on the student's own study material below. Only test content that appears in it.\n\n--- STUDY MATERIAL ---\n${data.source}\n--- END ---`
+        : ""
+    }`;
 
     const raw = await callAI([
       { role: "system", content: system },
