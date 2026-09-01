@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Sparkles, Wand2, ChevronDown, CheckCircle2 } from "lucide-react";
+import { Loader2, Sparkles, Wand2, ChevronDown, CheckCircle2, Library, Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { generateQuestions, markAnswer } from "@/lib/ai.functions";
 import { Textarea } from "@/components/ui/textarea";
 import { AtlasMarkdown } from "@/components/AtlasMarkdown";
 import { HistoryRail } from "@/components/AtlasHistory";
+import { useRecallStore } from "@/hooks/useRecallStore";
 
 type Difficulty = "Easy" | "Medium" | "Hard" | "HSC";
 type Question = { n: number; difficulty: Difficulty; marks: number; question: string; rubric: string };
@@ -78,6 +79,24 @@ export function QuestionBankPanel() {
   const [railOpen, setRailOpen] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
 
+  // Quick Recall study material can ground the generated questions.
+  const recall = useRecallStore();
+  const [showMaterials, setShowMaterials] = useState(false);
+  const [useIds, setUseIds] = useState<string[]>([]);
+
+  const chosen = useMemo(
+    () => recall.materials.filter((m) => useIds.includes(m.id)),
+    [recall.materials, useIds],
+  );
+  const source = useMemo(
+    () =>
+      chosen
+        .map((m) => `### ${m.name}\n${m.content}`)
+        .join("\n\n")
+        .slice(0, 44000),
+    [chosen],
+  );
+
   useEffect(() => {
     try {
       const rawSets = localStorage.getItem(SETS_KEY);
@@ -121,7 +140,9 @@ export function QuestionBankPanel() {
     if (!topic.trim() || busy) return;
     setBusy(true);
     try {
-      const res = await run({ data: { topic: topic.trim(), focus } });
+      const res = await run({
+        data: { topic: topic.trim(), focus, ...(source ? { source } : {}) },
+      });
       const qs = res.questions as Question[];
       const id = `set_${Date.now()}`;
       setQuestions(qs);
@@ -241,6 +262,17 @@ export function QuestionBankPanel() {
           className="resize-none rounded-xl border-border/70 bg-surface/70 text-sm"
         />
         <div className="mt-2 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowMaterials((v) => !v)}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+              useIds.length
+                ? "border-primary/70 bg-primary/20 text-foreground"
+                : "border-border/60 bg-surface/50 text-muted-foreground hover:border-primary/40"
+            }`}
+          >
+            <Library className="h-3 w-3" />
+            {useIds.length ? `${useIds.length} note${useIds.length > 1 ? "s" : ""}` : "Quick Recall notes"}
+          </button>
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
             Weight
           </span>
@@ -267,6 +299,57 @@ export function QuestionBankPanel() {
           </button>
         </div>
       </div>
+
+      {showMaterials && (
+        <div className="max-h-52 overflow-y-auto border-b border-border/40 bg-surface/30 px-3 py-2.5">
+          {recall.loading ? (
+            <p className="text-[11px] text-muted-foreground">Loading your Quick Recall library…</p>
+          ) : recall.materials.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground">
+              No study material yet — upload notes in Quick Recall and they'll appear here.
+            </p>
+          ) : (
+            <div className="space-y-2.5">
+              {recall.subjects.map((sub) => {
+                const folderIds = recall.folders.filter((f) => f.subject_id === sub.id).map((f) => f.id);
+                const mats = recall.materials.filter((m) => folderIds.includes(m.folder_id));
+                if (!mats.length) return null;
+                return (
+                  <div key={sub.id}>
+                    <div className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {sub.emoji} {sub.name}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {mats.map((m) => {
+                        const on = useIds.includes(m.id);
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() => {
+                              setUseIds((prev) =>
+                                prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id],
+                              );
+                              if (!topic.trim()) setTopic(`${sub.name}: ${m.name}`);
+                            }}
+                            className={`flex max-w-full cursor-pointer items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                              on
+                                ? "border-primary/70 bg-primary/20 text-foreground"
+                                : "border-border/60 bg-surface/50 text-muted-foreground hover:border-primary/40"
+                            }`}
+                          >
+                            {on ? <Check className="h-3 w-3 shrink-0" /> : null}
+                            <span className="truncate">{m.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {questions.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 border-b border-border/40 px-3 py-2">
