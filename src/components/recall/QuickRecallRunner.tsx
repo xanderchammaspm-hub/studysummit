@@ -10,7 +10,7 @@ import {
   type RecallSummary,
 } from "@/lib/recall.functions";
 import type { QuickRecallPayload, RecallMaterial } from "@/components/recall/types";
-import { LoadingStages, ScoreRing } from "@/components/recall/RecallShared";
+import { LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
 import { RecallMascot, type MascotMood } from "@/components/recall/RecallMascot";
 import { clearDraft, readDraft, useAutosaveDraft } from "@/hooks/useRecallDraft";
 import { cn } from "@/lib/utils";
