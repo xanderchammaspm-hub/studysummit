@@ -222,3 +222,43 @@ export function relativeDay(iso: string): string {
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
 }
+
+/** Banner offering to resume an autosaved, unfinished attempt. */
+export function ResumeBanner({
+  title,
+  detail,
+  onResume,
+  onDiscard,
+}: {
+  title: string;
+  detail: string;
+  onResume: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <div className="mx-auto mb-5 max-w-2xl fade-in-up rounded-2xl border border-yellow/40 bg-yellow/8 px-4 py-3.5 backdrop-blur-xl sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold tracking-tight text-yellow">{title}</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={onResume}
+            className="cursor-pointer rounded-full border border-primary/60 bg-primary/25 px-4 py-1.5 text-xs font-semibold transition-transform hover:scale-[1.03]"
+          >
+            Resume
+          </button>
+          <button
+            type="button"
+            onClick={onDiscard}
+            className="cursor-pointer rounded-full border border-border/60 bg-surface/50 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Discard
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
