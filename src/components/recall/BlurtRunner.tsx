@@ -296,7 +296,10 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
             <ArrowLeft className="h-3.5 w-3.5" /> Exit blurt
           </button>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{words} words</span>
+            <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+              {words} words{savedAt ? " · saved" : ""}
+            </span>
+
             {timerOn ? (
               <div
                 className={cn(
