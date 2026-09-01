@@ -117,7 +117,7 @@ export function MaterialPicker({
   );
 }
 
-export function QuickRecallRunner({ subjectName, folderName, materials, onExit, onComplete }: Props) {
+export function QuickRecallRunner({ folderId, subjectName, folderName, materials, onExit, onComplete }: Props) {
   const [stage, setStage] = useState<Stage>("select");
   const [selected, setSelected] = useState<string[]>(materials.map((m) => m.id));
   const [questions, setQuestions] = useState<RecallQuestion[]>([]);
@@ -128,6 +128,38 @@ export function QuickRecallRunner({ subjectName, folderName, materials, onExit, 
   const [current, setCurrent] = useState<RecallGrade | null>(null);
   const [summary, setSummary] = useState<RecallSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recovered, setRecovered] = useState<QuickRecallDraft | null>(null);
+
+  // Recover an unfinished attempt after a refresh (client only).
+  useEffect(() => {
+    const d = readDraft<QuickRecallDraft>("quick_recall", folderId);
+    if (d && d.questions?.length) setRecovered(d);
+  }, [folderId]);
+
+  const savedAt = useAutosaveDraft<QuickRecallDraft>(
+    "quick_recall",
+    folderId,
+    stage === "run" ? { selected, questions, idx, answer, grades } : null,
+    stage === "run",
+  );
+
+  function resume() {
+    if (!recovered) return;
+    setSelected(recovered.selected);
+    setQuestions(recovered.questions);
+    setIdx(recovered.idx);
+    setAnswer(recovered.answer);
+    setGrades(recovered.grades);
+    setCurrent(recovered.grades[recovered.idx] ?? null);
+    setRecovered(null);
+    setStage("run");
+  }
+
+  function discardDraft() {
+    clearDraft("quick_recall", folderId);
+    setRecovered(null);
+  }
+
 
   const source = useMemo(
     () =>
