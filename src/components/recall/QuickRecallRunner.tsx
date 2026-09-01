@@ -274,7 +274,16 @@ export function QuickRecallRunner({ folderId, subjectName, folderName, materials
     return (
       <div>
         <BackBar onExit={onExit} label="Quick Recall" folderName={folderName} />
+        {recovered ? (
+          <ResumeBanner
+            title="Resume your attempt"
+            detail={`You were on question ${Math.min(recovered.idx + 1, recovered.questions.length)} of ${recovered.questions.length}.`}
+            onResume={resume}
+            onDiscard={discardDraft}
+          />
+        ) : null}
         <MaterialPicker
+
           title="What do you want to study?"
           materials={materials}
           selected={selected}
