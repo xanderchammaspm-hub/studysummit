@@ -249,7 +249,9 @@ export function QuickRecallRunner({ folderId, subjectName, folderName, materials
       grades,
       summary: sum,
     });
+    clearDraft("quick_recall", folderId);
   }
+
 
   /* -------------------------------- Render ------------------------------- */
 
