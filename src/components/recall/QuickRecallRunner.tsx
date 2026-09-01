@@ -360,7 +360,9 @@ export function QuickRecallRunner({ folderId, subjectName, folderName, materials
             </div>
             <div className="text-sm text-muted-foreground">
               Question {idx + 1} of {questions.length}
+              {savedAt ? <span className="ml-2 text-[11px] text-primary/70">· progress saved</span> : null}
             </div>
+
           </div>
           <RecallMascot mood={mood} size={52} />
         </div>
