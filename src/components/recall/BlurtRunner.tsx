@@ -14,12 +14,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { analyseBlurt, type BlurtAnalysis } from "@/lib/recall.functions";
 import type { BlurtPayload, RecallMaterial } from "@/components/recall/types";
-import { LoadingStages, ScoreRing } from "@/components/recall/RecallShared";
+import { LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
 import { MaterialPicker } from "@/components/recall/QuickRecallRunner";
 import { RecallMascot, type MascotMood } from "@/components/recall/RecallMascot";
+import { clearDraft, readDraft, useAutosaveDraft } from "@/hooks/useRecallDraft";
 import { cn } from "@/lib/utils";
 
+type BlurtDraft = {
+  selected: string[];
+  blurt: string;
+  timerOn: boolean;
+  left: number;
+};
+
 type Props = {
+  folderId: string;
   subjectName: string;
   folderName: string;
   materials: RecallMaterial[];
@@ -79,7 +88,7 @@ function ConceptList({
   );
 }
 
-export function BlurtRunner({ subjectName, folderName, materials, previous, onExit, onComplete }: Props) {
+export function BlurtRunner({ folderId, subjectName, folderName, materials, previous, onExit, onComplete }: Props) {
   const [stage, setStage] = useState<Stage>("select");
   const [selected, setSelected] = useState<string[]>(materials.map((m) => m.id));
   const [blurt, setBlurt] = useState("");
@@ -90,6 +99,37 @@ export function BlurtRunner({ subjectName, folderName, materials, previous, onEx
   const [running, setRunning] = useState(false);
   const [left, setLeft] = useState(TIMER_SECONDS);
   const areaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [recovered, setRecovered] = useState<BlurtDraft | null>(null);
+
+  // Recover an unfinished brain dump after a refresh (client only).
+  useEffect(() => {
+    const d = readDraft<BlurtDraft>("blurt", folderId);
+    if (d && d.blurt?.trim()) setRecovered(d);
+  }, [folderId]);
+
+  const savedAt = useAutosaveDraft<BlurtDraft>(
+    "blurt",
+    folderId,
+    stage === "write" ? { selected, blurt, timerOn, left } : null,
+    stage === "write",
+  );
+
+  function resume() {
+    if (!recovered) return;
+    setSelected(recovered.selected);
+    setBlurt(recovered.blurt);
+    setTimerOn(recovered.timerOn);
+    setLeft(recovered.left);
+    setRunning(false);
+    setRecovered(null);
+    setStage("write");
+    window.setTimeout(() => areaRef.current?.focus(), 120);
+  }
+
+  function discardDraft() {
+    clearDraft("blurt", folderId);
+    setRecovered(null);
+  }
 
   useEffect(() => {
     if (!running) return;
@@ -169,6 +209,7 @@ export function BlurtRunner({ subjectName, folderName, materials, previous, onEx
         blurt: blurt.trim(),
         analysis: res,
       });
+      clearDraft("blurt", folderId);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Atlas couldn't analyse that. Try again.");
       setStage("write");
@@ -187,6 +228,14 @@ export function BlurtRunner({ subjectName, folderName, materials, previous, onEx
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to {folderName}
         </button>
+        {recovered ? (
+          <ResumeBanner
+            title="Resume your blurt"
+            detail={`You had ${recovered.blurt.trim().split(/\s+/).length} words written.`}
+            onResume={resume}
+            onDiscard={discardDraft}
+          />
+        ) : null}
         <MaterialPicker
           title="Blurt — what will you dump from memory?"
           materials={materials}
