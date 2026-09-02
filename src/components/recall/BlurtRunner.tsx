@@ -138,6 +138,7 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
         if (v <= 1) {
           window.clearInterval(id);
           setRunning(false);
+          setTimeUp(true);
           return 0;
         }
         return v - 1;
@@ -145,6 +146,15 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
     }, 1000);
     return () => window.clearInterval(id);
   }, [running]);
+
+  /** Give yourself more time — unlocks the pad and restarts the countdown. */
+  function extend(minutes: number) {
+    setTotal((t) => t + minutes * 60);
+    setLeft(minutes * 60);
+    setTimeUp(false);
+    setRunning(true);
+    window.setTimeout(() => areaRef.current?.focus(), 120);
+  }
 
   const source = useMemo(
     () =>
