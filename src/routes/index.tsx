@@ -10,6 +10,8 @@ const StudyCalendar = lazyWithRetry(() => import("@/components/StudyCalendar").t
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import { SummitLogo, SUMMIT_LOGO_SRC } from "@/components/SummitLogo";
 import { ExamEngineLogo } from "@/components/ExamEngineLogo";
+import { QuickRecallLogo } from "@/components/recall/QuickRecallLogo";
+
 const EnglishFormula = lazyWithRetry(() => import("@/components/EnglishFormula").then((m) => ({ default: m.EnglishFormula })));
 const UpcomingExams = lazyWithRetry(() => import("@/components/UpcomingExams").then((m) => ({ default: m.UpcomingExams })));
 const WeeklyReport = lazyWithRetry(() => import("@/components/WeeklyReport").then((m) => ({ default: m.WeeklyReport })));
