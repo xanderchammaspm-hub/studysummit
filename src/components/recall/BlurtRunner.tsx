@@ -98,6 +98,8 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
   const [timerOn, setTimerOn] = useState(false);
   const [running, setRunning] = useState(false);
   const [left, setLeft] = useState(TIMER_SECONDS);
+  const [total, setTotal] = useState(TIMER_SECONDS);
+  const [timeUp, setTimeUp] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement | null>(null);
   const [recovered, setRecovered] = useState<BlurtDraft | null>(null);
 
