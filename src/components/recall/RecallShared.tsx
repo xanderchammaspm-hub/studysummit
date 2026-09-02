@@ -217,10 +217,70 @@ export function scoreColor(score: number): string {
 
 export function relativeDay(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+/** Shared glass modal shell used by the recall dialogs. */
+export function GlassModal({
+  title,
+  subtitle,
+  onClose,
+  children,
+  maxWidth = "max-w-2xl",
+}: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  onClose: () => void;
+  children: ReactNode;
+  maxWidth?: string;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] grid place-items-center bg-black/65 p-4 backdrop-blur-md"
+      style={{ animation: "overlayIn 220ms ease-out" }}
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "relative w-full overflow-hidden rounded-3xl purple-outline bg-card/85 shadow-[0_30px_80px_-20px_oklch(0.5_0.22_300_/_0.6)] backdrop-blur-2xl",
+          maxWidth,
+        )}
+        style={{ animation: "popIn 320ms cubic-bezier(0.22,1,0.36,1)" }}
+      >
+        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <div className="truncate text-base font-semibold tracking-tight">{title}</div>
+            {subtitle ? <div className="mt-0.5 text-xs text-muted-foreground">{subtitle}</div> : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="shrink-0 cursor-pointer rounded-full border border-border/60 bg-surface/60 p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="relative max-h-[70vh] overflow-auto px-5 py-5 sm:px-6">{children}</div>
+      </div>
+    </div>
+  );
 }
 
 /** Banner offering to resume an autosaved, unfinished attempt. */
