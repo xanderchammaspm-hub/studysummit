@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { SummiFlyby } from "@/components/SummiFlyby";
 
 /**
  * Living background: a slow purple nebula galaxy, a deep multi-layer star
@@ -110,6 +111,9 @@ export function AmbientBackground() {
           }}
         />
       ))}
+
+      {/* Summi comets past every so often */}
+      <SummiFlyby />
 
       {/* Drifting motes */}
       <div className="absolute inset-0">
