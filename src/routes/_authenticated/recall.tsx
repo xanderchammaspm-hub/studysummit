@@ -9,7 +9,8 @@ import { QuickRecallRunner } from "@/components/recall/QuickRecallRunner";
 import { BlurtRunner } from "@/components/recall/BlurtRunner";
 import { AddMaterialDialog } from "@/components/recall/AddMaterialDialog";
 import { RecallMascot } from "@/components/recall/RecallMascot";
-import type { BlurtPayload, QuickRecallPayload } from "@/components/recall/types";
+import { SessionDetail } from "@/components/recall/SessionDetail";
+import type { BlurtPayload, QuickRecallPayload, RecallSession } from "@/components/recall/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/recall")({
@@ -43,6 +44,7 @@ function RecallPage() {
   const [folderId, setFolderId] = useState<string | null>(null);
   const [runner, setRunner] = useState<Runner>(null);
   const [adding, setAdding] = useState(false);
+  const [openSession, setOpenSession] = useState<RecallSession | null>(null);
 
   const subject = useMemo(
     () => store.subjects.find((s) => s.id === subjectId) ?? null,
@@ -180,6 +182,7 @@ function RecallPage() {
             onStartQuickRecall={() => setRunner("quick_recall")}
             onStartBlurt={() => setRunner("blurt")}
             onDeleteSession={(id) => void store.deleteSession(id)}
+            onOpenSession={(s) => setOpenSession(s)}
           />
         ) : subject ? (
           <FolderList
@@ -212,6 +215,8 @@ function RecallPage() {
           />
         )}
       </div>
+
+      {openSession ? <SessionDetail session={openSession} onClose={() => setOpenSession(null)} /> : null}
 
       {adding && folder ? (
         <AddMaterialDialog
