@@ -1,3 +1,4 @@
+import { useCallback, useRef, useState } from "react";
 import summiAsset from "@/assets/summi-mascot-transparent.png.asset.json";
 
 export type MascotMood = "idle" | "thinking" | "happy" | "celebrate" | "encourage";
@@ -18,29 +19,74 @@ const GLOW: Record<MascotMood, number> = {
   encourage: 0.6,
 };
 
+type Burst = { id: number; spins: number; stars: { a: number; d: number; s: number; gold: boolean }[] };
+
 /**
  * Summi — the glowing galaxy blob buddy. The artwork stays on-brand while the
  * mood drives its pose: floating, tilting in thought, squashing on a bounce or
  * shaking off a wobble, plus orbiting sparks and a soft ground shadow.
+ *
+ * Clicking him sends him into a low-gravity Kirby-style spin and sprays a
+ * short burst of star sparkles. Rapid clicks stack into a longer spin.
  */
 export function RecallMascot({
   mood = "idle",
   size = 72,
   className = "",
   label,
+  interactive = true,
 }: {
   mood?: MascotMood;
   size?: number;
   className?: string;
   /** Optional speech bubble caption under/next to Summi. */
   label?: string;
+  /** Set false to disable the click-to-spin easter egg. */
+  interactive?: boolean;
 }) {
   const glow = GLOW[mood];
   const sparks = mood === "celebrate" || mood === "happy" ? 5 : mood === "thinking" ? 3 : 0;
 
+  const [burst, setBurst] = useState<Burst | null>(null);
+  const seq = useRef(0);
+  const timer = useRef<number | null>(null);
+
+  const poke = useCallback(() => {
+    if (!interactive) return;
+    seq.current += 1;
+    const id = seq.current;
+    const spins = burst ? Math.min(3, burst.spins + 1) : 1;
+    const count = 7 + spins * 2;
+    setBurst({
+      id,
+      spins,
+      stars: Array.from({ length: count }, (_, i) => ({
+        a: (360 / count) * i + (i % 2 ? 12 : -9),
+        d: size * (0.55 + ((i * 7) % 5) * 0.11),
+        s: 3 + ((i * 5) % 4),
+        gold: i % 3 === 0,
+      })),
+    });
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setBurst(null), 900 * spins + 240);
+  }, [burst, interactive, size]);
+
   return (
     <div className={`relative inline-flex flex-col items-center ${className}`}>
-      <div className="relative" style={{ width: size, height: size * 1.16 }} aria-hidden>
+      <div
+        className={`relative ${interactive ? "cursor-pointer select-none" : ""}`}
+        style={{ width: size, height: size * 1.16 }}
+        onClick={poke}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        aria-label={interactive ? "Poke Summi" : undefined}
+        onKeyDown={(e) => {
+          if (interactive && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            poke();
+          }
+        }}
+      >
         {/* orbit ring while thinking */}
         {mood === "thinking" ? (
           <div
@@ -60,8 +106,30 @@ export function RecallMascot({
           }}
         />
 
+        {/* click flare */}
+        {burst ? (
+          <span
+            key={`flare-${burst.id}`}
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, color-mix(in oklab, var(--primary) 60%, white) 0%, transparent 65%)",
+              animation: "mascotFlare 620ms ease-out forwards",
+            }}
+          />
+        ) : null}
+
         {/* body */}
-        <div className="absolute inset-x-0 top-0" style={{ height: size, animation: MOTION[mood] }}>
+        <div
+          className="absolute inset-x-0 top-0"
+          style={{
+            height: size,
+            animation: burst
+              ? `mascotKirbySpin ${0.9 * burst.spins}s cubic-bezier(0.28,0.9,0.3,1) both`
+              : MOTION[mood],
+          }}
+          key={burst ? `spin-${burst.id}` : `pose-${mood}`}
+        >
           <img
             src={summiAsset.url}
             alt=""
@@ -73,6 +141,34 @@ export function RecallMascot({
             draggable={false}
           />
         </div>
+
+        {/* click star burst */}
+        {burst
+          ? burst.stars.map((st, i) => {
+              const rad = (st.a * Math.PI) / 180;
+              return (
+                <span
+                  key={`${burst.id}-${i}`}
+                  className="pointer-events-none absolute left-1/2 top-1/2"
+                  style={{
+                    width: st.s,
+                    height: st.s,
+                    marginLeft: -st.s / 2,
+                    marginTop: -st.s / 2,
+                    borderRadius: 1,
+                    background: st.gold
+                      ? "var(--yellow, oklch(0.9 0.14 82))"
+                      : "color-mix(in oklab, var(--primary) 70%, white)",
+                    boxShadow: `0 0 ${st.s * 2.5}px currentColor`,
+                    color: st.gold ? "oklch(0.9 0.14 82)" : "oklch(0.75 0.2 300)",
+                    ["--sx" as string]: `${Math.cos(rad) * st.d}px`,
+                    ["--sy" as string]: `${Math.sin(rad) * st.d}px`,
+                    animation: `mascotStarPop ${700 + i * 26}ms cubic-bezier(0.18,0.9,0.3,1) forwards`,
+                  }}
+                />
+              );
+            })
+          : null}
 
         {/* sparks */}
         {Array.from({ length: sparks }).map((_, i) => (

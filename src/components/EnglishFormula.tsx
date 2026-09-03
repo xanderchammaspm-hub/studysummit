@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronUp, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
@@ -19,6 +19,8 @@ export function EnglishFormula() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [section, setSection] = useState<string>("skeleton");
   const [adding, setAdding] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
   const [newLabel, setNewLabel] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -146,12 +148,17 @@ export function EnglishFormula() {
                   key={s.id}
                   active={section === s.id}
                   onClick={() => setSection(s.id)}
-                  onMoveUp={i > 0 ? () => moveSection(mode.id, orderIds, i, i - 1) : undefined}
-                  onMoveDown={
-                    i < allSections.length - 1
-                      ? () => moveSection(mode.id, orderIds, i, i + 1)
-                      : undefined
-                  }
+                  dragging={dragIdx === i}
+                  dropTarget={dragIdx !== null && dragIdx !== i && overIdx === i}
+                  onDragStart={() => setDragIdx(i)}
+                  onDragOver={() => setOverIdx(i)}
+                  onDragEnd={() => {
+                    if (dragIdx !== null && overIdx !== null && dragIdx !== overIdx) {
+                      moveSection(mode.id, orderIds, dragIdx, overIdx);
+                    }
+                    setDragIdx(null);
+                    setOverIdx(null);
+                  }}
                   onDelete={
                     custom.some((c) => c.id === s.id)
                       ? () => {
@@ -436,22 +443,43 @@ function SideItem({
   active,
   onClick,
   onDelete,
-  onMoveUp,
-  onMoveDown,
   children,
 }: {
   active: boolean;
   onClick: () => void;
   onDelete?: () => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
+  dragging?: boolean;
+  dropTarget?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: () => void;
+  onDragEnd?: () => void;
   children: React.ReactNode;
 }) {
+  const draggable = Boolean(onDragStart);
   return (
-    <div className="group/side relative flex items-center">
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={(e) => {
+        if (!draggable) return;
+        e.preventDefault();
+        onDragOver?.();
+      }}
+      onDrop={(e) => {
+        if (!draggable) return;
+        e.preventDefault();
+        onDragEnd?.();
+      }}
+      onDragEnd={onDragEnd}
+      className={`group/side relative flex items-center transition-all duration-200 ${
+        dragging ? "scale-[0.98] opacity-50" : ""
+      } ${dropTarget ? "before:absolute before:-top-0.5 before:left-2 before:right-2 before:h-0.5 before:rounded-full before:bg-primary before:shadow-[0_0_10px_var(--primary)]" : ""}`}
+    >
       <button
         onClick={onClick}
-        className={`flex w-full cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors ${
+        className={`flex w-full items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors ${
+          draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+        } ${
           active
             ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
             : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
@@ -459,26 +487,6 @@ function SideItem({
       >
         {children}
       </button>
-      {(onMoveUp || onMoveDown) && (
-        <span className={`absolute ${onDelete ? "right-8" : "right-1.5"} flex items-center opacity-0 transition-opacity group-hover/side:opacity-100`}>
-          <button
-            onClick={onMoveUp}
-            disabled={!onMoveUp}
-            aria-label="Move section up"
-            className="cursor-pointer rounded-md p-0.5 text-muted-foreground hover:text-primary disabled:opacity-30"
-          >
-            <ChevronUp className="h-3 w-3" />
-          </button>
-          <button
-            onClick={onMoveDown}
-            disabled={!onMoveDown}
-            aria-label="Move section down"
-            className="cursor-pointer rounded-md p-0.5 text-muted-foreground hover:text-primary disabled:opacity-30"
-          >
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </span>
-      )}
       {onDelete && (
         <button
           onClick={onDelete}

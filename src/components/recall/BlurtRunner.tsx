@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { analyseBlurt, type BlurtAnalysis } from "@/lib/recall.functions";
 import type { BlurtPayload, RecallMaterial } from "@/components/recall/types";
-import { LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
+import { GlassModal, LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
 import { MaterialPicker } from "@/components/recall/QuickRecallRunner";
 import { RecallMascot, type MascotMood } from "@/components/recall/RecallMascot";
 import { clearDraft, readDraft, useAutosaveDraft } from "@/hooks/useRecallDraft";
@@ -151,7 +151,7 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
 
   /** Give yourself more time — unlocks the pad and restarts the countdown. */
   function extend(minutes: number) {
-    setTotal((t) => t + minutes * 60);
+    setTotal(minutes * 60);
     setLeft(minutes * 60);
     setTimeUp(false);
     setRunning(true);
@@ -190,6 +190,8 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
     setAnalysis(null);
     setError(null);
     setLeft(TIMER_SECONDS);
+    setTotal(TIMER_SECONDS);
+    setTimeUp(false);
     setRunning(timerOn);
     setStage("write");
     window.setTimeout(() => areaRef.current?.focus(), 120);
@@ -201,6 +203,7 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
       return;
     }
     setRunning(false);
+    setTimeUp(false);
     setError(null);
     setStage("analysing");
     try {
@@ -338,15 +341,21 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
           <div className="h-1 overflow-hidden rounded-full bg-surface/60">
             <div
               className={cn("h-full rounded-full transition-[width] duration-1000 ease-linear", low ? "bg-red-400" : "bg-primary")}
-              style={{ width: `${(left / TIMER_SECONDS) * 100}%` }}
+              style={{ width: `${Math.max(0, Math.min(100, (left / Math.max(1, total)) * 100))}%` }}
             />
           </div>
         ) : null}
 
-        <div className="rounded-3xl purple-outline bg-card/60 p-1.5 backdrop-blur-xl">
+        <div
+          className={cn(
+            "rounded-3xl purple-outline bg-card/60 p-1.5 backdrop-blur-xl transition-all duration-300",
+            timeUp && "opacity-60 saturate-50",
+          )}
+        >
           <textarea
             ref={areaRef}
             value={blurt}
+            readOnly={timeUp}
             onChange={(e) => setBlurt(e.target.value)}
             placeholder={`Everything you remember about ${folderName} — no notes, no peeking. Structure it however it comes out.`}
             className="min-h-[45vh] w-full resize-y rounded-[1.35rem] bg-transparent px-3.5 py-3.5 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground/50 sm:px-5 sm:py-4 sm:text-sm"
@@ -364,6 +373,37 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
             <Sparkles className="mr-2 h-4 w-4" /> Analyse my blurt
           </Button>
         </div>
+
+        {timeUp ? (
+          <GlassModal
+            title="Time's up"
+            subtitle={`${words} words dumped on ${folderName}`}
+            onClose={() => void submit()}
+            maxWidth="max-w-md"
+          >
+            <div className="flex flex-col items-center gap-5 text-center">
+              <RecallMascot mood="encourage" size={84} label="Need a little longer?" />
+              <p className="text-sm text-muted-foreground">
+                Your pad is locked. Add more time to keep going, or let Atlas analyse what you have.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {[1, 2, 3, 5, 10].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => extend(m)}
+                    className="cursor-pointer rounded-full border border-primary/45 bg-primary/12 px-4 py-1.5 text-sm font-semibold text-purple-100 transition-transform duration-200 hover:scale-[1.06] hover:bg-primary/22"
+                  >
+                    +{m} min
+                  </button>
+                ))}
+              </div>
+              <Button onClick={() => void submit()} className="cursor-pointer rounded-full px-7">
+                <Sparkles className="mr-2 h-4 w-4" /> Analyse my blurt
+              </Button>
+            </div>
+          </GlassModal>
+        ) : null}
       </div>
     );
   }
