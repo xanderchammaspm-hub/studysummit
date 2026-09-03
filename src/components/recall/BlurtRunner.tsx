@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { analyseBlurt, type BlurtAnalysis } from "@/lib/recall.functions";
 import type { BlurtPayload, RecallMaterial } from "@/components/recall/types";
-import { LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
+import { GlassModal, LoadingStages, ResumeBanner, ScoreRing } from "@/components/recall/RecallShared";
 import { MaterialPicker } from "@/components/recall/QuickRecallRunner";
 import { RecallMascot, type MascotMood } from "@/components/recall/RecallMascot";
 import { clearDraft, readDraft, useAutosaveDraft } from "@/hooks/useRecallDraft";
@@ -151,7 +151,7 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
 
   /** Give yourself more time — unlocks the pad and restarts the countdown. */
   function extend(minutes: number) {
-    setTotal((t) => t + minutes * 60);
+    setTotal(minutes * 60);
     setLeft(minutes * 60);
     setTimeUp(false);
     setRunning(true);
@@ -190,6 +190,8 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
     setAnalysis(null);
     setError(null);
     setLeft(TIMER_SECONDS);
+    setTotal(TIMER_SECONDS);
+    setTimeUp(false);
     setRunning(timerOn);
     setStage("write");
     window.setTimeout(() => areaRef.current?.focus(), 120);
@@ -201,6 +203,7 @@ export function BlurtRunner({ folderId, subjectName, folderName, materials, prev
       return;
     }
     setRunning(false);
+    setTimeUp(false);
     setError(null);
     setStage("analysing");
     try {
