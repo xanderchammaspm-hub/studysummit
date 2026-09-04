@@ -1097,15 +1097,8 @@ input[type="range"]::-moz-range-thumb {
   30% { transform: scale(1.025, 0.975) skewX(1.2deg); }
   65% { transform: scale(0.978, 1.022) skewX(-1.2deg); }
 }
-/* Little limb nubs paddling either side of the blob. */
-@keyframes mascotLimbL {
-  0%, 100% { transform: rotate(8deg) translateY(0); }
-  50% { transform: rotate(-26deg) translateY(-3px); }
-}
-@keyframes mascotLimbR {
-  0%, 100% { transform: rotate(-8deg) translateY(0); }
-  50% { transform: rotate(26deg) translateY(-3px); }
-}
+/* (no fake limbs — the artwork already has arms) */
+
 @keyframes mascotStarPop {
   0% { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 0; }
   15% { opacity: 1; }
