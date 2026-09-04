@@ -155,27 +155,8 @@ export function RecallMascot({
                     : "mascotBreathe 3.2s ease-in-out infinite",
                 }}
               >
-                {/* paddling limb nubs */}
-                {([-1, 1] as const).map((side) => (
-                  <span
-                    key={side}
-                    className="pointer-events-none absolute rounded-full"
-                    style={{
-                      top: "58%",
-                      [side < 0 ? "left" : "right"]: "-4%",
-                      width: size * 0.16,
-                      height: size * 0.1,
-                      background:
-                        "radial-gradient(circle at 40% 35%, color-mix(in oklab, var(--primary) 80%, white), color-mix(in oklab, var(--primary) 55%, transparent))",
-                      boxShadow: "0 0 10px color-mix(in oklab, var(--primary) 60%, transparent)",
-                      transformOrigin: side < 0 ? "right center" : "left center",
-                      opacity: 0.75,
-                      animation: `${side < 0 ? "mascotLimbL" : "mascotLimbR"} ${
-                        mood === "celebrate" ? 0.8 : 2.4
-                      }s ease-in-out infinite`,
-                    } as React.CSSProperties}
-                  />
-                ))}
+                {/* (the artwork already has his arms — no extra nubs) */}
+
                 <img
                   src={summiAsset.url}
                   alt=""

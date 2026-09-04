@@ -68,20 +68,20 @@ export function SummiFlyby() {
         <span
           className="absolute right-full mr-1 origin-right rounded-full"
           style={{
-            height: run.size * 0.16,
-            width: run.size * 5.5,
+            height: run.size * 0.2,
+            width: run.size * 6.5,
             background:
-              "linear-gradient(to left, color-mix(in oklab, var(--primary) 85%, white), color-mix(in oklab, var(--primary) 45%, transparent) 45%, transparent)",
-            filter: "blur(2px)",
-            clipPath: "polygon(0% 0%, 100% 45%, 100% 55%, 0% 100%)",
-            animation: "summiTrail 1.4s ease-in-out infinite",
+              "linear-gradient(to left, color-mix(in oklab, var(--primary) 90%, white), color-mix(in oklab, var(--primary) 40%, transparent) 40%, transparent)",
+            filter: "blur(3px)",
+            clipPath: "polygon(0% 12%, 100% 47%, 100% 53%, 0% 88%)",
+            animation: "summiTrail 1.8s ease-in-out infinite",
           }}
         />
         {/* glistening star specks shedding off the trail */}
         {sparkles.map((s) => (
           <span
             key={s.id}
-            className="absolute right-full rounded-[1px]"
+            className="absolute right-full"
             style={
               {
                 marginRight: s.offset,
@@ -89,52 +89,47 @@ export function SummiFlyby() {
                 height: s.size,
                 background: s.gold ? "oklch(0.92 0.15 85)" : "oklch(0.88 0.16 300)",
                 color: s.gold ? "oklch(0.92 0.15 85)" : "oklch(0.88 0.16 300)",
-                boxShadow: "0 0 10px currentColor",
+                clipPath:
+                  "polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%)",
+                boxShadow: "0 0 12px currentColor",
                 "--drift": `${s.drift}px`,
                 animation: `summiSparkTrail ${1.5 + (s.id % 3) * 0.4}s ease-out ${s.delay}s infinite`,
               } as React.CSSProperties
             }
           />
         ))}
-        {/* Summi himself — tumbling and paddling, not idling */}
-        <div
-          className="relative"
-          style={{
-            width: run.size,
-            height: run.size,
-            animation: `summiTumble ${2.6}s ease-in-out infinite`,
-          }}
-        >
-          {([-1, 1] as const).map((side) => (
-            <span
-              key={side}
-              className="absolute rounded-full"
-              style={
-                {
-                  top: "58%",
-                  [side < 0 ? "left" : "right"]: "-6%",
-                  width: run.size * 0.18,
-                  height: run.size * 0.11,
-                  background: "color-mix(in oklab, var(--primary) 70%, white)",
-                  boxShadow: "0 0 8px color-mix(in oklab, var(--primary) 70%, transparent)",
-                  transformOrigin: side < 0 ? "right center" : "left center",
-                  opacity: 0.7,
-                  animation: `${side < 0 ? "mascotLimbL" : "mascotLimbR"} 0.9s ease-in-out infinite`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-          <img
-            src={summiAsset.url}
-            alt=""
-            width={run.size}
-            height={run.size}
-            className="h-full w-full select-none object-contain opacity-85"
-            style={{ filter: "drop-shadow(0 0 14px oklch(0.65 0.22 300 / 0.8))" }}
-            draggable={false}
-          />
+        {/* Summi himself — bobbing, banking and swimming through the sky */}
+        <div style={{ animation: "summiBob 2.1s ease-in-out infinite" }}>
+          <div style={{ animation: "summiBank 3.4s ease-in-out infinite" }}>
+            <div
+              className="relative"
+              style={{
+                width: run.size,
+                height: run.size,
+                animation: "summiSwim 1.6s ease-in-out infinite",
+              }}
+            >
+              <span
+                className="absolute inset-0 rounded-full blur-xl"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 55%, color-mix(in oklab, var(--primary) 65%, transparent), transparent 70%)",
+                }}
+              />
+              <img
+                src={summiAsset.url}
+                alt=""
+                width={run.size}
+                height={run.size}
+                className="h-full w-full select-none object-contain opacity-90"
+                style={{ filter: "drop-shadow(0 0 14px oklch(0.65 0.22 300 / 0.8))" }}
+                draggable={false}
+              />
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }

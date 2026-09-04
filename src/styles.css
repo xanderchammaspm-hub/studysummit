@@ -1097,15 +1097,8 @@ input[type="range"]::-moz-range-thumb {
   30% { transform: scale(1.025, 0.975) skewX(1.2deg); }
   65% { transform: scale(0.978, 1.022) skewX(-1.2deg); }
 }
-/* Little limb nubs paddling either side of the blob. */
-@keyframes mascotLimbL {
-  0%, 100% { transform: rotate(8deg) translateY(0); }
-  50% { transform: rotate(-26deg) translateY(-3px); }
-}
-@keyframes mascotLimbR {
-  0%, 100% { transform: rotate(-8deg) translateY(0); }
-  50% { transform: rotate(26deg) translateY(-3px); }
-}
+/* (no fake limbs — the artwork already has arms) */
+
 @keyframes mascotStarPop {
   0% { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 0; }
   15% { opacity: 1; }
@@ -1125,23 +1118,31 @@ input[type="range"]::-moz-range-thumb {
   90% { opacity: 0.65; }
   100% { transform: translate3d(118vw, 9vh, 0) scale(0.8); opacity: 0; }
 }
-/* While flying he tumbles and paddles instead of sitting idle. */
-@keyframes summiTumble {
-  0% { transform: rotate(-14deg) scale(1, 1); }
-  25% { transform: rotate(10deg) scale(1.06, 0.94); }
-  50% { transform: rotate(-6deg) scale(0.95, 1.05); }
-  75% { transform: rotate(14deg) scale(1.04, 0.96); }
-  100% { transform: rotate(-14deg) scale(1, 1); }
+/* Flying feel: a soft vertical bob, a lazy bank/lean, and a swim squash —
+   layered so nothing fights and it never reads as a flat sliding image. */
+@keyframes summiBob {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-9%) }
+}
+@keyframes summiBank {
+  0%, 100% { transform: rotate(-7deg) }
+  50% { transform: rotate(6deg) }
+}
+@keyframes summiSwim {
+  0%, 100% { transform: scale(1, 1) }
+  35% { transform: scale(1.05, 0.95) }
+  70% { transform: scale(0.96, 1.04) }
 }
 @keyframes summiTrail {
-  0%, 100% { opacity: 0.45; transform: scaleX(0.9) scaleY(0.8); }
-  50% { opacity: 1; transform: scaleX(1.25) scaleY(1.3); }
+  0%, 100% { opacity: 0.5; transform: scaleX(0.94) scaleY(0.85); }
+  50% { opacity: 1; transform: scaleX(1.15) scaleY(1.2); }
 }
 @keyframes summiSparkTrail {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-  25% { opacity: 1; }
-  100% { opacity: 0; transform: translate(38px, var(--drift, 6px)) scale(0.2); }
+  0% { opacity: 0; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+  20% { opacity: 1; transform: translate(-6px, 0) scale(1) rotate(45deg); }
+  100% { opacity: 0; transform: translate(-46px, var(--drift, 6px)) scale(0.2) rotate(180deg); }
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .summi-flyby { display: none !important; }
