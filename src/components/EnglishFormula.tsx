@@ -443,6 +443,11 @@ function SideItem({
   active,
   onClick,
   onDelete,
+  dragging,
+  dropTarget,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
   children,
 }: {
   active: boolean;
