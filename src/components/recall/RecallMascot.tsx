@@ -119,27 +119,74 @@ export function RecallMascot({
           />
         ) : null}
 
-        {/* body */}
+        {/* body — layered so the pose, the hop, the spin and the squash never
+            fight each other (that's what made the old 360 feel rough) */}
         <div
           className="absolute inset-x-0 top-0"
-          style={{
-            height: size,
-            animation: burst
-              ? `mascotKirbySpin ${0.9 * burst.spins}s cubic-bezier(0.28,0.9,0.3,1) both`
-              : MOTION[mood],
-          }}
+          style={{ height: size, animation: burst ? undefined : MOTION[mood] }}
           key={burst ? `spin-${burst.id}` : `pose-${mood}`}
         >
-          <img
-            src={summiAsset.url}
-            alt=""
-            width={size}
-            height={size}
-            loading="lazy"
-            className="h-full w-full select-none object-contain"
-            style={{ filter: `saturate(${1 + glow * 0.3}) drop-shadow(0 6px 18px oklch(0.6 0.2 300 / 0.45))` }}
-            draggable={false}
-          />
+          <div
+            className="h-full w-full"
+            style={{
+              animation: burst
+                ? `mascotHop ${0.62 * burst.spins + 0.28}s cubic-bezier(0.33,0.9,0.32,1) both`
+                : undefined,
+            }}
+          >
+            <div
+              className="h-full w-full will-change-transform"
+              style={{
+                transformStyle: "preserve-3d",
+                animation: burst
+                  ? `mascotKirbySpin ${0.62 * burst.spins + 0.28}s linear both`
+                  : undefined,
+              }}
+            >
+              <div
+                className="relative h-full w-full"
+                style={{
+                  animation: burst
+                    ? `mascotSquash ${0.62 * burst.spins + 0.28}s ease-in-out both`
+                    : "mascotBreathe 3.2s ease-in-out infinite",
+                }}
+              >
+                {/* paddling limb nubs */}
+                {([-1, 1] as const).map((side) => (
+                  <span
+                    key={side}
+                    className="pointer-events-none absolute rounded-full"
+                    style={{
+                      top: "58%",
+                      [side < 0 ? "left" : "right"]: "-4%",
+                      width: size * 0.16,
+                      height: size * 0.1,
+                      background:
+                        "radial-gradient(circle at 40% 35%, color-mix(in oklab, var(--primary) 80%, white), color-mix(in oklab, var(--primary) 55%, transparent))",
+                      boxShadow: "0 0 10px color-mix(in oklab, var(--primary) 60%, transparent)",
+                      transformOrigin: side < 0 ? "right center" : "left center",
+                      opacity: 0.75,
+                      animation: `${side < 0 ? "mascotLimbL" : "mascotLimbR"} ${
+                        mood === "celebrate" ? 0.8 : 2.4
+                      }s ease-in-out infinite`,
+                    } as React.CSSProperties}
+                  />
+                ))}
+                <img
+                  src={summiAsset.url}
+                  alt=""
+                  width={size}
+                  height={size}
+                  loading="lazy"
+                  className="h-full w-full select-none object-contain"
+                  style={{
+                    filter: `saturate(${1 + glow * 0.3}) drop-shadow(0 6px 18px oklch(0.6 0.2 300 / 0.45))`,
+                  }}
+                  draggable={false}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* click star burst */}
