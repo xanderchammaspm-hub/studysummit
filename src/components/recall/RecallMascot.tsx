@@ -123,7 +123,11 @@ export function RecallMascot({
             fight each other (that's what made the old 360 feel rough) */}
         <div
           className="absolute inset-x-0 top-0"
-          style={{ height: size, animation: burst ? undefined : MOTION[mood] }}
+          style={{
+            height: size,
+            perspective: size * 6,
+            animation: burst ? undefined : MOTION[mood],
+          }}
           key={burst ? `spin-${burst.id}` : `pose-${mood}`}
         >
           <div
