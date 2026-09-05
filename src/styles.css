@@ -1068,27 +1068,31 @@ input[type="range"]::-moz-range-thumb {
   [style*="mascot"] { animation: none !important; }
 }
 
-/* ------------------- Summi: click spin + star burst ------------------- */
-/* Smooth low-gravity spin: rotation is linear so it never stutters, while a
-   separate hop layer handles the arc and a squash layer the landing. */
-@keyframes mascotKirbySpin {
-  from { transform: rotate3d(0.12, 1, 0.05, 0deg); }
-  to { transform: rotate3d(0.12, 1, 0.05, 360deg); }
-}
-@keyframes mascotHop {
+/* ------------------- Summi: expressive click + star burst ------------------- */
+@keyframes mascotJoyHop {
   0% { transform: translateY(0); }
-  45% { transform: translateY(-30px); }
-  70% { transform: translateY(-12px); }
-  88% { transform: translateY(0); }
-  94% { transform: translateY(-3px); }
+  9% { transform: translateY(5px); }
+  34% { transform: translateY(-31px); }
+  58% { transform: translateY(-36px); }
+  83% { transform: translateY(1px); }
+  91% { transform: translateY(-5px); }
   100% { transform: translateY(0); }
 }
-@keyframes mascotSquash {
+@keyframes mascotJoyTurn {
+  0% { transform: rotate(0deg); }
+  12% { transform: rotate(-8deg); }
+  38% { transform: rotate(12deg); }
+  62% { transform: rotate(-7deg); }
+  84% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes mascotJoySquash {
   0% { transform: scale(1, 1); }
-  10% { transform: scale(1.1, 0.9); }
-  30% { transform: scale(0.94, 1.07); }
-  70% { transform: scale(1, 1); }
-  90% { transform: scale(1.13, 0.87); }
+  10% { transform: scale(1.11, 0.88); }
+  25% { transform: scale(0.91, 1.1); }
+  58% { transform: scale(1.03, 0.98); }
+  83% { transform: scale(1.15, 0.84); }
+  91% { transform: scale(0.96, 1.06); }
   100% { transform: scale(1, 1); }
 }
 /* Always-on liveliness: a soft breathing wobble under every pose. */
@@ -1110,37 +1114,60 @@ input[type="range"]::-moz-range-thumb {
 }
 /* Flyby: a gentle swooping arc across the sky. */
 @keyframes summiFlyby {
-  0% { transform: translate3d(-14vw, 0, 0) scale(0.72); opacity: 0; }
-  10% { opacity: 0.9; }
-  30% { transform: translate3d(22vw, -7vh, 0) scale(0.86); }
-  55% { transform: translate3d(52vw, 4vh, 0) scale(1); }
-  80% { transform: translate3d(84vw, -3vh, 0) scale(0.92); }
+  0% { transform: translate3d(-16vw, 9vh, 0) rotate(-10deg) scale(0.68); opacity: 0; }
+  8% { opacity: 0.95; }
+  25% { transform: translate3d(18vw, -4vh, 0) rotate(-5deg) scale(0.82); }
+  48% { transform: translate3d(47vw, -9vh, 0) rotate(3deg) scale(1); }
+  69% { transform: translate3d(73vw, 2vh, 0) rotate(7deg) scale(0.94); }
+  86% { transform: translate3d(96vw, -5vh, 0) rotate(-3deg) scale(0.84); }
   90% { opacity: 0.65; }
-  100% { transform: translate3d(118vw, 9vh, 0) scale(0.8); opacity: 0; }
+  100% { transform: translate3d(120vw, -1vh, 0) rotate(-8deg) scale(0.74); opacity: 0; }
 }
 /* Flying feel: a soft vertical bob, a lazy bank/lean, and a swim squash —
    layered so nothing fights and it never reads as a flat sliding image. */
 @keyframes summiBob {
   0%, 100% { transform: translateY(0) }
-  50% { transform: translateY(-9%) }
+  42% { transform: translateY(-13%) }
+  72% { transform: translateY(4%) }
 }
 @keyframes summiBank {
-  0%, 100% { transform: rotate(-7deg) }
-  50% { transform: rotate(6deg) }
+  0%, 100% { transform: rotate(-9deg) }
+  45% { transform: rotate(7deg) }
+  72% { transform: rotate(3deg) }
 }
 @keyframes summiSwim {
-  0%, 100% { transform: scale(1, 1) }
-  35% { transform: scale(1.05, 0.95) }
-  70% { transform: scale(0.96, 1.04) }
+  0%, 100% { transform: scale(1, 1) translateX(0) }
+  30% { transform: scale(1.08, 0.93) translateX(2px) }
+  62% { transform: scale(0.95, 1.06) translateX(-1px) }
+}
+.summi-nebula-wake {
+  position: absolute;
+  right: 66%;
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: right center;
+  border-radius: 999px;
+  opacity: 0.72;
+  filter: blur(7px);
+  clip-path: polygon(0 50%, 100% 18%, 100% 82%);
+  background: radial-gradient(ellipse at right, color-mix(in oklab, var(--primary) 78%, transparent), color-mix(in oklab, var(--primary) 28%, transparent) 38%, transparent 72%);
+  animation: summiTrail 1.25s ease-in-out infinite;
+}
+.summi-nebula-wake-gold {
+  opacity: 0.48;
+  filter: blur(5px);
+  background: radial-gradient(ellipse at right, oklch(0.86 0.14 84 / 0.68), oklch(0.76 0.13 70 / 0.16) 42%, transparent 72%);
+  animation-delay: -0.42s;
 }
 @keyframes summiTrail {
-  0%, 100% { opacity: 0.5; transform: scaleX(0.94) scaleY(0.85); }
-  50% { opacity: 1; transform: scaleX(1.15) scaleY(1.2); }
+  0%, 100% { opacity: 0.5; transform: translateY(-50%) scaleX(0.9) scaleY(0.78); }
+  50% { opacity: 0.82; transform: translateY(-50%) scaleX(1.08) scaleY(1.12); }
 }
 @keyframes summiSparkTrail {
   0% { opacity: 0; transform: translate(0, 0) scale(0.35) rotate(0deg); }
-  20% { opacity: 1; transform: translate(-6px, 0) scale(1) rotate(45deg); }
-  100% { opacity: 0; transform: translate(-46px, var(--drift, 6px)) scale(0.2) rotate(180deg); }
+  18% { opacity: 1; transform: translate(-7px, 0) scale(1) rotate(45deg); }
+  62% { opacity: 0.74; }
+  100% { opacity: 0; transform: translate(-68px, var(--drift, 6px)) scale(0.16) rotate(225deg); }
 }
 
 

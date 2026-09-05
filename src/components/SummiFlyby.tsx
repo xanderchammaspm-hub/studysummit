@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import summiAsset from "@/assets/summi-mascot-transparent.png.asset.json";
+import summiFlight from "@/assets/summi-comet-flight.png";
 
 /**
  * Every couple of minutes Summi comets across the background: he swoops in an
@@ -40,12 +40,12 @@ export function SummiFlyby() {
 
   const sparkles = useMemo(
     () =>
-      Array.from({ length: 9 }, (_, i) => ({
+      Array.from({ length: 18 }, (_, i) => ({
         id: i,
-        offset: 14 + i * 16,
-        size: 3.4 - (i % 4) * 0.5,
-        drift: (i % 2 ? 1 : -1) * (4 + (i % 3) * 5),
-        delay: i * 0.13,
+        offset: 8 + i * 11,
+        size: 2.4 + (i % 4) * 0.9,
+        drift: (i % 2 ? 1 : -1) * (5 + (i % 5) * 4),
+        delay: (i % 7) * 0.16,
         gold: i % 3 === 0,
       })),
     [],
@@ -64,19 +64,9 @@ export function SummiFlyby() {
       }}
     >
       <div className="relative flex items-center">
-        {/* tapered comet trail */}
-        <span
-          className="absolute right-full mr-1 origin-right rounded-full"
-          style={{
-            height: run.size * 0.2,
-            width: run.size * 6.5,
-            background:
-              "linear-gradient(to left, color-mix(in oklab, var(--primary) 90%, white), color-mix(in oklab, var(--primary) 40%, transparent) 40%, transparent)",
-            filter: "blur(3px)",
-            clipPath: "polygon(0% 12%, 100% 47%, 100% 53%, 0% 88%)",
-            animation: "summiTrail 1.8s ease-in-out infinite",
-          }}
-        />
+        {/* layered nebula wake — soft colour, never a straight white line */}
+        <span className="summi-nebula-wake" style={{ width: run.size * 7.4, height: run.size * 1.7 }} />
+        <span className="summi-nebula-wake summi-nebula-wake-gold" style={{ width: run.size * 4.8, height: run.size }} />
         {/* glistening star specks shedding off the trail */}
         {sparkles.map((s) => (
           <span
@@ -93,20 +83,20 @@ export function SummiFlyby() {
                   "polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%)",
                 boxShadow: "0 0 12px currentColor",
                 "--drift": `${s.drift}px`,
-                animation: `summiSparkTrail ${1.5 + (s.id % 3) * 0.4}s ease-out ${s.delay}s infinite`,
+                 animation: `summiSparkTrail ${1.4 + (s.id % 4) * 0.28}s ease-out ${s.delay}s infinite`,
               } as React.CSSProperties
             }
           />
         ))}
-        {/* Summi himself — bobbing, banking and swimming through the sky */}
-        <div style={{ animation: "summiBob 2.1s ease-in-out infinite" }}>
-          <div style={{ animation: "summiBank 3.4s ease-in-out infinite" }}>
+        {/* Dedicated smiling flight pose with bank, kick and breathing layers. */}
+        <div style={{ animation: "summiBob 1.7s ease-in-out infinite" }}>
+          <div style={{ animation: "summiBank 2.8s ease-in-out infinite" }}>
             <div
               className="relative"
               style={{
                 width: run.size,
                 height: run.size,
-                animation: "summiSwim 1.6s ease-in-out infinite",
+                animation: "summiSwim 1.3s ease-in-out infinite",
               }}
             >
               <span
@@ -117,12 +107,12 @@ export function SummiFlyby() {
                 }}
               />
               <img
-                src={summiAsset.url}
+                 src={summiFlight}
                 alt=""
                 width={run.size}
                 height={run.size}
-                className="h-full w-full select-none object-contain opacity-90"
-                style={{ filter: "drop-shadow(0 0 14px oklch(0.65 0.22 300 / 0.8))" }}
+                 className="h-full w-full select-none object-contain opacity-95"
+                 style={{ filter: "drop-shadow(-8px 4px 16px oklch(0.65 0.22 300 / 0.72))" }}
                 draggable={false}
               />
             </div>
