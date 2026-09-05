@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import summiAsset from "@/assets/summi-mascot-transparent.png.asset.json";
+import summiJoy from "@/assets/summi-joy-jump.png";
 
 export type MascotMood = "idle" | "thinking" | "happy" | "celebrate" | "encourage";
 
@@ -55,7 +56,7 @@ export function RecallMascot({
     if (!interactive) return;
     seq.current += 1;
     const id = seq.current;
-    const spins = burst ? Math.min(3, burst.spins + 1) : 1;
+  const spins = burst ? Math.min(3, burst.spins + 1) : 1;
     const count = 7 + spins * 2;
     setBurst({
       id,
@@ -119,13 +120,12 @@ export function RecallMascot({
           />
         ) : null}
 
-        {/* body — layered so the pose, the hop, the spin and the squash never
-            fight each other (that's what made the old 360 feel rough) */}
+        {/* A click swaps to a real expressive pose instead of rotating a flat
+            picture. Nested layers keep anticipation, moon-hop and landing soft. */}
         <div
           className="absolute inset-x-0 top-0"
           style={{
             height: size,
-            perspective: size * 6,
             animation: burst ? undefined : MOTION[mood],
           }}
           key={burst ? `spin-${burst.id}` : `pose-${mood}`}
@@ -134,16 +134,15 @@ export function RecallMascot({
             className="h-full w-full"
             style={{
               animation: burst
-                ? `mascotHop ${0.62 * burst.spins + 0.28}s cubic-bezier(0.33,0.9,0.32,1) both`
+                ? `mascotJoyHop ${0.62 * burst.spins + 0.48}s cubic-bezier(0.22,0.86,0.28,1) both`
                 : undefined,
             }}
           >
             <div
               className="h-full w-full will-change-transform"
               style={{
-                transformStyle: "preserve-3d",
                 animation: burst
-                  ? `mascotKirbySpin ${0.62 * burst.spins + 0.28}s linear both`
+                  ? `mascotJoyTurn ${0.62 * burst.spins + 0.48}s cubic-bezier(0.2,0.75,0.25,1) both`
                   : undefined,
               }}
             >
@@ -151,14 +150,14 @@ export function RecallMascot({
                 className="relative h-full w-full"
                 style={{
                   animation: burst
-                    ? `mascotSquash ${0.62 * burst.spins + 0.28}s ease-in-out both`
+                    ? `mascotJoySquash ${0.62 * burst.spins + 0.48}s ease-in-out both`
                     : "mascotBreathe 3.2s ease-in-out infinite",
                 }}
               >
                 {/* (the artwork already has his arms — no extra nubs) */}
 
                 <img
-                  src={summiAsset.url}
+                  src={burst ? summiJoy : summiAsset.url}
                   alt=""
                   width={size}
                   height={size}
@@ -166,6 +165,7 @@ export function RecallMascot({
                   className="h-full w-full select-none object-contain"
                   style={{
                     filter: `saturate(${1 + glow * 0.3}) drop-shadow(0 6px 18px oklch(0.6 0.2 300 / 0.45))`,
+                    transform: burst ? "scale(1.18)" : undefined,
                   }}
                   draggable={false}
                 />
