@@ -1210,4 +1210,16 @@ input[type="range"]::-moz-range-thumb {
 
 @media (prefers-reduced-motion: reduce) {
   .summi-flyby { display: none !important; }
+  .mountain-mist,
+  .mountain-summi-ring,
+  .mountain-summi-climb,
+  .mountain-summi-celebrate,
+  .mountain-star-burst { animation: none !important; }
+}
+
+@media (max-width: 640px) {
+  .glass-panel,
+  .overlay-glass {
+    backdrop-filter: blur(12px) saturate(1.08);
+  }
 }

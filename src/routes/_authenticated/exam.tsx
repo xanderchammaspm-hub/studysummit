@@ -12,6 +12,16 @@ import { BarChart3, BookOpen, Home, LogOut, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/exam")({
   component: ExamEnginePage,
+  head: () => ({
+    meta: [
+      { title: "Summit Exam Engine | HSC Practice" },
+      { name: "description", content: "Practise HSC papers with timed questions, AI marking, detailed feedback and mistake tracking." },
+      { property: "og:title", content: "Summit Exam Engine | HSC Practice" },
+      { property: "og:description", content: "Practise HSC papers with timed questions, AI marking, detailed feedback and mistake tracking." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 type Tab = "library" | "vault" | "analytics";
@@ -89,7 +99,7 @@ function ExamEnginePage() {
         </header>
 
         {!active && (
-          <nav className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card/50 p-1.5 backdrop-blur-md">
+          <nav className="glass-panel flex flex-wrap gap-2 rounded-2xl p-1.5">
             {tabs.map((t) => (
               <button
                 key={t.id}

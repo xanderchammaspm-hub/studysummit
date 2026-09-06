@@ -491,7 +491,7 @@ function PaperCard({
   const isPdf = Boolean(paper.file_path);
   return (
     <article
-      className="fade-in-up group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-md purple-glow-hover"
+      className="fade-in-up glass-panel lift-hover group relative flex flex-col overflow-hidden rounded-2xl p-5"
       style={{ animationDelay: `${index * 70}ms` }}
     >
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -555,7 +555,7 @@ function ImportChoiceDialog({
         onClick={onClose}
         className="absolute inset-0 cursor-default bg-background/70 backdrop-blur-md"
       />
-      <div className="scale-in relative w-full max-w-lg overflow-hidden rounded-2xl border border-primary/30 bg-card/80 p-6 shadow-2xl backdrop-blur-2xl">
+        <div className="overlay-glass scale-in relative w-full max-w-lg overflow-hidden rounded-2xl p-6">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent"
@@ -625,7 +625,7 @@ function InteractivePreviewDialog({
         onClick={onCancel}
         className="absolute inset-0 cursor-default bg-background/70 backdrop-blur-md"
       />
-      <div className="scale-in relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/85 shadow-2xl backdrop-blur-2xl">
+        <div className="overlay-glass scale-in relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent"
@@ -652,7 +652,7 @@ function InteractivePreviewDialog({
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 pb-4">
           {parsed.questions.slice(0, 6).map((q, i) => (
-            <div key={i} className="rounded-xl border border-border bg-surface/50 p-4">
+            <div key={i} className="interactive-glass rounded-xl p-4">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
                   Q{i + 1} · {q.qtype === "mcq" ? "Multiple choice" : q.qtype === "extended" ? "Extended" : "Short"}
