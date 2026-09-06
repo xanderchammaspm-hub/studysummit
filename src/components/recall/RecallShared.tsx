@@ -163,7 +163,7 @@ export function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl purple-outline bg-card/60 px-4 py-3.5 backdrop-blur-xl">
+    <div className="interactive-glass rounded-2xl px-4 py-3.5">
       <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         {icon}
         {label}
@@ -247,7 +247,7 @@ export function GlassModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] grid place-items-center bg-black/65 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[70] grid place-items-center bg-background/75 p-4 backdrop-blur-md"
       style={{ animation: "overlayIn 220ms ease-out" }}
       onClick={onClose}
       role="presentation"
@@ -257,12 +257,11 @@ export function GlassModal({
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "relative w-full overflow-hidden rounded-3xl purple-outline bg-card/85 shadow-[0_30px_80px_-20px_oklch(0.5_0.22_300_/_0.6)] backdrop-blur-2xl",
+          "overlay-glass relative w-full overflow-hidden rounded-3xl",
           maxWidth,
         )}
         style={{ animation: "popIn 320ms cubic-bezier(0.22,1,0.36,1)" }}
       >
-        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <div className="truncate text-base font-semibold tracking-tight">{title}</div>
@@ -306,14 +305,14 @@ export function ResumeBanner({
           <button
             type="button"
             onClick={onResume}
-            className="cursor-pointer rounded-full border border-primary/60 bg-primary/25 px-4 py-1.5 text-xs font-semibold transition-transform hover:scale-[1.03]"
+            className="interactive-glass cursor-pointer rounded-full border-primary/60 bg-primary/25 px-4 py-1.5 text-xs font-semibold"
           >
             Resume
           </button>
           <button
             type="button"
             onClick={onDiscard}
-            className="cursor-pointer rounded-full border border-border/60 bg-surface/50 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            className="interactive-glass cursor-pointer rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
           >
             Discard
           </button>

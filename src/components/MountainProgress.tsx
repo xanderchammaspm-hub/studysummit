@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarCog, RotateCcw } from "lucide-react";
+import summiIdle from "@/assets/summi-mascot-transparent.png.asset.json";
+import summiFlight from "@/assets/summi-comet-flight.png";
+import summiJoy from "@/assets/summi-joy-jump.png";
 import {
   CAMPS,
   CAMP_LABEL,
@@ -28,7 +31,16 @@ export function MountainProgress() {
   const prevCamp = useRef<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
+  const celebrationTimer = useRef<number | null>(null);
   useEffect(() => setMounted(true), []);
+
+  useEffect(
+    () => () => {
+      if (celebrationTimer.current) window.clearTimeout(celebrationTimer.current);
+    },
+    [],
+  );
 
 
   useEffect(() => {
@@ -39,6 +51,9 @@ export function MountainProgress() {
     if (curIdx > highestIdx) {
       localStorage.setItem(HIGHEST_KEY, currentCamp.key);
       if (prevCamp.current !== null) {
+        setCelebrating(true);
+        if (celebrationTimer.current) window.clearTimeout(celebrationTimer.current);
+        celebrationTimer.current = window.setTimeout(() => setCelebrating(false), 1800);
         toast.success(`${currentCamp.emoji} ${currentCamp.name} reached!`, {
           description: currentCamp.desc,
         });
@@ -68,6 +83,9 @@ export function MountainProgress() {
   const t = seg - i0;
   const mx = pts[i0][0] + (pts[i0 + 1][0] - pts[i0][0]) * t;
   const my = pts[i0][1] + (pts[i0 + 1][1] - pts[i0][1]) * t;
+  const slope = Math.atan2(pts[i0 + 1][1] - pts[i0][1], pts[i0 + 1][0] - pts[i0][0]) * (180 / Math.PI);
+  const summitReached = progress >= 100;
+  const pose = celebrating || summitReached ? summiJoy : progress <= 1 ? summiIdle.url : summiFlight;
 
   const nextDays = nextCamp ? daysUntil(dates[nextCamp.key]) : null;
 
@@ -144,6 +162,7 @@ export function MountainProgress() {
         </div>
       )}
 
+      <div className="mountain-scene relative overflow-hidden rounded-2xl border border-primary/20 bg-surface/35">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full h-auto"
@@ -173,6 +192,14 @@ export function MountainProgress() {
             <stop offset="0%" stopColor="oklch(0.95 0.14 82 / 0.9)" />
             <stop offset="100%" stopColor="oklch(0.9 0.13 82 / 0)" />
           </radialGradient>
+          <linearGradient id="mtn-mist" x1="0" x2="1">
+            <stop offset="0%" stopColor="oklch(0.82 0.08 300 / 0)" />
+            <stop offset="48%" stopColor="oklch(0.82 0.08 300 / 0.2)" />
+            <stop offset="100%" stopColor="oklch(0.9 0.05 85 / 0)" />
+          </linearGradient>
+          <filter id="summi-shadow" x="-80%" y="-80%" width="260%" height="260%">
+            <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="oklch(0.7 0.22 300)" floodOpacity="0.7" />
+          </filter>
         </defs>
 
         <rect x="0" y="0" width={W} height={H} fill="url(#mtn-sky)" />
@@ -216,12 +243,23 @@ export function MountainProgress() {
           d={`M-50,${H} L120,180 L280,120 L440,175 L620,90 L820,200 L${W + 50},${H} Z`}
           fill="url(#mtn-back)"
         />
+        <path
+          d={`M-40,${H} L90,235 L215,178 L330,238 L470,135 L580,205 L690,126 L840,${H} Z`}
+          fill="oklch(0.22 0.06 292 / 0.52)"
+        />
 
         <path
           d={mountainPath}
           fill="url(#mtn-body)"
           stroke="oklch(0.6 0.2 300 / 0.55)"
           strokeWidth="1.2"
+        />
+        <path
+          d="M-40 235 C120 215 190 248 330 224 S570 190 840 204"
+          fill="none"
+          stroke="url(#mtn-mist)"
+          strokeWidth="22"
+          className="mountain-mist"
         />
 
         {pts.map(([x, y], i) => {
@@ -273,6 +311,9 @@ export function MountainProgress() {
                   transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               />
+              {reached ? (
+                <circle cx={x} cy={y} r="13" fill="none" stroke="oklch(0.9 0.14 82 / 0.32)" strokeWidth="1.5" className="mountain-camp-pulse" />
+              ) : null}
               <text
                 x={x}
                 y={above ? y - 26 : y - 14}
@@ -300,31 +341,36 @@ export function MountainProgress() {
 
         <g
           style={{
-            transform: `translate(${mx}px, ${my - 18}px)`,
+            transform: `translate(${mx}px, ${my - 22}px)`,
             transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <circle
-            r="11"
-            fill="none"
-            stroke="oklch(0.85 0.15 300)"
-            strokeWidth="2"
-            style={{ animation: "ringPulse 1.8s ease-out infinite", transformOrigin: "center" }}
-          />
-          <g style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}>
-            <circle
-              r="11"
-              fill="oklch(0.72 0.22 300)"
-              stroke="oklch(0.98 0.02 285)"
-              strokeWidth="2"
-              style={{ filter: "drop-shadow(0 0 14px oklch(0.75 0.24 305 / 0.95))" }}
+          <circle r="27" fill="oklch(0.72 0.22 300 / 0.13)" className="mountain-summi-ring" />
+          <g className={celebrating || summitReached ? "mountain-summi-celebrate" : "mountain-summi-climb"}>
+            <image
+              href={pose}
+              x="-31"
+              y="-31"
+              width="62"
+              height="62"
+              preserveAspectRatio="xMidYMid meet"
+              filter="url(#summi-shadow)"
+              style={{ transform: `rotate(${celebrating || summitReached ? 0 : Math.max(-18, slope)}deg)`, transformOrigin: "center" }}
             />
-            <text y="4" textAnchor="middle" fontSize="12" style={{ pointerEvents: "none" }}>
-              🚩
-            </text>
           </g>
+          {(celebrating || summitReached) && Array.from({ length: 7 }).map((_, i) => (
+            <circle
+              key={`burst-${i}`}
+              r={i % 2 ? 1.8 : 2.4}
+              fill={i % 2 ? "oklch(0.9 0.14 82)" : "oklch(0.82 0.18 302)"}
+              className="mountain-star-burst"
+              style={{ ["--mountain-star-x" as string]: `${Math.cos((i / 7) * Math.PI * 2) * 32}px`, ["--mountain-star-y" as string]: `${Math.sin((i / 7) * Math.PI * 2) * 27}px`, animationDelay: `${i * 55}ms` }}
+            />
+          ))}
         </g>
       </svg>
+      <div className="pointer-events-none absolute inset-x-[12%] bottom-[13%] h-8 rounded-full bg-primary/10 blur-2xl" />
+      </div>
 
       {/* Progress bar to next camp */}
       <div className="mt-4">
@@ -361,7 +407,7 @@ export function MountainProgress() {
           return (
             <div
               key={c.key}
-              className="rounded-lg border border-border/60 bg-surface/50 px-3 py-2 transition-colors hover:border-primary/50"
+              className="interactive-glass rounded-lg px-3 py-2"
             >
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 {CAMP_LABEL[c.key]}
@@ -394,7 +440,7 @@ function Contrib({
   hint: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/60 bg-surface/50 px-3 py-2" title={hint}>
+    <div className="interactive-glass rounded-lg px-3 py-2" title={hint}>
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
       <div className="text-base font-semibold tabular-nums text-foreground">{value}</div>
     </div>
