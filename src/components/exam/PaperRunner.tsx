@@ -47,6 +47,15 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
   const [grading, setGrading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (done || loading) return;
+    const t = window.setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => window.clearInterval(t);
+  }, [done, loading]);
+
+
 
   useEffect(() => {
     let alive = true;
