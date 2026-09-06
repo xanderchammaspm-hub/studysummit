@@ -300,30 +300,35 @@ export function MountainProgress() {
 
         <g
           style={{
-            transform: `translate(${mx}px, ${my - 18}px)`,
+            transform: `translate(${mx}px, ${my - 34}px)`,
             transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <circle
-            r="11"
-            fill="none"
-            stroke="oklch(0.85 0.15 300)"
-            strokeWidth="2"
-            style={{ animation: "ringPulse 1.8s ease-out infinite", transformOrigin: "center" }}
+          <ellipse
+            cx="0"
+            cy="30"
+            rx="14"
+            ry="4"
+            fill="oklch(0.1 0.03 285 / 0.55)"
+            style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}
           />
-          <g style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}>
-            <circle
-              r="11"
-              fill="oklch(0.72 0.22 300)"
-              stroke="oklch(0.98 0.02 285)"
-              strokeWidth="2"
-              style={{ filter: "drop-shadow(0 0 14px oklch(0.75 0.24 305 / 0.95))" }}
-            />
-            <text y="4" textAnchor="middle" fontSize="12" style={{ pointerEvents: "none" }}>
-              🚩
-            </text>
-          </g>
+          <circle
+            r="22"
+            fill="none"
+            stroke="oklch(0.85 0.15 300 / 0.55)"
+            strokeWidth="1.5"
+            style={{ animation: "ringPulse 2.4s ease-out infinite", transformOrigin: "center" }}
+          />
+          <foreignObject x={-30} y={-30} width={60} height={62} style={{ overflow: "visible" }}>
+            <div className="flex items-center justify-center">
+              <RecallMascot
+                size={52}
+                mood={progress >= 100 ? "celebrate" : progress >= 80 ? "happy" : "idle"}
+              />
+            </div>
+          </foreignObject>
         </g>
+
       </svg>
 
       {/* Progress bar to next camp */}
