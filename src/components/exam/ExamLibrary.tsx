@@ -491,7 +491,7 @@ function PaperCard({
   const isPdf = Boolean(paper.file_path);
   return (
     <article
-      className="fade-in-up group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-md purple-glow-hover"
+      className="fade-in-up group relative flex flex-col overflow-hidden glass-panel lift-hover p-5 purple-glow-hover"
       style={{ animationDelay: `${index * 70}ms` }}
     >
       <div className="mb-3 flex items-start justify-between gap-3">

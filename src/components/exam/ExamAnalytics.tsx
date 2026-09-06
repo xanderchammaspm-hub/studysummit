@@ -117,7 +117,7 @@ export function ExamAnalytics({
         {bySubject.map((s, si) => (
           <details
             key={s.subject}
-            className="fade-in-up group overflow-hidden rounded-2xl border border-border bg-card/60 backdrop-blur-md transition-all duration-300 hover:border-primary/50"
+            className="fade-in-up group overflow-hidden glass-panel lift-hover transition-all duration-300 hover:border-primary/50"
             style={{ animationDelay: `${si * 60}ms` }}
           >
             <summary className="flex cursor-pointer list-none items-center gap-3 p-5">
@@ -166,7 +166,7 @@ export function ExamAnalytics({
 
       {/* Trend */}
       {trend.length > 1 && (
-        <section className="rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md">
+        <section className="glass-panel lift-hover p-6">
           <h3 className="mb-5 text-sm font-semibold tracking-tight">Score trend</h3>
           <div className="flex h-36 items-end gap-2">
             {trend.map((v, i) => (
@@ -187,7 +187,7 @@ export function ExamAnalytics({
       )}
 
       {/* Topic mastery */}
-      <section className="rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md">
+      <section className="glass-panel lift-hover p-6">
         <h3 className="mb-1 text-sm font-semibold tracking-tight">Topic mastery</h3>
         <p className="mb-5 text-xs text-muted-foreground">Weakest topics first — your revision order.</p>
         <div className="space-y-4">
@@ -220,7 +220,7 @@ export function ExamAnalytics({
       </section>
 
       {/* Recent attempts */}
-      <section className="rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md">
+      <section className="glass-panel lift-hover p-6">
         <h3 className="mb-4 text-sm font-semibold tracking-tight">Recent attempts</h3>
         <div className="space-y-2">
           {attempts.slice(0, 8).map((a) => (
@@ -248,7 +248,7 @@ export function ExamAnalytics({
 
 function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="fade-in-up rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-md purple-glow-hover">
+    <div className="fade-in-up glass-panel lift-hover p-5 purple-glow-hover">
       <div className="mb-3 w-fit rounded-lg border border-border bg-surface/70 p-2">{icon}</div>
       <p className="text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
       <p className="mt-0.5 text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
