@@ -109,7 +109,7 @@ export function MistakeVault({
               return (
                 <article
                   key={row.id}
-                  className="fade-in-up overflow-hidden rounded-2xl border border-border bg-card/60 backdrop-blur-md purple-glow-hover"
+                  className="fade-in-up overflow-hidden glass-panel lift-hover purple-glow-hover"
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
                   <button
