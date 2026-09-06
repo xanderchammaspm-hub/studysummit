@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarCog, RotateCcw } from "lucide-react";
+import { RecallMascot } from "@/components/recall/RecallMascot";
+
 import {
   CAMPS,
   CAMP_LABEL,
