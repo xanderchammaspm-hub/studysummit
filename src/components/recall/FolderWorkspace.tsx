@@ -190,7 +190,7 @@ export function FolderWorkspace({
               return (
                 <li
                   key={m.id}
-            "interactive-glass rounded-2xl backdrop-blur-xl"
+                  className="interactive-glass rounded-2xl backdrop-blur-xl"
                 >
                   <div className="flex items-center gap-3 px-4 py-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/40 bg-primary/12 text-primary">
