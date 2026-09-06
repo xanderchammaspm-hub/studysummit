@@ -302,7 +302,7 @@ function Home() {
 
       {/* Quick links */}
       <div className="mx-auto max-w-3xl px-6 mb-6">
-        <div className="glass-panel p-5 lift-hover">
+        <div className="glass-panel p-5">
           <div className="flex items-center gap-2 mb-3">
             <Link2 className="h-4 w-4 text-primary" />
             <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -320,7 +320,7 @@ function Home() {
       {/* Upcoming assessments */}
       {upcoming.length > 0 && (
         <div className="mx-auto max-w-3xl px-6 mb-6 fade-in-up">
-            <div className="glass-panel p-5 relative overflow-hidden lift-hover">
+          <div className="glass-panel p-5 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
             <div className="flex items-center gap-2 mb-3">
               <span className="text-yellow">⏰</span>
@@ -469,7 +469,7 @@ function Home() {
               />
               <button
                 onClick={handleAddSubject}
-                className="interactive-glass flex items-center gap-1 rounded-lg border-primary/60 bg-primary/20 px-4 py-2 text-sm text-foreground"
+                className="flex items-center gap-1 rounded-lg border border-primary/60 bg-primary/20 px-4 py-2 text-sm text-foreground hover:bg-primary/30"
               >
                 <Plus className="h-4 w-4" /> Add subject
               </button>
@@ -653,7 +653,7 @@ function Legend({
   active: "red" | "amber" | "green";
 }) {
   return (
-    <div className="interactive-glass flex items-start gap-3 rounded-lg p-4">
+    <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-surface/60 p-4">
       <TrafficLightIcon size={18} active={active} className="text-muted-foreground mt-0.5 shrink-0" />
       <span
         className="mt-1 h-3 w-3 shrink-0 rounded-full"

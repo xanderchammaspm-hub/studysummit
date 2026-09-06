@@ -89,7 +89,7 @@ function RecallPage() {
       <div className="relative mx-auto max-w-6xl space-y-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="glass-panel rounded-2xl p-1.5 shadow-[0_0_24px_-6px_var(--primary)]">
+            <div className="rounded-2xl border border-primary/35 bg-card/60 p-1.5 backdrop-blur-md shadow-[0_0_24px_-6px_var(--primary)]">
               <RecallMascot mood="idle" size={44} />
             </div>
             <div>
@@ -112,7 +112,7 @@ function RecallPage() {
         </header>
 
         {!runner ? (
-          <nav className="glass-panel flex w-fit items-center gap-1 rounded-full p-1">
+          <nav className="flex w-fit items-center gap-1 rounded-full purple-outline bg-surface/60 p-1">
             {tabs.map((t) => (
               <button
                 key={t.id}

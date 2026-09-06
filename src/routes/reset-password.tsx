@@ -58,7 +58,7 @@ function ResetPasswordPage() {
         <Link to="/auth" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to sign in
         </Link>
-        <div className="overlay-glass fade-in-up rounded-2xl p-8">
+        <div className="fade-in-up rounded-2xl border border-border bg-card/70 p-8 backdrop-blur-xl purple-outline">
           <div className="mb-6 flex flex-col items-center gap-3 text-center">
             <SummitLogo size={52} />
             <h1 className="text-2xl font-semibold tracking-tight gradient-text">Set a new password</h1>

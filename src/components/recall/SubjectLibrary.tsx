@@ -221,7 +221,7 @@ export function SubjectLibrary({
             return (
               <div
                 key={s.id}
-                className="group relative overflow-hidden rounded-3xl border bg-card/60 p-4 backdrop-blur-xl lift-hover sm:p-5"
+                className="group relative overflow-hidden rounded-3xl border bg-card/60 p-4 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 sm:p-5"
                 style={subjectSurface(c)}
               >
                 <div
@@ -238,7 +238,7 @@ export function SubjectLibrary({
                 <div className="relative flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="relative shrink-0">
-                   <button
+                      <button
                         type="button"
                         onClick={() => setPanel(panel === `${s.id}-emoji` ? null : `${s.id}-emoji`)}
                         className="grid h-11 w-11 cursor-pointer place-items-center rounded-2xl border text-xl transition-transform hover:scale-105"
@@ -339,7 +339,7 @@ export function SubjectLibrary({
                   <button
                     type="button"
                     onClick={() => onOpen(s.id)}
-                     className="cursor-pointer rounded-full border px-3 py-1.5 text-[11px] font-medium transition-all duration-200 hover:-translate-y-0.5"
+                    className="cursor-pointer rounded-full border px-3 py-1.5 text-[11px] font-medium transition-transform hover:scale-[1.04]"
                     style={{
                       borderColor: `color-mix(in oklab, ${c} 55%, transparent)`,
                       background: `color-mix(in oklab, ${c} 16%, transparent)`,

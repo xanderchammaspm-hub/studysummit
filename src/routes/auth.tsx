@@ -117,7 +117,7 @@ function AuthPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Summit
         </Link>
 
-        <div className="overlay-glass fade-in-up rounded-2xl p-8">
+        <div className="fade-in-up rounded-2xl border border-border bg-card/70 p-8 backdrop-blur-xl purple-outline">
           <div className="mb-6 flex flex-col items-center gap-3 text-center">
             <SummitLogo size={52} />
             <div>

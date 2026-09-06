@@ -1,7 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useSubjects, useAllSubjectStates, flattenSubject, type YearKey } from "./useSubjectStore";
 
 export type Camp = {
@@ -116,18 +113,6 @@ export function useMountainProgress() {
   const subjects = useSubjects();
   const store = useAllSubjectStates();
   const { dates, update, reset } = useExamDates();
-  const { user } = useAuth();
-  const attempts = useQuery({
-    queryKey: ["stat-attempts", user?.id ?? null],
-    enabled: Boolean(user),
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("exam_attempts")
-        .select("id, awarded_marks, total_marks, completed_at, subject")
-        .not("completed_at", "is", null);
-      return data ?? [];
-    },
-  });
 
   return useMemo(() => {
     let topics = 0;
@@ -157,31 +142,15 @@ export function useMountainProgress() {
     }
     const greenRatio = topics === 0 ? 0 : green / topics;
     const dotRatio = dots === 0 ? 0 : dotsDone / dots;
-    const completedAttempts = attempts.data ?? [];
-    const papersDone = completedAttempts.length;
-    const papersScore = Math.min(papersDone / 20, 1);
+    const papersScore = Math.min(papers / 20, 1);
     const assessScore = Math.min(assessments / 10, 1);
     const mastery = Math.round(
       (greenRatio * 0.5 + dotRatio * 0.2 + papersScore * 0.15 + assessScore * 0.15) * 100,
     );
 
-    const paperScores = completedAttempts
-      .filter((attempt) => Number(attempt.total_marks) > 0)
-      .map((attempt) => Number(attempt.awarded_marks) / Number(attempt.total_marks));
-    const averagePaperScore = paperScores.length
-      ? Math.round((paperScores.reduce((sum, score) => sum + score, 0) / paperScores.length) * 100)
-      : 0;
-    const latestPaperAt = completedAttempts
-      .map((attempt) => attempt.completed_at)
-      .filter((value): value is string => Boolean(value))
-      .sort()
-      .at(-1) ?? null;
-
-    // Dates remain the main ascent. Every completed interactive paper adds a visible half-step.
+    // The climb is driven by the exam calendar; mastery nudges you slightly ahead.
     const timeline = timelineProgress(dates);
-    const paperClimb = Math.min(papersDone * 0.5, 10);
-    const preciseProgress = Math.max(0, Math.min(100, timeline * 0.75 + mastery * 0.15 + paperClimb));
-    const progress = Math.round(preciseProgress);
+    const progress = Math.max(0, Math.min(100, Math.round(timeline * 0.8 + mastery * 0.2)));
 
     const currentCamp = [...CAMPS].reverse().find((c) => progress >= c.pct) ?? CAMPS[0];
     const nextCamp = CAMPS.find((c) => c.pct > progress) ?? null;
@@ -195,15 +164,11 @@ export function useMountainProgress() {
       topics,
       green,
       papers,
-      papersDone,
-      averagePaperScore,
-      latestPaperAt,
-      preciseProgress,
       assessments,
       subjectCount,
       dates,
       updateDate: update,
       resetDates: reset,
     };
-  }, [subjects, store, dates, update, reset, attempts.data]);
+  }, [subjects, store, dates, update, reset]);
 }

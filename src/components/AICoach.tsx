@@ -77,14 +77,14 @@ export function AICoach() {
       <SheetTrigger asChild>
         <button
           aria-label="Open Atlas AI"
-          className="group fixed z-50 flex items-center gap-2 rounded-full border border-primary/50 bg-gradient-to-br from-primary/90 to-primary/70 px-4 py-3 text-primary-foreground shadow-[0_10px_40px_-8px_oklch(0.7_0.22_300_/_0.8)] backdrop-blur transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_50px_-8px_oklch(0.75_0.24_305_/_0.95)]"
+          className="group fixed z-50 flex items-center gap-2 rounded-full border border-primary/50 bg-gradient-to-br from-primary/90 to-primary/70 px-4 py-3 text-primary-foreground shadow-[0_10px_40px_-8px_oklch(0.7_0.22_300_/_0.8)] backdrop-blur transition-all hover:scale-105 hover:shadow-[0_14px_50px_-8px_oklch(0.75_0.24_305_/_0.95)]"
           style={{
             right: "max(1rem, env(safe-area-inset-right))",
             bottom: "max(1rem, env(safe-area-inset-bottom))",
           }}
         >
           <span className="relative flex h-5 w-5 items-center justify-center">
-            <span className="absolute inset-0 rounded-full bg-primary-foreground/20 blur-sm" />
+            <span className="absolute inset-0 rounded-full bg-white/20 blur-sm" />
             <Sparkles className="h-4 w-4 relative" />
           </span>
           <span className="text-sm font-semibold hidden sm:inline">Atlas AI</span>
@@ -92,7 +92,7 @@ export function AICoach() {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="overlay-glass flex w-full sm:max-w-lg md:max-w-2xl flex-col gap-0 border-l border-primary/30 p-0"
+        className="flex w-full sm:max-w-lg md:max-w-2xl flex-col gap-0 border-l border-primary/30 bg-background/95 p-0 backdrop-blur-xl"
       >
         <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
           <SheetHeader className="border-b border-border/60 px-4 py-3 space-y-0">
@@ -395,7 +395,7 @@ function ChatPanel() {
                     setInput(s.prompt);
                     setTimeout(() => textareaRef.current?.focus(), 0);
                   }}
-                  className="interactive-glass text-left rounded-lg px-3 py-2 text-xs"
+                  className="text-left rounded-lg border border-border/60 bg-surface/60 hover:border-primary/60 hover:bg-primary/10 px-3 py-2 text-xs transition-colors"
                 >
                   {s.label}
                 </button>
@@ -414,7 +414,7 @@ function ChatPanel() {
       </div>
 
       <div className="border-t border-border/60 p-3 bg-background/70">
-        <div className="interactive-glass relative rounded-2xl focus-within:border-primary/70 focus-within:shadow-[0_0_0_3px_oklch(0.7_0.22_300_/_0.15)]">
+        <div className="relative rounded-2xl border border-border/70 bg-surface/70 focus-within:border-primary/70 focus-within:shadow-[0_0_0_3px_oklch(0.7_0.22_300_/_0.15)] transition-all">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -434,7 +434,7 @@ function ChatPanel() {
             {busy ? (
               <button
                 onClick={stop}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/80 text-white hover:bg-destructive transition-colors"
                 aria-label="Stop generation"
                 title="Stop"
               >

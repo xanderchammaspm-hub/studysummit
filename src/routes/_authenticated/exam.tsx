@@ -12,16 +12,6 @@ import { BarChart3, BookOpen, Home, LogOut, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/exam")({
   component: ExamEnginePage,
-  head: () => ({
-    meta: [
-      { title: "Summit Exam Engine | HSC Practice" },
-      { name: "description", content: "Practise HSC papers with timed questions, AI marking, detailed feedback and mistake tracking." },
-      { property: "og:title", content: "Summit Exam Engine | HSC Practice" },
-      { property: "og:description", content: "Practise HSC papers with timed questions, AI marking, detailed feedback and mistake tracking." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
 });
 
 type Tab = "library" | "vault" | "analytics";
@@ -75,7 +65,7 @@ function ExamEnginePage() {
       <div className="relative mx-auto max-w-6xl space-y-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="glass-panel rounded-2xl p-1.5 shadow-[0_0_24px_-6px_var(--primary)]">
+            <div className="rounded-2xl border border-primary/35 bg-card/60 p-1.5 backdrop-blur-md shadow-[0_0_24px_-6px_var(--primary)]">
               <ExamEngineLogo size={44} />
             </div>
             <div style={{ animation: "engineRise 700ms cubic-bezier(0.22,1,0.36,1) 120ms both" }}>
@@ -99,7 +89,7 @@ function ExamEnginePage() {
         </header>
 
         {!active && (
-          <nav className="glass-panel flex flex-wrap gap-2 rounded-2xl p-1.5">
+          <nav className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card/50 p-1.5 backdrop-blur-md">
             {tabs.map((t) => (
               <button
                 key={t.id}

@@ -22,7 +22,7 @@ export function AccountShell({
   return (
     <div className="relative min-h-screen">
       <div className="aurora" aria-hidden />
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/45 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <Link to="/" className="flex items-center gap-3">
             <SummitLogo size={34} />
@@ -43,7 +43,7 @@ export function AccountShell({
           <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
         </div>
 
-        <nav className="glass-panel mt-6 flex flex-wrap gap-1 rounded-full p-1">
+        <nav className="mt-6 flex flex-wrap gap-1 rounded-full purple-outline bg-surface/50 p-1">
           {TABS.map((t) => (
             <Link
               key={t.to}
@@ -67,7 +67,7 @@ export function AccountShell({
 
 export function Panel({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="glass-panel p-6 fade-in-up">
+    <section className="rounded-2xl purple-outline bg-card/60 p-6 backdrop-blur-xl fade-in-up">
       {title && (
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {title}

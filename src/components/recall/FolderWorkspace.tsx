@@ -61,7 +61,7 @@ function ToolCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-3xl border bg-card/60 p-6 backdrop-blur-xl lift-hover",
+        "group relative overflow-hidden rounded-3xl border bg-card/60 p-6 backdrop-blur-xl transition-all duration-500",
         purple ? "border-primary/40 hover:border-primary/70" : "border-yellow/35 hover:border-yellow/60",
         disabled ? "opacity-60" : "hover:-translate-y-1",
       )}
@@ -190,7 +190,7 @@ export function FolderWorkspace({
               return (
                 <li
                   key={m.id}
-                  className="interactive-glass rounded-2xl backdrop-blur-xl"
+                  className="rounded-2xl purple-outline bg-card/55 backdrop-blur-xl transition-colors hover:bg-card/70"
                 >
                   <div className="flex items-center gap-3 px-4 py-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/40 bg-primary/12 text-primary">
@@ -259,7 +259,7 @@ export function FolderWorkspace({
             {sessions.map((s) => (
               <li
                 key={s.id}
-                className="interactive-glass flex items-center gap-3 rounded-2xl px-4 py-3 backdrop-blur-xl"
+                className="flex items-center gap-3 rounded-2xl purple-outline bg-card/55 px-4 py-3 backdrop-blur-xl transition-all duration-300 hover:bg-card/70"
               >
                 <button
                   type="button"
