@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CalendarCog, RotateCcw } from "lucide-react";
+import { CalendarCog, Check, FileCheck2, RotateCcw, Star, Trophy } from "lucide-react";
 import summiIdle from "@/assets/summi-mascot-transparent.png.asset.json";
 import summiFlight from "@/assets/summi-comet-flight.png";
 import summiJoy from "@/assets/summi-joy-jump.png";
@@ -23,6 +23,10 @@ export function MountainProgress() {
     topics,
     green,
     papers,
+    papersDone,
+    averagePaperScore,
+    latestPaperAt,
+    preciseProgress,
     assessments,
     dates,
     updateDate,
@@ -62,30 +66,44 @@ export function MountainProgress() {
     prevCamp.current = currentCamp.key;
   }, [currentCamp]);
 
-  // Ridge waypoints — x/y in SVG coords, one per camp (6 total)
+  const recentPaper = latestPaperAt
+    ? Date.now() - Date.parse(latestPaperAt) < 10 * 60 * 1000
+    : false;
+  const paperAchievements = [
+    { count: 1, label: "First ascent", camp: 1 },
+    { count: 3, label: "Trail tested", camp: 2 },
+    { count: 5, label: "Peak practice", camp: 3 },
+    { count: 10, label: "Alpine scholar", camp: 4 },
+    { count: 20, label: "Paper summit", camp: 5 },
+  ];
+
+  // Camps sit on peaks; the extra waypoints create a real climb through valleys.
   const pts: [number, number][] = [
     [70, 305],
-    [180, 258],
-    [320, 214],
-    [460, 170],
-    [610, 118],
+    [190, 248],
+    [330, 202],
+    [470, 156],
+    [615, 108],
     [736, 74],
+  ];
+  const routePts: [number, number][] = [
+    pts[0], [128, 286], pts[1], [257, 274], pts[2], [402, 228], pts[3], [548, 186], pts[4], [680, 128], pts[5],
   ];
   const W = 800;
   const H = 340;
-  const mountainPath = `M0,${H} L${pts.map(([x, y]) => `${x},${y}`).join(" L ")} L${W},${H} Z`;
-  const ridgePath = `M${pts.map(([x, y]) => `${x},${y}`).join(" L ")}`;
+  const mountainPath = `M0,${H} L${routePts.map(([x, y]) => `${x},${y}`).join(" L ")} L${W},${H} Z`;
+  const ridgePath = `M${routePts.map(([x, y]) => `${x},${y}`).join(" L ")}`;
 
   // Marker position along ridge
-  const span = 100 / (pts.length - 1);
-  const seg = Math.max(0, Math.min(pts.length - 1, progress / span));
-  const i0 = Math.min(Math.floor(seg), pts.length - 2);
+  const span = 100 / (routePts.length - 1);
+  const seg = Math.max(0, Math.min(routePts.length - 1, preciseProgress / span));
+  const i0 = Math.min(Math.floor(seg), routePts.length - 2);
   const t = seg - i0;
-  const mx = pts[i0][0] + (pts[i0 + 1][0] - pts[i0][0]) * t;
-  const my = pts[i0][1] + (pts[i0 + 1][1] - pts[i0][1]) * t;
-  const slope = Math.atan2(pts[i0 + 1][1] - pts[i0][1], pts[i0 + 1][0] - pts[i0][0]) * (180 / Math.PI);
+  const mx = routePts[i0][0] + (routePts[i0 + 1][0] - routePts[i0][0]) * t;
+  const my = routePts[i0][1] + (routePts[i0 + 1][1] - routePts[i0][1]) * t;
+  const slope = Math.atan2(routePts[i0 + 1][1] - routePts[i0][1], routePts[i0 + 1][0] - routePts[i0][0]) * (180 / Math.PI);
   const summitReached = progress >= 100;
-  const pose = celebrating || summitReached ? summiJoy : progress <= 1 ? summiIdle.url : summiFlight;
+  const pose = celebrating || recentPaper || summitReached ? summiJoy : progress <= 1 ? summiIdle.url : summiFlight;
 
   const nextDays = nextCamp ? daysUntil(dates[nextCamp.key]) : null;
 
@@ -339,6 +357,28 @@ export function MountainProgress() {
           );
         })}
 
+        {Array.from({ length: Math.min(papersDone, 20) }).map((_, paperIndex) => {
+          const paperPct = Math.min(98, (paperIndex + 1) * 5);
+          const paperSeg = paperPct / (100 / (routePts.length - 1));
+          const p0 = Math.min(Math.floor(paperSeg), routePts.length - 2);
+          const pt = paperSeg - p0;
+          const x = routePts[p0][0] + (routePts[p0 + 1][0] - routePts[p0][0]) * pt;
+          const y = routePts[p0][1] + (routePts[p0 + 1][1] - routePts[p0][1]) * pt;
+          return <circle key={`paper-step-${paperIndex}`} cx={x} cy={y} r="2.8" fill="oklch(0.96 0.08 82)" className="mountain-paper-step" />;
+        })}
+
+        {paperAchievements.map((achievement) => {
+          const [x, y] = pts[achievement.camp];
+          const unlocked = papersDone >= achievement.count;
+          return (
+            <g key={achievement.count} transform={`translate(${x + 22} ${y - 27})`} opacity={unlocked ? 1 : 0.28}>
+              <circle r="10" fill={unlocked ? "oklch(0.88 0.13 82 / .95)" : "oklch(0.28 0.04 290 / .8)"} stroke="oklch(0.96 0.05 82 / .8)" strokeWidth="1" className={unlocked ? "mountain-achievement" : ""} />
+              <text textAnchor="middle" dominantBaseline="central" fill="oklch(0.16 0.03 285)" fontSize="8" fontWeight="800">{achievement.count}</text>
+              <title>{unlocked ? `${achievement.label} unlocked` : `Complete ${achievement.count} papers to unlock ${achievement.label}`}</title>
+            </g>
+          );
+        })}
+
         <g
           style={{
             transform: `translate(${mx}px, ${my - 22}px)`,
@@ -346,7 +386,7 @@ export function MountainProgress() {
           }}
         >
           <circle r="27" fill="oklch(0.72 0.22 300 / 0.13)" className="mountain-summi-ring" />
-          <g className={celebrating || summitReached ? "mountain-summi-celebrate" : "mountain-summi-climb"}>
+          <g className={celebrating || recentPaper || summitReached ? "mountain-summi-celebrate" : "mountain-summi-climb"}>
             <image
               href={pose}
               x="-31"
@@ -355,10 +395,10 @@ export function MountainProgress() {
               height="62"
               preserveAspectRatio="xMidYMid meet"
               filter="url(#summi-shadow)"
-              style={{ transform: `rotate(${celebrating || summitReached ? 0 : Math.max(-18, slope)}deg)`, transformOrigin: "center" }}
+              style={{ transform: `rotate(${celebrating || recentPaper || summitReached ? 0 : Math.max(-18, slope)}deg)`, transformOrigin: "center" }}
             />
           </g>
-          {(celebrating || summitReached) && Array.from({ length: 7 }).map((_, i) => (
+          {(celebrating || recentPaper || summitReached) && Array.from({ length: 7 }).map((_, i) => (
             <circle
               key={`burst-${i}`}
               r={i % 2 ? 1.8 : 2.4}
@@ -370,6 +410,41 @@ export function MountainProgress() {
         </g>
       </svg>
       <div className="pointer-events-none absolute inset-x-[12%] bottom-[13%] h-8 rounded-full bg-primary/10 blur-2xl" />
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-[1.15fr_.85fr]">
+        <div className="interactive-glass rounded-xl p-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <FileCheck2 className="h-4 w-4 text-primary" />
+              <div>
+                <div className="text-sm font-semibold">Paper ascent</div>
+                <div className="text-[11px] text-muted-foreground">Every completed paper moves Summi higher.</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-semibold tabular-nums gradient-text">{papersDone}</div>
+              <div className="section-label">completed</div>
+            </div>
+          </div>
+          <div className="mt-3 flex gap-1.5">
+            {paperAchievements.map((achievement) => (
+              <div key={achievement.count} title={achievement.label} className={`grid h-7 flex-1 place-items-center rounded-md border text-[10px] font-semibold transition-all ${papersDone >= achievement.count ? "border-yellow/55 bg-yellow/12 text-yellow shadow-[0_0_14px_color-mix(in_oklab,var(--color-yellow)_28%,transparent)]" : "border-border/45 bg-surface/30 text-muted-foreground"}`}>
+                {papersDone >= achievement.count ? <Check className="h-3.5 w-3.5" /> : achievement.count}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="interactive-glass flex items-center justify-between rounded-xl p-3.5">
+          <div className="flex items-center gap-2">
+            {averagePaperScore >= 90 ? <Trophy className="h-4 w-4 text-yellow" /> : <Star className="h-4 w-4 text-primary" />}
+            <div>
+              <div className="text-sm font-semibold">Paper form</div>
+              <div className="text-[11px] text-muted-foreground">Average across finished attempts</div>
+            </div>
+          </div>
+          <div className="text-xl font-semibold tabular-nums">{papersDone ? `${averagePaperScore}%` : "—"}</div>
+        </div>
       </div>
 
       {/* Progress bar to next camp */}
@@ -423,7 +498,7 @@ export function MountainProgress() {
       {/* Contribution breakdown */}
       <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
         <Contrib label="Mastered" value={`${green}/${topics}`} hint="Green topics" />
-        <Contrib label="Papers" value={papers} hint="Past papers logged" />
+        <Contrib label="Resources" value={papers} hint="Past paper links saved" />
         <Contrib label="Assessments" value={assessments} hint="Tracked assessments" />
       </div>
     </div>

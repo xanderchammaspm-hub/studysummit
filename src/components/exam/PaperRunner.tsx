@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { gradeAnswer, type GradeResult } from "@/lib/exam.functions";
 import type { Paper, Question } from "./types";
@@ -62,6 +63,7 @@ function formatTime(seconds: number) {
 }
 
 export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
+  const queryClient = useQueryClient();
   const { awardXp } = useProfile();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [attemptId, setAttemptId] = useState<string | null>(null);
@@ -278,6 +280,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
         .eq("id", attemptId);
       await awardXp("pastPaper");
       if (totalMarks > 0 && awarded / totalMarks >= 0.9) await awardXp("quiz");
+      await queryClient.invalidateQueries({ queryKey: ["stat-attempts", userId] });
     }
     clearDraft("paper_runner", paper.id);
     setTimerPaused(true);

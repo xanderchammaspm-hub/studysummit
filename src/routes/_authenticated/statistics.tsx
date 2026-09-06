@@ -84,7 +84,7 @@ function StatisticsPage() {
           {xp.data?.length ? (
             <ul className="space-y-2 text-sm">
               {xp.data.map((e) => (
-                <li key={e.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-surface/40 px-3 py-2">
+                <li key={e.id} className="interactive-glass flex items-center justify-between rounded-lg px-3 py-2">
                   <span className="truncate">{XP_LABELS[e.kind] ?? e.kind}</span>
                   <span className="text-yellow">+{e.amount} XP</span>
                 </li>
@@ -127,7 +127,7 @@ function Seg({ value, total, className }: { value: number; total: number; classN
 
 function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl purple-outline bg-card/60 p-4">
+    <div className="glass-panel p-4">
       <div className="flex items-center gap-2 text-primary">{icon}</div>
       <div className="mt-2 text-2xl font-semibold">{value}</div>
       <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>

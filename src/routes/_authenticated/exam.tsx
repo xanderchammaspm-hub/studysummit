@@ -75,7 +75,7 @@ function ExamEnginePage() {
       <div className="relative mx-auto max-w-6xl space-y-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl border border-primary/35 bg-card/60 p-1.5 backdrop-blur-md shadow-[0_0_24px_-6px_var(--primary)]">
+            <div className="glass-panel rounded-2xl p-1.5 shadow-[0_0_24px_-6px_var(--primary)]">
               <ExamEngineLogo size={44} />
             </div>
             <div style={{ animation: "engineRise 700ms cubic-bezier(0.22,1,0.36,1) 120ms both" }}>
