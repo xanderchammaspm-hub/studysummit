@@ -17,7 +17,15 @@ import {
   Loader2,
   Sparkles,
   Trophy,
+  Clock,
 } from "lucide-react";
+import { RecallMascot } from "@/components/recall/RecallMascot";
+
+function clock(s: number) {
+  const m = Math.floor(s / 60);
+  return `${m}:${String(s % 60).padStart(2, "0")}`;
+}
+
 
 type Graded = GradeResult & { correct?: boolean };
 
