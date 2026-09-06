@@ -302,7 +302,7 @@ export function StudyCalendar() {
 
           {/* Log panel */}
           <div className="space-y-4">
-            <div className="rounded-lg border border-border/60 bg-surface/60 p-4">
+            <div className="interactive-glass rounded-lg p-4">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
                 Log study time
               </div>
@@ -364,7 +364,7 @@ export function StudyCalendar() {
                   {dayLogs.map((l) => (
                     <li
                       key={l.id}
-                      className="flex items-center gap-2 rounded-md border border-border/40 bg-surface/40 px-3 py-2 text-sm"
+                      className="interactive-glass flex items-center gap-2 rounded-md px-3 py-2 text-sm"
                     >
                       <span className="tabular-nums font-semibold text-primary min-w-[3ch]">
                         {fmtHours(l.hours)}

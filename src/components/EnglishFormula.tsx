@@ -93,7 +93,7 @@ export function EnglishFormula() {
       <button
         onClick={toggle}
         aria-expanded={open}
-        className="ef-prompt group w-full cursor-pointer rounded-2xl border border-border/60 bg-card/50 px-6 py-7 text-left transition-all duration-300 hover:border-primary/70"
+        className="ef-prompt glass-panel group w-full cursor-pointer px-6 py-7 text-left transition-all duration-300 hover:border-primary/70"
       >
         <div className="flex items-center gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
@@ -118,7 +118,7 @@ export function EnglishFormula() {
       {open && (
         <div ref={sectionRef} className="mt-6 fade-in-up scroll-mt-24">
           {/* Workspace switcher */}
-          <div className="mb-4 flex flex-wrap gap-2 rounded-2xl border border-border/60 bg-card/40 p-1.5 backdrop-blur-md">
+          <div className="glass-panel mb-4 flex flex-wrap gap-2 rounded-2xl p-1.5">
             {MODES.map((m) => (
               <button
                 key={m.id}
@@ -137,7 +137,7 @@ export function EnglishFormula() {
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,215px)_minmax(0,1fr)]">
             {/* Sidebar */}
-            <aside className="purple-outline h-fit rounded-2xl bg-card/40 p-2">
+            <aside className="glass-panel h-fit rounded-2xl p-2">
               <SideItem active={section === "skeleton"} onClick={() => setSection("skeleton")}>
                 <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />{" "}
                 {hasSkeleton ? "Skeleton Blueprint" : "Overview"}
@@ -213,7 +213,7 @@ export function EnglishFormula() {
             {/* Workspace */}
             {section === "skeleton" && hasSkeleton ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,55fr)_minmax(0,45fr)]">
-                <div className="ef-stage relative purple-outline rounded-2xl p-3 overflow-hidden">
+                <div className="ef-stage glass-panel relative rounded-2xl p-3 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
                   <div
                     className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
@@ -303,7 +303,7 @@ export function EnglishFormula() {
               </div>
             ) : section === "skeleton" ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
-                <div className="ef-stage relative purple-outline flex flex-col items-center justify-center rounded-2xl p-6 overflow-hidden">
+                <div className="ef-stage glass-panel relative flex flex-col items-center justify-center rounded-2xl p-6 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
                   <ShortAnswerMark size={240} className="relative" />
                   <h3 className="relative mt-5 text-xl font-semibold uppercase tracking-[0.18em] text-foreground">
