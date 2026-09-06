@@ -215,7 +215,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-md">
+      <div className="glass-panel p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <button
@@ -237,6 +237,9 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
               {answeredCount} marked
             </p>
+            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full purple-outline bg-surface/60 px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground">
+              <Clock className="h-3 w-3 text-primary" /> {clock(elapsed)}
+            </p>
           </div>
         </div>
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface">
@@ -252,7 +255,7 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
       </div>
 
       {/* Question */}
-      <div key={q.id} className="fade-in-up rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-md purple-outline">
+      <div key={q.id} className="fade-in-up glass-panel p-6">
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-border bg-surface/70 px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted-foreground">
             {q.qtype === "mcq" ? "Multiple choice" : q.qtype === "extended" ? "Extended response" : "Short answer"}
@@ -309,10 +312,25 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
                   ? "Write your extended response here — thesis, analysis, evidence…"
                   : "Write your response here…"
               }
-              className="min-h-[160px] resize-y bg-surface/50 text-sm leading-relaxed"
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  void submitCurrent();
+                }
+              }}
+              className="min-h-[160px] resize-y bg-surface/50 text-sm leading-relaxed transition-colors focus-visible:border-primary/70"
             />
           )}
         </div>
+
+            {q.qtype !== "mcq" && !result && (
+              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span className="tabular-nums">
+                  {(responses[q.id] ?? "").trim().split(/\s+/).filter(Boolean).length} words
+                </span>
+                <span>Press ⌘/Ctrl + Enter to mark</span>
+              </div>
+            )}
 
         {result && <Feedback result={result} marks={q.marks} />}
 
@@ -459,7 +477,8 @@ function Summary({
   const weak = Object.values(results).filter((r) => r.awarded < r.maxMarks * 0.6).length;
   return (
     <div className="fade-in-up rounded-2xl border border-border bg-card/60 p-8 text-center backdrop-blur-md purple-outline">
-      <div className="mx-auto mb-4 w-fit rounded-2xl border border-border bg-surface/70 p-4 pulse-glow">
+      <div className="mx-auto mb-4 flex w-fit items-center gap-3 rounded-2xl border border-border bg-surface/70 px-5 py-4 pulse-glow">
+        <RecallMascot size={54} mood={percentage >= 70 ? "celebrate" : "encourage"} />
         <Trophy className="h-7 w-7 text-yellow" />
       </div>
       <h2 className="text-xl font-semibold tracking-tight">Paper complete</h2>
