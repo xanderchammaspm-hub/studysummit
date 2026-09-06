@@ -345,14 +345,14 @@ export function MountainProgress() {
             transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <circle r="22" fill="oklch(0.72 0.22 300 / 0.13)" className="mountain-summi-ring" />
+          <circle r="27" fill="oklch(0.72 0.22 300 / 0.13)" className="mountain-summi-ring" />
           <g className={celebrating || summitReached ? "mountain-summi-celebrate" : "mountain-summi-climb"}>
             <image
               href={pose}
-              x="-25"
-              y="-25"
-              width="50"
-              height="50"
+              x="-31"
+              y="-31"
+              width="62"
+              height="62"
               preserveAspectRatio="xMidYMid meet"
               filter="url(#summi-shadow)"
               style={{ transform: `rotate(${celebrating || summitReached ? 0 : Math.max(-18, slope)}deg)`, transformOrigin: "center" }}

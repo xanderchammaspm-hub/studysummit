@@ -145,7 +145,8 @@ export function PaperRunner({ paper, userId, onExit, onFinished }: Props) {
         : null,
     [attemptId, choices, done, idx, responses, results, secondsLeft, timerOn, timerPaused, timerTotal],
   );
-  useAutosaveDraft("paper_runner", paper.id, draft, Boolean(attemptId && !pendingDraft && !done));
+  const hasStarted = idx > 0 || timerOn || Object.keys(responses).length > 0 || Object.keys(choices).length > 0 || Object.keys(results).length > 0;
+  useAutosaveDraft("paper_runner", paper.id, draft, Boolean(attemptId && !pendingDraft && !done && hasStarted));
 
   useEffect(() => {
     if (!timerOn || timerPaused || done || timeUp) return;
