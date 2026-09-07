@@ -1,17 +1,47 @@
 import { useEffect, useState } from "react";
 import { SummitLogo } from "@/components/SummitLogo";
 
+const SEEN_KEY = "summit-splash-seen-v1";
+
 /** Cinematic mountain-logo intro that dissolves into the app. */
 export function SummitSplash() {
-  const [phase, setPhase] = useState<"in" | "out" | "gone">("in");
+  const [phase, setPhase] = useState<"in" | "out" | "gone">(() => {
+    if (typeof window === "undefined") return "in";
+    try {
+      if (sessionStorage.getItem(SEEN_KEY) === "1") return "gone";
+    } catch {
+      /* ignore */
+    }
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return "gone";
+    if (document.documentElement.classList.contains("reduce-motion")) return "gone";
+    return "in";
+  });
 
   useEffect(() => {
-    const t1 = window.setTimeout(() => setPhase("out"), 2600);
-    const t2 = window.setTimeout(() => setPhase("gone"), 3700);
+    if (phase === "gone") return;
+    try {
+      sessionStorage.setItem(SEEN_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+
+    let t2 = 0;
+    const dismiss = () => {
+      setPhase((p) => (p === "in" ? "out" : p));
+      window.clearTimeout(t2);
+      t2 = window.setTimeout(() => setPhase("gone"), 700);
+    };
+
+    const t1 = window.setTimeout(dismiss, 2200);
+    window.addEventListener("pointerdown", dismiss, { once: true });
+    window.addEventListener("keydown", dismiss, { once: true });
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
+      window.removeEventListener("pointerdown", dismiss);
+      window.removeEventListener("keydown", dismiss);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (phase === "gone") return null;
@@ -24,13 +54,15 @@ export function SummitSplash() {
         background:
           "radial-gradient(120% 90% at 50% 40%, oklch(0.22 0.06 300) 0%, oklch(0.13 0.03 290) 60%, oklch(0.11 0.02 285) 100%)",
         opacity: phase === "out" ? 0 : 1,
-        transform: phase === "out" ? "scale(1.08)" : "scale(1)",
-        filter: phase === "out" ? "blur(6px)" : "blur(0px)",
+        transform: phase === "out" ? "scale(1.05)" : "scale(1)",
         transition:
-          "opacity 1050ms cubic-bezier(0.22,1,0.36,1), transform 1050ms cubic-bezier(0.22,1,0.36,1), filter 1050ms ease",
-        pointerEvents: phase === "out" ? "none" : "auto",
+          "opacity 680ms cubic-bezier(0.22,1,0.36,1), transform 680ms cubic-bezier(0.22,1,0.36,1)",
+        willChange: "opacity, transform",
+        contain: "strict",
+        pointerEvents: "none",
       }}
     >
+
       <div className="aurora" />
 
       {/* Soft expanding halo behind the mark */}
