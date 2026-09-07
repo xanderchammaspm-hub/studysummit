@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarCog, RotateCcw } from "lucide-react";
-import { RecallMascot } from "@/components/recall/RecallMascot";
 
 import {
   CAMPS,
@@ -60,16 +59,7 @@ export function MountainProgress() {
   ];
   const W = 800;
   const H = 340;
-  const mountainPath = `M0,${H} L${pts.map(([x, y]) => `${x},${y}`).join(" L ")} L${W},${H} Z`;
   const ridgePath = `M${pts.map(([x, y]) => `${x},${y}`).join(" L ")}`;
-
-  // Marker position along ridge
-  const span = 100 / (pts.length - 1);
-  const seg = Math.max(0, Math.min(pts.length - 1, progress / span));
-  const i0 = Math.min(Math.floor(seg), pts.length - 2);
-  const t = seg - i0;
-  const mx = pts[i0][0] + (pts[i0 + 1][0] - pts[i0][0]) * t;
-  const my = pts[i0][1] + (pts[i0 + 1][1] - pts[i0][1]) * t;
 
   const nextDays = nextCamp ? daysUntil(dates[nextCamp.key]) : null;
 
@@ -148,33 +138,41 @@ export function MountainProgress() {
 
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="w-full h-auto"
+        className="mountain-scene w-full h-auto overflow-visible"
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label={`Mountain progress: ${progress}% — currently at ${currentCamp.name}`}
       >
         <defs>
-          <linearGradient id="mtn-body" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.55 0.2 300 / 0.85)" />
-            <stop offset="60%" stopColor="oklch(0.3 0.1 290 / 0.9)" />
-            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0.95)" />
+          <linearGradient id="mtn-body" x1="0" x2="0.65" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--mountain-snow-shadow)" />
+            <stop offset="22%" stopColor="var(--mountain-ridge-light)" />
+            <stop offset="62%" stopColor="var(--mountain-rock)" />
+            <stop offset="100%" stopColor="var(--mountain-valley)" />
           </linearGradient>
           <linearGradient id="mtn-back" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.35 0.14 300 / 0.55)" />
-            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
+            <stop offset="0%" stopColor="var(--mountain-distant)" />
+            <stop offset="100%" stopColor="var(--mountain-valley)" />
           </linearGradient>
           <linearGradient id="mtn-done" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0%" stopColor="oklch(0.75 0.22 300)" />
             <stop offset="100%" stopColor="oklch(0.9 0.14 82)" />
           </linearGradient>
           <linearGradient id="mtn-sky" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.3 0.1 300 / 0.22)" />
-            <stop offset="100%" stopColor="oklch(0.2 0.06 285 / 0)" />
+            <stop offset="0%" stopColor="var(--mountain-sky)" />
+            <stop offset="72%" stopColor="var(--mountain-horizon)" />
+            <stop offset="100%" stopColor="var(--mountain-valley)" />
           </linearGradient>
           <radialGradient id="summit-glow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stopColor="oklch(0.95 0.14 82 / 0.9)" />
-            <stop offset="100%" stopColor="oklch(0.9 0.13 82 / 0)" />
+            <stop offset="0%" stopColor="var(--mountain-gold)" />
+            <stop offset="100%" stopColor="transparent" />
           </radialGradient>
+          <linearGradient id="snow-face" x1="0" x2="0.8" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--mountain-snow)" />
+            <stop offset="100%" stopColor="var(--mountain-snow-shadow)" />
+          </linearGradient>
+          <filter id="mist-blur"><feGaussianBlur stdDeviation="8" /></filter>
+          <filter id="route-glow"><feGaussianBlur stdDeviation="4" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
         </defs>
 
         <rect x="0" y="0" width={W} height={H} fill="url(#mtn-sky)" />
@@ -205,55 +203,51 @@ export function MountainProgress() {
           />
         )}
 
-        <g style={{ opacity: 0.35 }}>
-          <ellipse cx="0" cy="140" rx="55" ry="9" fill="oklch(0.9 0.03 285)"
-            style={{ animation: "cloudDrift 38s linear infinite" }} />
-          <ellipse cx="0" cy="210" rx="70" ry="11" fill="oklch(0.85 0.04 285)"
-            style={{ animation: "cloudDrift 55s linear -18s infinite" }} />
-          <ellipse cx="0" cy="90" rx="40" ry="7" fill="oklch(0.92 0.03 285)"
-            style={{ animation: "cloudDrift 46s linear -30s infinite" }} />
+        <g className="mountain-mist" filter="url(#mist-blur)">
+          <ellipse cx="40" cy="188" rx="150" ry="18" fill="var(--mountain-mist)" />
+          <ellipse cx="470" cy="136" rx="180" ry="20" fill="var(--mountain-mist)" />
         </g>
 
+        {/* Distant ranges establish depth behind the main ascent. */}
         <path
-          d={`M-50,${H} L120,180 L280,120 L440,175 L620,90 L820,200 L${W + 50},${H} Z`}
+          d="M-40 340 L95 218 L176 254 L296 150 L392 225 L515 128 L604 194 L710 106 L840 235 L840 340 Z"
           fill="url(#mtn-back)"
         />
+        <path d="M-20 340 L132 246 L218 273 L337 190 L433 248 L552 166 L655 221 L804 143 L830 340 Z" fill="var(--mountain-mid)" opacity="0.76" />
 
+        {/* Main mountain range: layered faces, gullies and snow shelves. */}
         <path
-          d={mountainPath}
+          d="M0 340 L70 305 L180 258 L320 214 L460 170 L610 118 L736 74 L800 340 Z"
           fill="url(#mtn-body)"
-          stroke="oklch(0.6 0.2 300 / 0.55)"
-          strokeWidth="1.2"
         />
+        <path d="M70 305 L180 258 L320 214 L460 170 L610 118 L736 74 L690 155 L625 142 L573 202 L492 190 L425 242 L351 229 L286 282 L196 276 L118 326 Z" fill="var(--mountain-shadow)" opacity="0.72" />
+        <path d="M736 74 L700 142 L674 120 L645 165 L610 118 L575 177 L540 164 L510 219 L460 170 L430 226 L394 213 L355 269 L320 214 L286 263 L250 252 L218 302 L180 258 L148 303 L108 292 L70 305 Z" fill="url(#snow-face)" opacity="0.92" />
+        <path d="M736 74 L716 119 L701 105 L686 134 L668 122 L650 151 L631 139 L610 118 L586 158 L568 151 L548 181 L526 173 L507 201 L485 189 L460 170 L438 207 L420 199 L399 230 L377 220 L355 250 L337 239 L320 214 L299 247 L281 240 L259 270 L238 262 L218 286 L200 279 L180 258 L159 286 L141 279 L121 307 L98 298 L70 305" fill="none" stroke="var(--mountain-snow)" strokeWidth="2.2" opacity="0.7" />
+        <g opacity="0.48" stroke="var(--mountain-ridge-line)" strokeWidth="1">
+          <path d="M736 74 L748 230 L800 340" /><path d="M610 118 L640 237 L690 340" />
+          <path d="M460 170 L492 272 L548 340" /><path d="M320 214 L352 300 L408 340" />
+          <path d="M180 258 L211 317 L270 340" /><path d="M70 305 L106 340" />
+        </g>
+        <path d="M0 334 Q170 314 315 322 T800 310 L800 340 L0 340 Z" fill="var(--mountain-foreground)" />
+        <g className="mountain-mist mountain-mist-front" filter="url(#mist-blur)">
+          <ellipse cx="250" cy="302" rx="220" ry="16" fill="var(--mountain-mist)" />
+          <ellipse cx="690" cy="244" rx="140" ry="13" fill="var(--mountain-mist)" />
+        </g>
 
-        {pts.map(([x, y], i) => {
-          const reached = progress >= CAMPS[i].pct;
-          const size = reached ? 12 + i * 1.6 : 6;
-          return (
-            <path
-              key={`snow${i}`}
-              d={`M${x - size},${y + size * 0.6} Q${x - size / 2},${y + 2} ${x},${y + size * 0.2} Q${x + size / 2},${y + 2} ${x + size},${y + size * 0.6} Z`}
-              fill="oklch(0.98 0.01 285)"
-              opacity={reached ? 0.9 : 0.25}
-              style={{ transition: "all 700ms ease" }}
-            />
-          );
-        })}
-
-        <path d={ridgePath} fill="none" stroke="oklch(0.4 0.1 285)" strokeWidth="2" />
+        <path d={ridgePath} fill="none" stroke="var(--mountain-route-muted)" strokeWidth="2.5" />
 
         <path
           d={ridgePath}
           fill="none"
           stroke="url(#mtn-done)"
-          strokeWidth="4"
+          strokeWidth="3.5"
           strokeLinecap="round"
           pathLength={100}
           strokeDasharray="100"
           strokeDashoffset={100 - progress}
           style={{
             transition: "stroke-dashoffset 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-            filter: "drop-shadow(0 0 8px oklch(0.75 0.22 300 / 0.75))",
+            filter: "url(#route-glow)",
           }}
         />
 
@@ -267,11 +261,11 @@ export function MountainProgress() {
                 cx={x}
                 cy={y}
                 r={reached ? 7 : 5}
-                fill={reached ? "oklch(0.9 0.14 82)" : "oklch(0.25 0.05 285)"}
-                stroke={reached ? "oklch(0.96 0.06 82)" : "oklch(0.55 0.18 295 / 0.7)"}
+                fill={reached ? "var(--mountain-gold)" : "var(--mountain-marker)"}
+                stroke={reached ? "var(--mountain-gold-bright)" : "var(--mountain-route)"}
                 strokeWidth="2"
                 style={{
-                  filter: reached ? "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.85))" : "none",
+                  filter: reached ? "drop-shadow(0 0 10px var(--mountain-gold))" : "drop-shadow(0 0 5px var(--mountain-route))",
                   transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               />
@@ -288,7 +282,7 @@ export function MountainProgress() {
                 x={i === 0 ? x - 12 : i === CAMPS.length - 1 ? x + 12 : x}
                 y={above ? y - 42 : y + 20}
                 textAnchor={i === 0 ? "start" : i === CAMPS.length - 1 ? "end" : "middle"}
-                fill={reached ? "oklch(0.95 0.02 285)" : "oklch(0.6 0.03 285)"}
+                fill={reached ? "var(--mountain-label-active)" : "var(--mountain-label)"}
                 fontSize="9.5"
                 fontWeight="700"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
@@ -299,37 +293,6 @@ export function MountainProgress() {
             </g>
           );
         })}
-
-        <g
-          style={{
-            transform: `translate(${mx}px, ${my - 34}px)`,
-            transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-          }}
-        >
-          <ellipse
-            cx="0"
-            cy="30"
-            rx="14"
-            ry="4"
-            fill="oklch(0.1 0.03 285 / 0.55)"
-            style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}
-          />
-          <circle
-            r="22"
-            fill="none"
-            stroke="oklch(0.85 0.15 300 / 0.55)"
-            strokeWidth="1.5"
-            style={{ animation: "ringPulse 2.4s ease-out infinite", transformOrigin: "center" }}
-          />
-          <foreignObject x={-30} y={-30} width={60} height={62} style={{ overflow: "visible" }}>
-            <div className="flex items-center justify-center">
-              <RecallMascot
-                size={52}
-                mood={progress >= 100 ? "celebrate" : progress >= 80 ? "happy" : "idle"}
-              />
-            </div>
-          </foreignObject>
-        </g>
 
       </svg>
 
