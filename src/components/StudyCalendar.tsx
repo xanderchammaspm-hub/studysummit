@@ -61,7 +61,7 @@ export function StudyCalendar() {
   const [logs, setLogs] = useState<StudyLog[]>(() => loadLogs());
   useEffect(() => saveLogs(logs), [logs]);
 
-  const { awardXp } = useProfile();
+  const { awardXp, claimStudyStreak } = useProfile();
 
   const [month, setMonth] = useState(() => {
     const d = new Date();
