@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AtlasMarkdown } from "@/components/AtlasMarkdown";
 import { HistoryRail } from "@/components/AtlasHistory";
+import { usePacedText } from "@/hooks/usePacedText";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Sheet,
