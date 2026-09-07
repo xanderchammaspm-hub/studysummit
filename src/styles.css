@@ -63,28 +63,6 @@
   --yellow-glow: oklch(0.9 0.13 80);
   --yellow-soft: oklch(0.82 0.1 82 / 0.25);
 
-  /* Moonlit alpine progression scene */
-  --mountain-sky: oklch(0.19 0.09 285);
-  --mountain-horizon: oklch(0.25 0.12 295);
-  --mountain-distant: oklch(0.3 0.11 292 / 0.7);
-  --mountain-mid: oklch(0.2 0.065 287);
-  --mountain-rock: oklch(0.25 0.085 292);
-  --mountain-ridge-light: oklch(0.38 0.14 296);
-  --mountain-shadow: oklch(0.12 0.035 282);
-  --mountain-valley: oklch(0.105 0.025 282);
-  --mountain-foreground: oklch(0.1 0.025 282 / 0.94);
-  --mountain-snow: oklch(0.9 0.035 275);
-  --mountain-snow-shadow: oklch(0.6 0.08 285);
-  --mountain-ridge-line: oklch(0.62 0.12 292 / 0.44);
-  --mountain-mist: oklch(0.82 0.06 285 / 0.18);
-  --mountain-route: oklch(0.75 0.24 305);
-  --mountain-route-muted: oklch(0.48 0.15 298 / 0.72);
-  --mountain-marker: oklch(0.16 0.04 285);
-  --mountain-gold: oklch(0.86 0.14 82);
-  --mountain-gold-bright: oklch(0.96 0.09 84);
-  --mountain-label: oklch(0.7 0.035 285);
-  --mountain-label-active: oklch(0.97 0.015 285);
-
   --secondary: oklch(0.25 0.05 290);
   --secondary-foreground: oklch(0.97 0.01 285);
   --muted: oklch(0.24 0.03 285);
@@ -507,30 +485,6 @@ button:disabled,
     inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.08),
     0 22px 60px -34px oklch(0.5 0.2 295 / 0.8);
   border-radius: calc(var(--radius) + 6px);
-}
-
-.mountain-scene {
-  border-radius: var(--radius-md);
-  box-shadow: inset 0 0 50px oklch(0.08 0.025 285 / 0.52);
-}
-
-.mountain-mist {
-  opacity: 0.7;
-  animation: mountainMist 20s ease-in-out infinite alternate;
-}
-
-.mountain-mist-front {
-  animation-duration: 27s;
-  animation-direction: alternate-reverse;
-}
-
-@keyframes mountainMist {
-  from { transform: translateX(-22px); opacity: 0.38; }
-  to { transform: translateX(28px); opacity: 0.76; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mountain-mist { animation: none; }
 }
 
 /* Subtle hover lift for interactive tiles */
