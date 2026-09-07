@@ -151,7 +151,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 
   return (
     <div
-      className="subject-card lift-hover rounded-xl fade-in-up"
+      className={`subject-card lift-hover rounded-xl fade-in-up ${subject.pinned ? "subject-card-pinned" : ""}`}
       style={
         {
           animationDelay: `${index * 60}ms`,
