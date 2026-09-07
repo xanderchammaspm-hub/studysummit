@@ -373,12 +373,17 @@
 .mtn-waypoint > circle:nth-last-child(2) {
   animation: waypointFloat 3.6s ease-in-out infinite;
 }
+.summit-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+}
 
 @media (prefers-reduced-motion: reduce) {
   [style*="hudSpin"],
   [style*="hudScan"],
   .mtn-aurora,
-  .mtn-waypoint > circle {
+  .mtn-waypoint > circle,
+  .summit-glow {
     animation: none !important;
   }
 }
