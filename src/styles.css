@@ -351,12 +351,34 @@
   100% { transform: translateY(1080px); opacity: 0; }
 }
 
+@keyframes auroraDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); opacity: 0.55; }
+  50% { transform: translate3d(-18px, 6px, 0) scaleY(1.08); opacity: 0.9; }
+}
+@keyframes waypointFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+.mtn-aurora {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: auroraDrift 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.mtn-waypoint > circle:last-child,
+.mtn-waypoint > circle:nth-last-child(2) {
+  animation: waypointFloat 3.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [style*="hudSpin"],
-  [style*="hudScan"] {
+  [style*="hudScan"],
+  .mtn-aurora,
+  .mtn-waypoint > circle {
     animation: none !important;
   }
 }
+
 
 
 @utility bar-fill-anim {
