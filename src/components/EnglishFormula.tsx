@@ -355,21 +355,25 @@ export function EnglishFormula() {
                   <p className="mt-2 text-sm text-muted-foreground">{docSection.blurb}</p>
                 )}
                 {docSection?.vault && (
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <MemoriseLinkBox
                       storageKey={`${mode.id}-memorise-by-heart`}
                       label="Memorise By Heart"
                     />
                   </div>
                 )}
-                
-                <div className="mt-4">
+
+                <div className="mt-6">
+                  <MemoriseVault storageKey={`${mode.id}-${section}-vault`} />
+                </div>
+
+                <div className="mt-6">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
                     placeholder="Add a table, list or notes — formatting is saved automatically…"
-                    minHeight={340}
+                    minHeight={380}
+                    resizable
                   />
-
                 </div>
               </div>
             )}
