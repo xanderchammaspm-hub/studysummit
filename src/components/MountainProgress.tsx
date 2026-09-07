@@ -200,11 +200,33 @@ export function MountainProgress() {
           className="mtn-aurora"
         />
 
-        {/* Moon */}
-        <g>
-          <circle cx="690" cy="52" r="42" fill="url(#moon-glow)" />
-          <circle cx="690" cy="52" r="11" fill="oklch(0.97 0.04 90 / 0.85)" />
-        </g>
+        {/* Summit crown corona — glows as HSC approaches */}
+        {progress >= 55 && (
+          <g
+            style={{
+              opacity: Math.min(1, (progress - 55) / 35),
+              transition: "opacity 900ms ease",
+              transformOrigin: `${pts[5][0]}px ${pts[5][1]}px`,
+              animation: "crownPulse 3.6s ease-in-out infinite",
+            }}
+          >
+            <path
+              d={`M${pts[5][0] - 34},${pts[5][1] + 10} L${pts[5][0] - 22},${pts[5][1] - 34} L${pts[5][0] - 8},${pts[5][1] - 12} L${pts[5][0]},${pts[5][1] - 42} L${pts[5][0] + 8},${pts[5][1] - 12} L${pts[5][0] + 22},${pts[5][1] - 34} L${pts[5][0] + 34},${pts[5][1] + 10} Q${pts[5][0]},${pts[5][1] + 18} ${pts[5][0] - 34},${pts[5][1] + 10} Z`}
+              fill="oklch(0.92 0.14 82 / 0.22)"
+              stroke="oklch(0.9 0.14 82 / 0.65)"
+              strokeWidth="1.4"
+              style={{ filter: "drop-shadow(0 0 18px oklch(0.9 0.14 82 / 0.85))" }}
+            />
+            <circle
+              cx={pts[5][0]}
+              cy={pts[5][1]}
+              r={44}
+              fill="url(#summit-glow)"
+              opacity={0.55}
+            />
+          </g>
+        )}
+
 
         {[
           [80, 40], [160, 70], [260, 30], [340, 90], [480, 45],
