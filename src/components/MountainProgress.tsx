@@ -223,6 +223,7 @@ export function MountainProgress() {
             cy={pts[5][1]}
             r={78}
             fill="url(#summit-glow)"
+            className="summit-glow"
             style={{ mixBlendMode: "screen" }}
           />
           <circle
@@ -230,6 +231,7 @@ export function MountainProgress() {
             cy={pts[5][1]}
             r={42}
             fill="url(#summit-glow)"
+            className="summit-glow"
             style={{ mixBlendMode: "screen", animation: "summitPulse 2.4s ease-in-out infinite" }}
           />
         </g>
