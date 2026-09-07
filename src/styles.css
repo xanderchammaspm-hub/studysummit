@@ -351,12 +351,34 @@
   100% { transform: translateY(1080px); opacity: 0; }
 }
 
+@keyframes auroraDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); opacity: 0.55; }
+  50% { transform: translate3d(-18px, 6px, 0) scaleY(1.08); opacity: 0.9; }
+}
+@keyframes waypointFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+.mtn-aurora {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: auroraDrift 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.mtn-waypoint > circle:last-child,
+.mtn-waypoint > circle:nth-last-child(2) {
+  animation: waypointFloat 3.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [style*="hudSpin"],
-  [style*="hudScan"] {
+  [style*="hudScan"],
+  .mtn-aurora,
+  .mtn-waypoint > circle {
     animation: none !important;
   }
 }
+
 
 
 @utility bar-fill-anim {
@@ -822,6 +844,13 @@ select:hover:not(:disabled) {
   opacity: 0.85;
   pointer-events: none;
 }
+.subject-card-pinned {
+  border-color: color-mix(in oklab, var(--acc) 62%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.1),
+    0 0 0 1px color-mix(in oklab, oklch(0.9 0.14 82) 22%, transparent),
+    0 26px 70px -36px color-mix(in oklab, var(--acc) 85%, transparent);
+}
 .subject-card-sheen {
   background: linear-gradient(180deg, color-mix(in oklab, var(--acc) 9%, transparent) 0%, transparent 100%);
 }
@@ -1190,4 +1219,20 @@ input[type="range"]::-moz-range-thumb {
 
 @media (prefers-reduced-motion: reduce) {
   .summi-flyby { display: none !important; }
+}
+
+/* Account / settings panels */
+.account-panel {
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms ease,
+    box-shadow 320ms ease;
+}
+.account-panel:hover {
+  transform: translateY(-2px);
+  border-color: oklch(0.7 0.2 300 / 0.55);
+  box-shadow: 0 26px 70px -40px oklch(0.7 0.22 300 / 0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-panel:hover { transform: none; }
 }

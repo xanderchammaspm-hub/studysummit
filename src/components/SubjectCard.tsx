@@ -12,6 +12,7 @@ import {
   BellRing,
   ListChecks,
   NotebookPen,
+  Star,
 } from "lucide-react";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
@@ -150,7 +151,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
 
   return (
     <div
-      className="subject-card lift-hover rounded-xl fade-in-up"
+      className={`subject-card lift-hover rounded-xl fade-in-up ${subject.pinned ? "subject-card-pinned" : ""}`}
       style={
         {
           animationDelay: `${index * 60}ms`,
@@ -230,11 +231,27 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 </div>
               </button>
             )}
+            <input
+              value={subject.tagline ?? ""}
+              onChange={(e) => updateSubject({ tagline: e.target.value })}
+              placeholder="Add a short note (e.g. Band 6 target)"
+              className="mt-1 w-full truncate rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-muted-foreground outline-none transition-colors hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
+            />
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {!editing && (
             <>
+              <button
+                onClick={() => updateSubject({ pinned: !subject.pinned })}
+                className={`p-1.5 transition-colors ${
+                  subject.pinned ? "text-yellow" : "text-muted-foreground hover:text-yellow"
+                }`}
+                aria-label={subject.pinned ? "Unpin subject" : "Pin subject"}
+                title={subject.pinned ? "Unpin subject" : "Pin to the top"}
+              >
+                <Star className={`h-4 w-4 ${subject.pinned ? "fill-current" : ""}`} />
+              </button>
               <button
                 onClick={() => {
                   setNameDraft(name);
@@ -268,6 +285,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
             </>
           )}
         </div>
+
       </div>
 
       <div

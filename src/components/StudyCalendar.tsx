@@ -61,7 +61,7 @@ export function StudyCalendar() {
   const [logs, setLogs] = useState<StudyLog[]>(() => loadLogs());
   useEffect(() => saveLogs(logs), [logs]);
 
-  const { awardXp } = useProfile();
+  const { awardXp, claimStudyStreak } = useProfile();
 
   const [month, setMonth] = useState(() => {
     const d = new Date();
@@ -86,6 +86,9 @@ export function StudyCalendar() {
       },
     ]);
     void awardXp("studyHour", h);
+    // Streaks only count on days with logged study hours.
+    if (selectedDate === todayISO()) void claimStudyStreak();
+
     setHours("1");
     setNote("");
   };

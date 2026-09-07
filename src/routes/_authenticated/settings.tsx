@@ -190,7 +190,7 @@ function SettingsPage() {
 
   return (
     <AccountShell title="Settings" subtitle="Profile, study goals, exam dates, appearance and account security.">
-      <Panel title="Profile">
+      <Panel title="Profile" description="Your name, username and picture across Summit.">
         <div className="flex flex-wrap items-center gap-5">
           <div className="relative">
             {avatarUrl ? (
@@ -241,7 +241,7 @@ function SettingsPage() {
         </div>
       </Panel>
 
-      <Panel title="Study goals">
+      <Panel title="Study goals" description="Daily hours and the ATAR you are climbing towards.">
         <div className="space-y-6">
           <div>
             <Label>Daily study goal</Label>
@@ -271,7 +271,7 @@ function SettingsPage() {
         </div>
       </Panel>
 
-      <Panel title="Exam dates">
+      <Panel title="Exam dates" description="These drive your mountain climb.">
         <p className="mb-4 text-xs text-muted-foreground">
           These drive your mountain climb. Change one and the progress bar moves with it.
         </p>
@@ -299,7 +299,7 @@ function SettingsPage() {
         </Button>
       </Panel>
 
-      <Panel title="Reminders">
+      <Panel title="Reminders" description="How far ahead assessments should warn you.">
         <p className="mb-3 text-xs text-muted-foreground">
           Highlight exams and assessments when they fall inside these windows.
         </p>
@@ -323,7 +323,7 @@ function SettingsPage() {
         </div>
       </Panel>
 
-      <Panel title="Appearance">
+      <Panel title="Appearance" description="Aurora intensity, accent colour and motion.">
         <div className="space-y-6">
           <div>
             <Label>Accent</Label>
@@ -384,7 +384,7 @@ function SettingsPage() {
         </div>
       </Panel>
 
-      <Panel title="Data">
+      <Panel title="Data" description="Export, import or clear this device’s copy.">
         <div className="space-y-3 text-sm">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3">
             <div>
@@ -445,7 +445,7 @@ function SettingsPage() {
         </div>
       </Panel>
 
-      <Panel title="Account">
+      <Panel title="Account" description="Password and sign-in security.">
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 px-4 py-3 text-sm">
           <div>
             <div className="font-medium">Password</div>
