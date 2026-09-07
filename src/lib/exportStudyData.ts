@@ -154,7 +154,7 @@ export function collectSubjectContent(): SubjectRow[] {
         ...base,
         kind: "assessment",
         title: a.title ?? "",
-        detail: [a.due ? `due ${a.due}` : "", a.url ?? ""].filter(Boolean).join(" • "),
+        detail: [a.due ? `due ${a.due}` : "", a.url ?? ""].filter(Boolean).join(" • ") || "",
       });
     for (const tp of t.topics ?? [])
       rows.push({ ...base, kind: "traffic-light", title: tp.title ?? "", detail: tp.status ?? "none" });
@@ -169,10 +169,25 @@ export function collectSubjectContent(): SubjectRow[] {
 
   for (const [id, subject] of Object.entries(state)) {
     if (!subject) continue;
+    const meta = names.get(id) ?? { year: "", name: id };
+    if (!meta.name) continue;
+    const before = rows.length;
     if (subject.terms) {
       for (const [k, t] of Object.entries(subject.terms)) if (t) push(id, k, t);
     } else {
       push(id, "T1", subject);
+    }
+    // Ensure every subject appears in the export, even if its terms are empty.
+    if (rows.length === before) {
+      const termList = Object.values(TERM_LABELS).join(", ");
+      rows.push({
+        year: meta.year,
+        subject: meta.name,
+        term: "",
+        kind: "subject",
+        title: meta.name,
+        detail: `No term content yet — terms: ${termList}`,
+      });
     }
   }
   return rows;
