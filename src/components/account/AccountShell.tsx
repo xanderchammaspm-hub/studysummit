@@ -65,15 +65,34 @@ export function AccountShell({
   );
 }
 
-export function Panel({ title, children }: { title?: string; children: ReactNode }) {
+export function Panel({
+  title,
+  description,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="rounded-2xl purple-outline bg-card/60 p-6 backdrop-blur-xl fade-in-up">
+    <section className="account-panel group relative overflow-hidden rounded-2xl purple-outline bg-card/60 p-6 backdrop-blur-xl fade-in-up">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-70"
+      />
       {title && (
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          {title}
-        </h2>
+        <div className="mb-4">
+          <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <span className="h-3.5 w-1 rounded-full bg-gradient-to-b from-primary to-yellow" />
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-1.5 pl-3 text-xs text-muted-foreground/80">{description}</p>
+          )}
+        </div>
       )}
       {children}
     </section>
   );
 }
+
