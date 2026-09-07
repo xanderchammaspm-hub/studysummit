@@ -378,11 +378,13 @@
 @media (prefers-reduced-motion: reduce) {
   [style*="hudSpin"],
   [style*="hudScan"],
+  [style*="crownPulse"],
   .mtn-aurora,
   .mtn-waypoint > circle {
     animation: none !important;
   }
 }
+
 
 
 
