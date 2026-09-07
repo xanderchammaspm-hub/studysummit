@@ -221,6 +221,8 @@ export function useSubject(id: string) {
   const state: SubjectState = {
     emoji: raw.emoji ?? "📘",
     color: raw.color,
+    tagline: raw.tagline,
+    pinned: raw.pinned,
     papers: raw.papers ?? [],
     topics: raw.topics ?? [],
     assessments: raw.assessments ?? [],
@@ -260,6 +262,8 @@ export function useSubjectTerm(id: string, term: TermKey) {
         const next: SubjectState = {
           emoji: cur.emoji ?? "📘",
           color: cur.color,
+          tagline: cur.tagline,
+          pinned: cur.pinned,
           papers: [],
           topics: [],
           assessments: [],
