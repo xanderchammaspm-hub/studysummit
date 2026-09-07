@@ -223,7 +223,7 @@ function Home() {
 
       {/* Header */}
       <header className="border-b border-border/60 backdrop-blur-md sticky top-0 z-30 bg-background/70">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <SummitLogo size={38} priority />
             <div className="leading-tight">
