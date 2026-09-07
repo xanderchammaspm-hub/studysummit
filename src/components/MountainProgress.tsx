@@ -200,12 +200,6 @@ export function MountainProgress() {
           className="mtn-aurora"
         />
 
-        {/* Moon */}
-        <g>
-          <circle cx="690" cy="52" r="42" fill="url(#moon-glow)" />
-          <circle cx="690" cy="52" r="11" fill="oklch(0.97 0.04 90 / 0.85)" />
-        </g>
-
         {[
           [80, 40], [160, 70], [260, 30], [340, 90], [480, 45],
           [560, 75], [640, 35], [700, 100], [140, 110], [420, 20],
@@ -222,15 +216,23 @@ export function MountainProgress() {
           />
         ))}
 
-        {progress >= 70 && (
+        {/* HSC success glow */}
+        <g style={{ opacity: progress >= 70 ? 0.85 : 0, transition: "opacity 900ms ease" }}>
           <circle
             cx={pts[5][0]}
             cy={pts[5][1]}
-            r={60}
+            r={78}
             fill="url(#summit-glow)"
-            style={{ opacity: (progress - 60) / 40, transition: "opacity 900ms ease" }}
+            style={{ mixBlendMode: "screen" }}
           />
-        )}
+          <circle
+            cx={pts[5][0]}
+            cy={pts[5][1]}
+            r={42}
+            fill="url(#summit-glow)"
+            style={{ mixBlendMode: "screen", animation: "summitPulse 2.4s ease-in-out infinite" }}
+          />
+        </g>
 
         <g style={{ opacity: 0.35 }}>
           <ellipse cx="0" cy="140" rx="55" ry="9" fill="oklch(0.9 0.03 285)"
