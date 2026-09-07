@@ -25,6 +25,10 @@ export type TermState = {
 export type SubjectState = {
   emoji: string;
   color?: string;
+  /** Short personal tagline shown under the subject name. */
+  tagline?: string;
+  /** Pinned subjects sort to the front of the grid. */
+  pinned?: boolean;
   papers: Paper[];
   topics: Topic[];
   assessments: Assessment[];
