@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, GripVertical, Maximize2, PenLine, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { RichEditor } from "@/components/RichEditor";
 import { MemoriseLinkBox } from "@/components/MemoriseLinkBox";
+import { MemoriseVault } from "@/components/MemoriseVault";
 import { SkeletonFigure } from "@/components/SkeletonFigure";
 import { ShortAnswerMark } from "@/components/ShortAnswerMark";
 import { AtlasSectionChat } from "@/components/AtlasSectionChat";
@@ -320,11 +321,12 @@ export function EnglishFormula() {
                   <div className="mt-3">
                     <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-6">
                     <RichEditor
                       storageKey={`${mode.id}-overview`}
                       placeholder="Working space — paste a question, draft a response…"
-                      minHeight={220}
+                      minHeight={380}
+                      resizable
                     />
                   </div>
                 </div>
@@ -354,21 +356,25 @@ export function EnglishFormula() {
                   <p className="mt-2 text-sm text-muted-foreground">{docSection.blurb}</p>
                 )}
                 {docSection?.vault && (
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <MemoriseLinkBox
                       storageKey={`${mode.id}-memorise-by-heart`}
                       label="Memorise By Heart"
                     />
                   </div>
                 )}
-                
-                <div className="mt-4">
+
+                <div className="mt-6">
+                  <MemoriseVault storageKey={`${mode.id}-${section}-vault`} />
+                </div>
+
+                <div className="mt-6">
                   <RichEditor
                     storageKey={`${mode.id}-doc-${section}`}
                     placeholder="Add a table, list or notes — formatting is saved automatically…"
-                    minHeight={340}
+                    minHeight={380}
+                    resizable
                   />
-
                 </div>
               </div>
             )}
@@ -463,8 +469,6 @@ function SideItem({
   const draggable = Boolean(onDragStart);
   return (
     <div
-      draggable={draggable}
-      onDragStart={onDragStart}
       onDragOver={(e) => {
         if (!draggable) return;
         e.preventDefault();
@@ -475,16 +479,28 @@ function SideItem({
         e.preventDefault();
         onDragEnd?.();
       }}
-      onDragEnd={onDragEnd}
-      className={`group/side relative flex items-center transition-all duration-200 ${
+      className={`group/side relative flex items-center gap-1 transition-all duration-200 ${
         dragging ? "scale-[0.98] opacity-50" : ""
-      } ${dropTarget ? "before:absolute before:-top-0.5 before:left-2 before:right-2 before:h-0.5 before:rounded-full before:bg-primary before:shadow-[0_0_10px_var(--primary)]" : ""}`}
+      } ${dropTarget ? "before:absolute before:-top-0.5 before:left-6 before:right-2 before:h-0.5 before:rounded-full before:bg-primary before:shadow-[0_0_10px_var(--primary)]" : ""}`}
     >
+      {draggable && (
+        <span
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.effectAllowed = "move";
+            onDragStart?.();
+          }}
+          onDragEnd={onDragEnd}
+          className="shrink-0 cursor-grab rounded-md p-1 text-muted-foreground/40 hover:text-primary/70 active:cursor-grabbing"
+          aria-label="Drag to reorder"
+          title="Drag to reorder"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </span>
+      )}
       <button
         onClick={onClick}
-        className={`flex w-full items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors ${
-          draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-        } ${
+        className={`flex flex-1 items-center gap-1.5 rounded-xl px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
           active
             ? "bg-primary/15 text-foreground shadow-[0_0_0_1px_var(--color-border)]"
             : "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
@@ -496,7 +512,7 @@ function SideItem({
         <button
           onClick={onDelete}
           aria-label="Delete section"
-          className="absolute right-1.5 cursor-pointer rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/side:opacity-100"
+          className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover/side:opacity-100"
         >
           <Trash2 className="h-3 w-3" />
         </button>

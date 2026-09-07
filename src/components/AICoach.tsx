@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AtlasMarkdown } from "@/components/AtlasMarkdown";
 import { HistoryRail } from "@/components/AtlasHistory";
+import { usePacedText } from "@/hooks/usePacedText";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Sheet,
@@ -403,13 +404,19 @@ function ChatPanel() {
             </div>
           </div>
         ) : (
-          messages.map((m) => (
-            <Bubble
-              key={m.id}
-              msg={m}
-              thinking={busy && m.role === "assistant" && !m.content}
-            />
-          ))
+          (() => {
+            const lastAssistant = [...messages]
+              .reverse()
+              .find((m) => m.role === "assistant");
+            return messages.map((m) => (
+              <Bubble
+                key={m.id}
+                msg={m}
+                thinking={busy && m.role === "assistant" && !m.content}
+                streaming={busy && m.id === lastAssistant?.id && m.role === "assistant"}
+              />
+            ));
+          })()
         )}
       </div>
 
@@ -464,8 +471,17 @@ function ChatPanel() {
   );
 }
 
-function Bubble({ msg, thinking }: { msg: Message; thinking: boolean }) {
+function Bubble({
+  msg,
+  thinking,
+  streaming,
+}: {
+  msg: Message;
+  thinking: boolean;
+  streaming?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
+  const displayed = usePacedText(msg.content, streaming ?? false, 260);
   const copy = () => {
     navigator.clipboard.writeText(msg.content).then(() => {
       setCopied(true);
@@ -495,8 +511,15 @@ function Bubble({ msg, thinking }: { msg: Message; thinking: boolean }) {
           </div>
         ) : (
           <>
-            <AtlasMarkdown>{msg.content}</AtlasMarkdown>
-            {msg.content && (
+            {streaming ? (
+              <div className="relative text-sm leading-relaxed text-foreground">
+                <span className="whitespace-pre-wrap">{displayed}</span>
+                <span className="atlas-caret" />
+              </div>
+            ) : (
+              <AtlasMarkdown>{msg.content}</AtlasMarkdown>
+            )}
+            {msg.content && !streaming && (
               <button
                 onClick={copy}
                 className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"

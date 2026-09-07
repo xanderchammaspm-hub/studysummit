@@ -125,22 +125,28 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
             Paste a short-answer question and your attempt — Atlas will mark it and model a Band 6 response.
           </p>
         ) : (
-          messages.map((m) => (
-            <div
-              key={m.id}
-              className={`fade-in-up rounded-xl px-3 py-2 text-sm ${
-                m.role === "user"
-                  ? "ml-auto max-w-[85%] bg-primary/15 text-foreground"
-                  : "max-w-full bg-surface/70 text-foreground"
-              }`}
-            >
-              {m.role === "assistant" ? (
-                <AtlasAnswer content={m.content} streaming={busy} />
-              ) : (
-                <span className="whitespace-pre-wrap">{m.content}</span>
-              )}
-            </div>
-          ))
+          (() => {
+            const lastAsst = [...messages].reverse().find((m) => m.role === "assistant");
+            return messages.map((m) => (
+              <div
+                key={m.id}
+                className={`fade-in-up rounded-xl px-3 py-2 text-sm ${
+                  m.role === "user"
+                    ? "ml-auto max-w-[85%] bg-primary/15 text-foreground"
+                    : "max-w-full bg-surface/70 text-foreground"
+                }`}
+              >
+                {m.role === "assistant" ? (
+                  <AtlasAnswer
+                    content={m.content}
+                    streaming={busy && m.id === lastAsst?.id}
+                  />
+                ) : (
+                  <span className="whitespace-pre-wrap">{m.content}</span>
+                )}
+              </div>
+            ));
+          })()
         )}
       </div>
 
@@ -172,7 +178,14 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
 }
 
 function AtlasAnswer({ content, streaming }: { content: string; streaming: boolean }) {
-  const live = streaming && !content.endsWith("\u0000");
-  const shown = usePacedText(content, live);
-  return <AtlasMarkdown caret={live && shown.length < content.length}>{shown || "…"}</AtlasMarkdown>;
+  const shown = usePacedText(content, streaming, 260);
+  if (streaming) {
+    return (
+      <div className="relative text-sm leading-relaxed text-foreground">
+        <span className="whitespace-pre-wrap">{shown || "…"}</span>
+        <span className="atlas-caret" />
+      </div>
+    );
+  }
+  return <AtlasMarkdown>{content || "…"}</AtlasMarkdown>;
 }
