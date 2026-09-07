@@ -86,6 +86,9 @@ export function StudyCalendar() {
       },
     ]);
     void awardXp("studyHour", h);
+    // Streaks only count on days with logged study hours.
+    if (selectedDate === todayISO()) void claimStudyStreak();
+
     setHours("1");
     setNote("");
   };
