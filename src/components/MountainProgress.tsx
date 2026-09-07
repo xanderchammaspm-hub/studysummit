@@ -154,29 +154,57 @@ export function MountainProgress() {
       >
         <defs>
           <linearGradient id="mtn-body" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.55 0.2 300 / 0.85)" />
-            <stop offset="60%" stopColor="oklch(0.3 0.1 290 / 0.9)" />
-            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0.95)" />
+            <stop offset="0%" stopColor="oklch(0.62 0.21 300 / 0.9)" />
+            <stop offset="45%" stopColor="oklch(0.36 0.13 295 / 0.92)" />
+            <stop offset="100%" stopColor="oklch(0.15 0.04 285 / 0.96)" />
           </linearGradient>
           <linearGradient id="mtn-back" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.35 0.14 300 / 0.55)" />
+            <stop offset="0%" stopColor="oklch(0.4 0.15 300 / 0.5)" />
+            <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
+          </linearGradient>
+          <linearGradient id="mtn-far" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="oklch(0.45 0.12 310 / 0.28)" />
             <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
           </linearGradient>
           <linearGradient id="mtn-done" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0%" stopColor="oklch(0.75 0.22 300)" />
-            <stop offset="100%" stopColor="oklch(0.9 0.14 82)" />
+            <stop offset="60%" stopColor="oklch(0.82 0.18 320)" />
+            <stop offset="100%" stopColor="oklch(0.92 0.14 82)" />
           </linearGradient>
           <linearGradient id="mtn-sky" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.3 0.1 300 / 0.22)" />
+            <stop offset="0%" stopColor="oklch(0.34 0.12 305 / 0.3)" />
+            <stop offset="55%" stopColor="oklch(0.24 0.08 290 / 0.12)" />
             <stop offset="100%" stopColor="oklch(0.2 0.06 285 / 0)" />
+          </linearGradient>
+          <linearGradient id="mtn-aurora" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="oklch(0.7 0.2 300 / 0)" />
+            <stop offset="45%" stopColor="oklch(0.72 0.2 310 / 0.22)" />
+            <stop offset="100%" stopColor="oklch(0.88 0.14 82 / 0)" />
           </linearGradient>
           <radialGradient id="summit-glow" cx="0.5" cy="0.5" r="0.5">
             <stop offset="0%" stopColor="oklch(0.95 0.14 82 / 0.9)" />
             <stop offset="100%" stopColor="oklch(0.9 0.13 82 / 0)" />
           </radialGradient>
+          <radialGradient id="moon-glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stopColor="oklch(0.96 0.06 90 / 0.5)" />
+            <stop offset="100%" stopColor="oklch(0.96 0.06 90 / 0)" />
+          </radialGradient>
         </defs>
 
         <rect x="0" y="0" width={W} height={H} fill="url(#mtn-sky)" />
+
+        {/* Aurora ribbon */}
+        <path
+          d="M-40,90 C160,30 320,120 500,60 C640,14 740,80 860,44 L860,0 L-40,0 Z"
+          fill="url(#mtn-aurora)"
+          className="mtn-aurora"
+        />
+
+        {/* Moon */}
+        <g>
+          <circle cx="690" cy="52" r="42" fill="url(#moon-glow)" />
+          <circle cx="690" cy="52" r="11" fill="oklch(0.97 0.04 90 / 0.85)" />
+        </g>
 
         {[
           [80, 40], [160, 70], [260, 30], [340, 90], [480, 45],
@@ -213,6 +241,12 @@ export function MountainProgress() {
             style={{ animation: "cloudDrift 46s linear -30s infinite" }} />
         </g>
 
+        {/* Far haze ridge */}
+        <path
+          d={`M-60,${H} L90,215 L220,160 L370,205 L520,140 L700,190 L${W + 60},${H} Z`}
+          fill="url(#mtn-far)"
+        />
+
         <path
           d={`M-50,${H} L120,180 L280,120 L440,175 L620,90 L820,200 L${W + 50},${H} Z`}
           fill="url(#mtn-back)"
@@ -221,9 +255,10 @@ export function MountainProgress() {
         <path
           d={mountainPath}
           fill="url(#mtn-body)"
-          stroke="oklch(0.6 0.2 300 / 0.55)"
+          stroke="oklch(0.66 0.21 300 / 0.6)"
           strokeWidth="1.2"
         />
+
 
         {pts.map(([x, y], i) => {
           const reached = progress >= CAMPS[i].pct;
