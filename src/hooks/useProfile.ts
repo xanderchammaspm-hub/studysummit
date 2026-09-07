@@ -89,35 +89,34 @@ export function useProfile() {
     [userId, qc],
   );
 
-  // Daily streak — counted once per calendar day on first visit.
-  useEffect(() => {
+  /**
+   * Daily streak — claimed only when the student actually logs study hours,
+   * never just for opening the site. Safe to call repeatedly: the day is
+   * claimed atomically and guarded per session.
+   */
+  const claimStudyStreak = useCallback(async () => {
     if (!userId || !profile) return;
     const day = today();
     if (profile.last_active_date === day) return;
-    // The profile query refetches asynchronously and this hook is mounted by
-    // several components, so use a module-level guard to award the streak once.
     const guardKey = `${userId}:${day}`;
     if (streakClaimed.has(guardKey)) return;
     streakClaimed.add(guardKey);
 
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
     const streak = profile.last_active_date === yesterday ? profile.streak_days + 1 : 1;
-    void (async () => {
-      // Claim the day atomically: only the write that actually flips
-      // last_active_date returns a row, and only that one awards XP.
-      const { data: claimed } = await supabase
-        .from("profiles")
-        .update({ last_active_date: day, streak_days: streak })
-        .eq("id", userId)
-        .or(`last_active_date.is.null,last_active_date.neq.${day}`)
-        .select("id");
-      if (!claimed?.length) return;
-      await supabase
-        .from("xp_events")
-        .insert({ user_id: userId, kind: "dailyStreak", amount: XP_RULES.dailyStreak, meta: { streak } });
-      await qc.invalidateQueries({ queryKey: ["profile", userId] });
-    })();
-
+    // Claim the day atomically: only the write that actually flips
+    // last_active_date returns a row, and only that one awards XP.
+    const { data: claimed } = await supabase
+      .from("profiles")
+      .update({ last_active_date: day, streak_days: streak })
+      .eq("id", userId)
+      .or(`last_active_date.is.null,last_active_date.neq.${day}`)
+      .select("id");
+    if (!claimed?.length) return;
+    await supabase
+      .from("xp_events")
+      .insert({ user_id: userId, kind: "dailyStreak", amount: XP_RULES.dailyStreak, meta: { streak } });
+    await qc.invalidateQueries({ queryKey: ["profile", userId] });
   }, [userId, profile, qc]);
 
   const progression = useMemo(() => progressionFromXp(profile?.xp ?? 0), [profile?.xp]);
@@ -130,8 +129,10 @@ export function useProfile() {
     progression,
     updateProfile: update.mutateAsync,
     awardXp,
+    claimStudyStreak,
     uploadAvatar,
   };
+
 }
 
 export function useAchievements() {
