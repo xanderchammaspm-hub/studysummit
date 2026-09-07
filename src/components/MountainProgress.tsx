@@ -335,10 +335,16 @@ export function MountainProgress() {
                 y={above ? y - 26 : y - 14}
                 textAnchor="middle"
                 fontSize="14"
-                style={{ pointerEvents: "none" }}
+                style={{
+                  pointerEvents: "none",
+                  filter: above
+                    ? "drop-shadow(0 0 8px oklch(0.9 0.14 82 / 0.9))"
+                    : "none",
+                }}
               >
                 {c.emoji}
               </text>
+
               <text
                 x={i === 0 ? x - 12 : i === CAMPS.length - 1 ? x + 12 : x}
                 y={above ? y - 42 : y + 20}
