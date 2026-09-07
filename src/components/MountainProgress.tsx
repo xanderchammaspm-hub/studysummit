@@ -163,7 +163,7 @@ export function MountainProgress() {
             <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
           </linearGradient>
           <linearGradient id="mtn-far" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.45 0.12 310 / 0.28)" />
+            <stop offset="0%" stopColor="oklch(0.45 0.12 310 / 0.16)" />
             <stop offset="100%" stopColor="oklch(0.16 0.04 285 / 0)" />
           </linearGradient>
           <linearGradient id="mtn-done" x1="0" x2="1" y1="0" y2="0">
@@ -243,7 +243,7 @@ export function MountainProgress() {
 
         {/* Far haze ridge */}
         <path
-          d={`M-60,${H} L90,215 L220,160 L370,205 L520,140 L700,190 L${W + 60},${H} Z`}
+          d={`M-60,${H} L110,236 L230,188 L360,232 L520,168 L680,214 L${W + 60},${H} Z`}
           fill="url(#mtn-far)"
         />
 
