@@ -47,7 +47,9 @@ export function usePacedText(full: string, streaming: boolean, cps = 220) {
         shownRef.current = full.slice(0, next);
         setShown(shownRef.current);
       }
-      raf = requestAnimationFrame(tick);
+      if (shownRef.current.length < full.length) {
+        raf = requestAnimationFrame(tick);
+      }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
