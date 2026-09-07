@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarCog, RotateCcw } from "lucide-react";
-import { RecallMascot } from "@/components/recall/RecallMascot";
 
 import {
   CAMPS,
@@ -302,33 +301,24 @@ export function MountainProgress() {
 
         <g
           style={{
-            transform: `translate(${mx}px, ${my - 34}px)`,
+            transform: `translate(${mx}px, ${my}px)`,
             transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <ellipse
-            cx="0"
-            cy="30"
-            rx="14"
-            ry="4"
-            fill="oklch(0.1 0.03 285 / 0.55)"
-            style={{ animation: "hikerFloat 2.4s ease-in-out infinite" }}
-          />
           <circle
-            r="22"
+            r="15"
             fill="none"
-            stroke="oklch(0.85 0.15 300 / 0.55)"
+            stroke="oklch(0.9 0.14 82 / 0.55)"
             strokeWidth="1.5"
             style={{ animation: "ringPulse 2.4s ease-out infinite", transformOrigin: "center" }}
           />
-          <foreignObject x={-30} y={-30} width={60} height={62} style={{ overflow: "visible" }}>
-            <div className="flex items-center justify-center">
-              <RecallMascot
-                size={52}
-                mood={progress >= 100 ? "celebrate" : progress >= 80 ? "happy" : "idle"}
-              />
-            </div>
-          </foreignObject>
+          <circle
+            r="8"
+            fill="oklch(0.9 0.14 82)"
+            stroke="oklch(0.98 0.05 82)"
+            strokeWidth="2"
+            style={{ filter: "drop-shadow(0 0 9px oklch(0.9 0.14 82 / 0.9))" }}
+          />
         </g>
 
       </svg>
