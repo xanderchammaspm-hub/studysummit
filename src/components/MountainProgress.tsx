@@ -234,7 +234,7 @@ export function MountainProgress() {
               d={`M${x - size},${y + size * 0.6} Q${x - size / 2},${y + 2} ${x},${y + size * 0.2} Q${x + size / 2},${y + 2} ${x + size},${y + size * 0.6} Z`}
               fill="oklch(0.98 0.01 285)"
               opacity={reached ? 0.9 : 0.25}
-              style={{ transition: "opacity 700ms ease" }}
+              style={{ transition: "all 700ms ease" }}
             />
           );
         })}
@@ -271,7 +271,7 @@ export function MountainProgress() {
                 strokeWidth="2"
                 style={{
                   filter: reached ? "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.85))" : "none",
-                  transition: "fill 600ms ease, stroke 600ms ease, filter 600ms ease, r 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               />
               <text

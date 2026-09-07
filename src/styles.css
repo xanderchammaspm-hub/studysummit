@@ -90,8 +90,8 @@
 
   html {
     background: linear-gradient(180deg, oklch(0.15 0.03 285) 0%, oklch(0.17 0.035 290) 50%, oklch(0.14 0.03 285) 100%);
+    background-attachment: fixed;
     background-color: oklch(0.15 0.03 285);
-    scroll-behavior: smooth;
   }
 
   html,
@@ -479,7 +479,7 @@ button:disabled,
 @utility glass-panel {
   background:
     linear-gradient(160deg, oklch(0.24 0.045 292 / 0.72) 0%, oklch(0.18 0.035 288 / 0.6) 100%);
-  backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.15);
   border: 1px solid oklch(0.6 0.18 298 / 0.28);
   box-shadow:
     inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.08),
@@ -549,12 +549,11 @@ button,
 [role="button"],
 a[href] {
   transition:
-    color 140ms ease,
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 180ms ease,
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
-  touch-action: manipulation;
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 240ms ease,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 button:not(:disabled):active,
 [role="button"]:not([aria-disabled="true"]):active {
@@ -569,9 +568,9 @@ input,
 textarea,
 select {
   transition:
-    border-color 140ms ease,
-    box-shadow 180ms ease,
-    background-color 140ms ease;
+    border-color 200ms ease,
+    box-shadow 240ms ease,
+    background-color 200ms ease;
 }
 input:hover:not(:disabled),
 textarea:hover:not(:disabled),
@@ -612,37 +611,110 @@ select:hover:not(:disabled) {
   }
 }
 
-/* ---------- Lightweight static galaxy background ---------- */
+/* ---------- Living background: nebula, stars, shooting stars, motes ---------- */
 .ambient-root {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  contain: strict;
 }
-.ambient-nebula {
+.nebula {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(70% 55% at 8% 5%, oklch(0.52 0.24 300 / 0.3), transparent 72%),
-    radial-gradient(65% 52% at 96% 18%, oklch(0.45 0.22 328 / 0.22), transparent 74%),
-    radial-gradient(58% 45% at 52% 105%, oklch(0.62 0.12 84 / 0.1), transparent 76%);
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform, opacity;
+}
+.nebula-a {
+  top: -24%;
+  left: -16%;
+  width: 92vw;
+  height: 92vw;
+  background: radial-gradient(circle, oklch(0.64 0.3 300 / 0.95) 0%, oklch(0.5 0.26 310 / 0.4) 42%, transparent 70%);
+  animation: nebulaDrift 96s ease-in-out infinite alternate;
+}
+.nebula-b {
+  top: 0%;
+  right: -24%;
+  width: 84vw;
+  height: 84vw;
+  background: radial-gradient(circle, oklch(0.58 0.3 328 / 0.85) 0%, oklch(0.45 0.24 330 / 0.35) 44%, transparent 70%);
+  animation: nebulaDrift 122s ease-in-out -20s infinite alternate-reverse;
+}
+.nebula-c {
+  bottom: -32%;
+  left: 8%;
+  width: 96vw;
+  height: 74vw;
+  background: radial-gradient(circle, oklch(0.72 0.16 84 / 0.28) 0%, transparent 66%);
+  animation: nebulaDrift 148s ease-in-out -46s infinite alternate;
+}
+.nebula-d {
+  top: 26%;
+  left: 24%;
+  width: 72vw;
+  height: 62vw;
+  background: radial-gradient(circle, oklch(0.6 0.28 268 / 0.7) 0%, transparent 68%);
+  animation: nebulaDrift 168s ease-in-out -70s infinite alternate;
+}
+.nebula-e {
+  bottom: 6%;
+  right: 4%;
+  width: 58vw;
+  height: 52vw;
+  background: radial-gradient(circle, oklch(0.55 0.26 288 / 0.6) 0%, transparent 68%);
+  animation: nebulaDrift 132s ease-in-out -96s infinite alternate-reverse;
 }
 
+/* Star field */
 .star-layer {
   position: absolute;
-  inset: 0;
+  inset: -5%;
+  will-change: transform;
 }
+.star-layer-0 { animation: starParallax 240s linear infinite; }
+.star-layer-1 { animation: starParallax 170s linear infinite reverse; }
+.star-layer-2 { animation: starParallax 120s linear infinite; }
 .star {
   position: absolute;
   border-radius: 50%;
-  background: oklch(0.96 0.02 285 / 0.5);
-  box-shadow: 0 0 5px oklch(0.82 0.14 300 / 0.3);
 }
-.star-gold {
-  background: oklch(0.9 0.13 85 / 0.62);
-  box-shadow: 0 0 6px oklch(0.9 0.13 85 / 0.34);
+@keyframes starParallax {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(2.5%, -2%, 0); }
+}
+
+/* Shooting stars */
+.shooting-star {
+  position: absolute;
+  width: 140px;
+  height: 2px;
+  border-radius: 999px;
+  transform: rotate(var(--angle, 20deg));
+  background: linear-gradient(90deg, transparent, oklch(0.95 0.06 300 / 0.9), oklch(1 0 0 / 0.95));
+  filter: drop-shadow(0 0 6px oklch(0.85 0.16 300 / 0.8));
+  opacity: 0;
+  will-change: transform, opacity;
+}
+@keyframes shootAcross {
+  0%   { opacity: 0; transform: rotate(var(--angle, 20deg)) translate3d(0, 0, 0) scaleX(0.4); }
+  1%   { opacity: 0.95; }
+  7%   { opacity: 0.9; transform: rotate(var(--angle, 20deg)) translate3d(70vw, 0, 0) scaleX(1); }
+  10%  { opacity: 0; transform: rotate(var(--angle, 20deg)) translate3d(105vw, 0, 0) scaleX(0.6); }
+  100% { opacity: 0; transform: rotate(var(--angle, 20deg)) translate3d(105vw, 0, 0) scaleX(0.6); }
+}
+
+@keyframes nebulaDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+  50%  { opacity: 1; }
+  to   { transform: translate3d(4%, -3.5%, 0) scale(1.12); opacity: 0.95; }
+}
+
+@keyframes moteDrift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  12%  { opacity: 0.55; }
+  88%  { opacity: 0.4; }
+  100% { transform: translate3d(48px, -150px, 0); opacity: 0; }
 }
 
 
@@ -701,7 +773,7 @@ select:hover:not(:disabled) {
   background:
     linear-gradient(160deg, color-mix(in oklab, var(--acc) 13%, transparent) 0%, transparent 42%),
     linear-gradient(160deg, oklch(0.24 0.045 292 / 0.6) 0%, oklch(0.17 0.032 288 / 0.66) 100%);
-  backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.15);
   border: 1px solid color-mix(in oklab, var(--acc) 34%, transparent);
   box-shadow:
     inset 0 1px 0 0 oklch(1 0 0 / 0.07),
