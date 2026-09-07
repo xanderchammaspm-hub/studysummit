@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { SummiFlyby } from "@/components/SummiFlyby";
 
 /**
  * Living background: a slow purple nebula galaxy, a deep multi-layer star
@@ -9,7 +8,7 @@ import { SummiFlyby } from "@/components/SummiFlyby";
 export function AmbientBackground() {
   const motes = useMemo(
     () =>
-      Array.from({ length: 16 }, (_, i) => ({
+      Array.from({ length: 8 }, (_, i) => ({
         id: i,
         left: (i * 37.5) % 100,
         top: (i * 61.7) % 100,
@@ -43,9 +42,9 @@ export function AmbientBackground() {
         };
       });
     return [
-      make(180, 1, 0.9, 0.32, 7),
-      make(96, 211, 1.4, 0.5, 5.5),
-      make(38, 617, 2.3, 0.66, 4.5),
+      make(64, 1, 0.9, 0.32, 7),
+      make(40, 211, 1.4, 0.5, 5.5),
+      make(20, 617, 2.3, 0.66, 4.5),
     ];
   }, []);
 
@@ -90,8 +89,12 @@ export function AmbientBackground() {
                 height: s.size,
                 background: s.tint,
                 opacity: s.opacity,
-                boxShadow: `0 0 ${s.size * 3}px ${s.tint}`,
-                animation: `twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+                ...(li === 2
+                  ? {
+                      boxShadow: `0 0 ${s.size * 3}px ${s.tint}`,
+                      animation: `twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+                    }
+                  : null),
               }}
             />
           ))}
@@ -111,9 +114,6 @@ export function AmbientBackground() {
           }}
         />
       ))}
-
-      {/* Summi comets past every so often */}
-      <SummiFlyby />
 
       {/* Drifting motes */}
       <div className="absolute inset-0">
