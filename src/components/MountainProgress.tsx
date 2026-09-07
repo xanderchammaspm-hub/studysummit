@@ -339,7 +339,9 @@ export function MountainProgress() {
             transform: `translate(${mx}px, ${my}px)`,
             transition: "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
+          className="mtn-waypoint"
         >
+          <circle r="22" fill="url(#summit-glow)" opacity="0.75" />
           <circle
             r="15"
             fill="none"
@@ -349,12 +351,14 @@ export function MountainProgress() {
           />
           <circle
             r="8"
-            fill="oklch(0.9 0.14 82)"
-            stroke="oklch(0.98 0.05 82)"
+            fill="oklch(0.92 0.15 84)"
+            stroke="oklch(0.99 0.05 82)"
             strokeWidth="2"
-            style={{ filter: "drop-shadow(0 0 9px oklch(0.9 0.14 82 / 0.9))" }}
+            style={{ filter: "drop-shadow(0 0 10px oklch(0.9 0.14 82 / 0.95))" }}
           />
+          <circle r="3" fill="oklch(0.99 0.03 90)" opacity="0.9" />
         </g>
+
 
       </svg>
 
