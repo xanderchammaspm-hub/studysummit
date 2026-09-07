@@ -178,7 +178,14 @@ export function AtlasSectionChat({ storageKey }: { storageKey: string }) {
 }
 
 function AtlasAnswer({ content, streaming }: { content: string; streaming: boolean }) {
-  const live = streaming && !content.endsWith("\u0000");
-  const shown = usePacedText(content, live);
-  return <AtlasMarkdown caret={live && shown.length < content.length}>{shown || "…"}</AtlasMarkdown>;
+  const shown = usePacedText(content, streaming, 260);
+  if (streaming) {
+    return (
+      <div className="relative text-sm leading-relaxed text-foreground">
+        <span className="whitespace-pre-wrap">{shown || "…"}</span>
+        <span className="atlas-caret" />
+      </div>
+    );
+  }
+  return <AtlasMarkdown>{content || "…"}</AtlasMarkdown>;
 }
