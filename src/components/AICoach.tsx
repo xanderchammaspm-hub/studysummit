@@ -404,13 +404,19 @@ function ChatPanel() {
             </div>
           </div>
         ) : (
-          messages.map((m) => (
-            <Bubble
-              key={m.id}
-              msg={m}
-              thinking={busy && m.role === "assistant" && !m.content}
-            />
-          ))
+          (() => {
+            const lastAssistant = [...messages]
+              .reverse()
+              .find((m) => m.role === "assistant");
+            return messages.map((m) => (
+              <Bubble
+                key={m.id}
+                msg={m}
+                thinking={busy && m.role === "assistant" && !m.content}
+                streaming={busy && m.id === lastAssistant?.id && m.role === "assistant"}
+              />
+            ));
+          })()
         )}
       </div>
 
