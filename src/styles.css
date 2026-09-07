@@ -359,11 +359,6 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2.5px); }
 }
-@keyframes crownPulse {
-  0%, 100% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(1.06); opacity: 1; }
-}
-
 .mtn-aurora {
   transform-box: fill-box;
   transform-origin: center;
@@ -378,13 +373,11 @@
 @media (prefers-reduced-motion: reduce) {
   [style*="hudSpin"],
   [style*="hudScan"],
-  [style*="crownPulse"],
   .mtn-aurora,
   .mtn-waypoint > circle {
     animation: none !important;
   }
 }
-
 
 
 
