@@ -12,6 +12,7 @@ import {
   BellRing,
   ListChecks,
   NotebookPen,
+  Star,
 } from "lucide-react";
 import { TrafficLightIcon } from "@/components/TrafficLightIcon";
 import {
