@@ -46,6 +46,7 @@ export function PdfViewerDialog({ paperId, url, title, subject, onClose }: Props
   const [scale, setScale] = useState(1.1);
   const [failed, setFailed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollFrameRef = useRef<number | null>(null);
   const [width, setWidth] = useState(760);
 
   const [mode, setMode] = useState<Mode>("read");
@@ -80,16 +81,27 @@ export function PdfViewerDialog({ paperId, url, title, subject, onClose }: Props
   }, [panelOpen]);
 
   const onScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el || numPages === 0) return;
-    const pages = Array.from(el.querySelectorAll<HTMLElement>("[data-page]"));
-    const mid = el.scrollTop + el.clientHeight / 2;
-    let active = 1;
-    for (const p of pages) {
-      if (p.offsetTop <= mid) active = Number(p.dataset["page"]);
-    }
-    setCurrent(active);
+    if (scrollFrameRef.current !== null) return;
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      const el = scrollRef.current;
+      if (!el || numPages === 0) return;
+      const pages = Array.from(el.querySelectorAll<HTMLElement>("[data-page]"));
+      const mid = el.scrollTop + el.clientHeight / 2;
+      let active = 1;
+      for (const page of pages) {
+        if (page.offsetTop <= mid) active = Number(page.dataset["page"]);
+      }
+      setCurrent((previous) => (previous === active ? previous : active));
+    });
   }, [numPages]);
+
+  useEffect(
+    () => () => {
+      if (scrollFrameRef.current !== null) cancelAnimationFrame(scrollFrameRef.current);
+    },
+    [],
+  );
 
   const goToPage = useCallback((page: number) => {
     const el = scrollRef.current;
