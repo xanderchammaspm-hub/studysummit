@@ -72,7 +72,13 @@ function Home() {
   const subjects = useSubjects();
   const store = useAllSubjectStates();
   const quickLinks = useQuickLinks();
-  const current = subjects[activeYear] ?? [];
+  // Pinned subjects always float to the front of the grid.
+  const current = useMemo(() => {
+    const list = subjects[activeYear] ?? [];
+    return [...list].sort(
+      (a, b) => Number(!!store[b.id]?.pinned) - Number(!!store[a.id]?.pinned),
+    );
+  }, [subjects, activeYear, store]);
 
   // Warm the most-used routes once the home page is idle.
   useEffect(() => {
