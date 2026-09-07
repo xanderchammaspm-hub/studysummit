@@ -321,11 +321,12 @@ export function EnglishFormula() {
                   <div className="mt-3">
                     <AtlasSectionChat storageKey={`${mode.id}-short-answers`} />
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-6">
                     <RichEditor
                       storageKey={`${mode.id}-overview`}
                       placeholder="Working space — paste a question, draft a response…"
-                      minHeight={220}
+                      minHeight={380}
+                      resizable
                     />
                   </div>
                 </div>
