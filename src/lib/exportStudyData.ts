@@ -96,7 +96,7 @@ export function collectStructureBoards(): StructureRow[] {
 /* ------------------------ subject / term content ------------------------- */
 
 export type SubjectRow = {
-  kind: "paper" | "notes-doc" | "assessment" | "traffic-light" | "syllabus";
+  kind: "subject" | "paper" | "notes-doc" | "assessment" | "traffic-light" | "syllabus";
   year: string;
   subject: string;
   term: string;
