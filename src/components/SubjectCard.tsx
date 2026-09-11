@@ -159,9 +159,10 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         } as React.CSSProperties
       }
     >
-      <div className="subject-card-sheen w-full flex items-center justify-between gap-3 rounded-t-xl px-6 py-5 text-left group">
+      <div className="subject-card-sheen w-full rounded-t-xl px-6 py-5 text-left group">
 
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-3 min-w-0">
+
           <div className="relative">
 
             <button
@@ -231,15 +232,17 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 </div>
               </button>
             )}
-            <input
-              value={subject.tagline ?? ""}
-              onChange={(e) => updateSubject({ tagline: e.target.value })}
-              placeholder="Add a short note (e.g. Band 6 target)"
-              className="mt-1 w-full truncate rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-muted-foreground outline-none transition-colors hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
-            />
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <input
+          value={subject.tagline ?? ""}
+          onChange={(e) => updateSubject({ tagline: e.target.value })}
+          placeholder="Add a short note (e.g. Band 6 target)"
+          className="mt-3 w-full rounded-md border border-transparent bg-transparent px-1 py-1 text-xs text-muted-foreground outline-none transition-colors hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
+        />
+        <div className="mt-2 flex items-center gap-1 justify-end">
+
+
           {!editing && (
             <>
               <button
