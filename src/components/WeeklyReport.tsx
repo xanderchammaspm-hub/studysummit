@@ -249,28 +249,50 @@ export function WeeklyReport() {
                   {weekStats.hours.toFixed(1)}h
                 </span>
               </div>
-              <div className="flex h-24 items-end gap-1.5">
-                {weekStats.perDay.map((d, i) => (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-                    <div className="flex w-full flex-1 items-end">
-                      <div
-                        title={`${d.label}: ${d.hours.toFixed(1)}h`}
-                        className="w-full rounded-t-md transition-all duration-700 ease-out"
-                        style={{
-                          height: `${Math.max(4, (d.hours / weekStats.peak) * 100)}%`,
-                          animationDelay: `${i * 60}ms`,
-                          background:
-                            "linear-gradient(180deg, oklch(0.86 0.11 82 / 0.9), oklch(0.68 0.22 300))",
-                          boxShadow: d.hours > 0 ? "0 0 18px -8px var(--color-primary)" : "none",
-                        }}
-                      />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24">
+                  {[0, 50, 100].map((p) => (
+                    <div
+                      key={p}
+                      className="absolute inset-x-0 border-t border-dashed border-border/40"
+                      style={{ top: `${p}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="relative flex h-24 items-end gap-1.5">
+                  {weekStats.perDay.map((d, i) => (
+                    <div key={i} className="group flex flex-1 flex-col items-center gap-1.5">
+                      <div className="flex w-full flex-1 items-end">
+                        <div
+                          title={`${d.label}: ${d.hours.toFixed(1)}h`}
+                          className="w-full rounded-t-md transition-all duration-700 ease-out group-hover:brightness-125"
+                          style={{
+                            height: `${Math.max(3, (d.hours / weekStats.peak) * 100)}%`,
+                            transitionDelay: `${i * 60}ms`,
+                            background:
+                              d.hours > 0
+                                ? "linear-gradient(180deg, oklch(0.86 0.11 82 / 0.9), oklch(0.68 0.22 300))"
+                                : "linear-gradient(180deg, oklch(0.68 0.22 300 / 0.28), oklch(0.68 0.22 300 / 0.12))",
+                            boxShadow: d.hours > 0 ? "0 0 18px -8px var(--color-primary)" : "none",
+                          }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[9px] uppercase tracking-wider ${
+                          d.hours > 0 ? "text-foreground/80" : "text-muted-foreground"
+                        }`}
+                      >
+                        {d.label}
+                      </span>
                     </div>
-                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
-                      {d.label}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+              {weekStats.hours === 0 && (
+                <p className="mt-3 text-[11px] text-muted-foreground">
+                  No study hours logged yet this week — log one in the calendar to start the bars.
+                </p>
+              )}
             </div>
 
             {/* Score + active days */}
