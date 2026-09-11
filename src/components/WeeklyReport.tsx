@@ -21,6 +21,43 @@ function weekId(d = new Date()) {
 
 type Cached = { week: string; text: string; at: number };
 
+/** Tidy older reports that used emoji + [BRACKET CAPS] headings and metric tables. */
+function tidyReport(text: string) {
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let skippingTable = false;
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, "");
+    const heading = line.match(/^(#{1,6})\s*(.*)$/);
+    if (heading) {
+      let title = heading[2]
+        .replace(/^[^\p{L}\p{N}[]*/u, "")
+        .replace(/^\[(.*)\]$/, "$1")
+        .trim();
+      if (title === title.toUpperCase()) title = title.charAt(0) + title.slice(1).toLowerCase();
+      skippingTable = /week in numbers/i.test(title);
+      if (skippingTable) continue;
+      out.push(`### ${title}`);
+      continue;
+    }
+    if (skippingTable) {
+      if (line.trim() === "" || line.trim().startsWith("|")) continue;
+      skippingTable = false;
+    }
+    out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function relativeTime(at: number) {
+  const mins = Math.round((Date.now() - at) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.round(hrs / 24)}d ago`;
+}
+
 /** Sunday AI report on the week's study, auto-generated once each week. */
 export function WeeklyReport() {
   const run = useServerFn(weeklyReport);
@@ -166,7 +203,7 @@ export function WeeklyReport() {
               <h2 className="text-lg font-semibold gradient-text">AI Weekly Report</h2>
               <p className="text-xs text-muted-foreground">
                 {cached
-                  ? `${stale ? "Last report" : "This week"} · ${cached.week}`
+                  ? `${stale ? "Last report" : "This week"} · ${cached.week} · updated ${relativeTime(cached.at)}`
                   : "Builds itself every Sunday — or generate one now."}
               </p>
             </div>
@@ -212,28 +249,50 @@ export function WeeklyReport() {
                   {weekStats.hours.toFixed(1)}h
                 </span>
               </div>
-              <div className="flex h-24 items-end gap-1.5">
-                {weekStats.perDay.map((d, i) => (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-                    <div className="flex w-full flex-1 items-end">
-                      <div
-                        title={`${d.label}: ${d.hours.toFixed(1)}h`}
-                        className="w-full rounded-t-md transition-all duration-700 ease-out"
-                        style={{
-                          height: `${Math.max(4, (d.hours / weekStats.peak) * 100)}%`,
-                          animationDelay: `${i * 60}ms`,
-                          background:
-                            "linear-gradient(180deg, oklch(0.86 0.11 82 / 0.9), oklch(0.68 0.22 300))",
-                          boxShadow: d.hours > 0 ? "0 0 18px -8px var(--color-primary)" : "none",
-                        }}
-                      />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24">
+                  {[0, 50, 100].map((p) => (
+                    <div
+                      key={p}
+                      className="absolute inset-x-0 border-t border-dashed border-border/40"
+                      style={{ top: `${p}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="relative flex h-24 items-end gap-1.5">
+                  {weekStats.perDay.map((d, i) => (
+                    <div key={i} className="group flex flex-1 flex-col items-center gap-1.5">
+                      <div className="flex w-full flex-1 items-end">
+                        <div
+                          title={`${d.label}: ${d.hours.toFixed(1)}h`}
+                          className="w-full rounded-t-md transition-all duration-700 ease-out group-hover:brightness-125"
+                          style={{
+                            height: `${Math.max(3, (d.hours / weekStats.peak) * 100)}%`,
+                            transitionDelay: `${i * 60}ms`,
+                            background:
+                              d.hours > 0
+                                ? "linear-gradient(180deg, oklch(0.86 0.11 82 / 0.9), oklch(0.68 0.22 300))"
+                                : "linear-gradient(180deg, oklch(0.68 0.22 300 / 0.28), oklch(0.68 0.22 300 / 0.12))",
+                            boxShadow: d.hours > 0 ? "0 0 18px -8px var(--color-primary)" : "none",
+                          }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[9px] uppercase tracking-wider ${
+                          d.hours > 0 ? "text-foreground/80" : "text-muted-foreground"
+                        }`}
+                      >
+                        {d.label}
+                      </span>
                     </div>
-                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
-                      {d.label}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+              {weekStats.hours === 0 && (
+                <p className="mt-3 text-[11px] text-muted-foreground">
+                  No study hours logged yet this week — log one in the calendar to start the bars.
+                </p>
+              )}
             </div>
 
             {/* Score + active days */}
@@ -260,8 +319,8 @@ export function WeeklyReport() {
               </div>
             )}
             {cached ? (
-              <div className="rounded-xl border border-border/60 bg-background/30 p-5">
-                <AtlasMarkdown>{cached.text}</AtlasMarkdown>
+              <div className="report-body rounded-xl border border-primary/15 bg-background/35 p-5 shadow-[inset_0_1px_0_oklch(1_0_0_/_0.05)]">
+                <AtlasMarkdown>{tidyReport(cached.text)}</AtlasMarkdown>
               </div>
             ) : (
               !busy && (
