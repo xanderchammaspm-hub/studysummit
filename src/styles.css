@@ -900,6 +900,29 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 30px 80px -46px oklch(0.6 0.22 300 / 0.85);
 }
 
+/* Weekly report body: calm, scannable sections */
+.report-body :is(h1, h2, h3, h4) {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: oklch(0.86 0.09 300);
+  margin-top: 1.4rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid oklch(0.72 0.2 302 / 0.7);
+}
+.report-body > :first-child {
+  margin-top: 0;
+}
+.report-body :is(ul, ol) {
+  margin-top: 0.45rem;
+}
+.report-body li + li {
+  margin-top: 0.3rem;
+}
+.report-body li::marker {
+  color: oklch(0.86 0.11 82);
+}
+
 /* ---------- Interstellar gas dust ---------- */
 .gas-dust {
   position: absolute;
