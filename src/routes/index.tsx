@@ -291,7 +291,7 @@ function Home() {
           <br />
           <span className="text-foreground">Subject Library</span>
         </h1>
-        <p className="mt-5 max-w-xl mx-auto text-muted-foreground">
+        <p className="mt-5 max-w-2xl mx-auto text-lg text-muted-foreground">
           Study smarter. Track progress. Reach the summit.
         </p>
 
@@ -307,7 +307,7 @@ function Home() {
       </section>
 
       {/* Quick links */}
-      <div className="mx-auto w-full max-w-[1100px] px-6 sm:px-10 mb-6">
+      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 mb-6">
         <div className="glass-panel p-5">
           <div className="flex items-center gap-2 mb-3">
             <Link2 className="h-4 w-4 text-primary" />
@@ -325,7 +325,7 @@ function Home() {
 
       {/* Upcoming assessments */}
       {upcoming.length > 0 && (
-        <div className="mx-auto w-full max-w-[1100px] px-6 sm:px-10 mb-6 fade-in-up">
+        <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 mb-6 fade-in-up">
           <div className="glass-panel p-5 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
             <div className="flex items-center gap-2 mb-3">
@@ -403,7 +403,7 @@ function Home() {
 
 
       {/* Search */}
-      <div className="mx-auto w-full max-w-[1100px] px-6 sm:px-10">
+      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
@@ -874,7 +874,7 @@ function StatsPanel({
   ];
 
   return (
-    <div className="mt-10 mx-auto w-full max-w-[1100px] purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
+    <div className="mt-10 mx-auto w-full max-w-[1400px] purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <ProgressRing value={stats.progress} />
