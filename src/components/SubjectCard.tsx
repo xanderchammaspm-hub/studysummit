@@ -331,7 +331,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   <button
                     key={t}
                     onClick={() => setTerm(t)}
-                    className={`rounded-full border px-3.5 py-1.5 text-xs transition-all duration-300 ${
+                    className={`rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
                       active
                         ? "border-primary/70 bg-primary/25 text-foreground shadow-[0_0_14px_oklch(0.7_0.22_300/0.35)]"
                         : "border-border/70 bg-surface/50 text-muted-foreground hover:text-foreground hover:border-primary/40"
