@@ -208,9 +208,10 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
           </div>
           <SubjectColorPicker value={accent} onChange={(hex) => updateSubject({ color: hex })} />
           <div className="min-w-0 flex-1">
-            <div className="text-xs uppercase tracking-widest" style={{ color: `color-mix(in oklab, ${accent} 80%, white 5%)` }}>
+            <div className="text-[11px] uppercase tracking-[0.2em]" style={{ color: `color-mix(in oklab, ${accent} 80%, white 5%)` }}>
               {year} · Subject {index + 1}
             </div>
+
             {editing ? (
               <div className="flex items-center gap-1 mt-0.5">
                 <input
