@@ -319,8 +319,8 @@ export function WeeklyReport() {
               </div>
             )}
             {cached ? (
-              <div className="rounded-xl border border-border/60 bg-background/30 p-5">
-                <AtlasMarkdown>{cached.text}</AtlasMarkdown>
+              <div className="report-body rounded-xl border border-primary/15 bg-background/35 p-5 shadow-[inset_0_1px_0_oklch(1_0_0_/_0.05)]">
+                <AtlasMarkdown>{tidyReport(cached.text)}</AtlasMarkdown>
               </div>
             ) : (
               !busy && (
