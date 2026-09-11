@@ -159,9 +159,28 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         } as React.CSSProperties
       }
     >
-      <div className="subject-card-sheen w-full rounded-t-xl px-6 py-5 text-left group">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={(e) => {
+          const el = e.target as HTMLElement;
+          if (el.closest("button, a, input, [data-no-toggle]")) return;
+          setOpen((o) => !o);
+        }}
+        onKeyDown={(e) => {
+          if (editing) return;
+          if (e.key === "Enter" || e.key === " ") {
+            if ((e.target as HTMLElement).closest("button, a, input")) return;
+            e.preventDefault();
+            setOpen((o) => !o);
+          }
+        }}
+        aria-expanded={open}
+        className="subject-card-sheen w-full cursor-pointer rounded-t-xl px-7 py-6 text-left group select-none"
+      >
 
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-4 min-w-0">
+
 
           <div className="relative">
 
@@ -170,7 +189,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 e.stopPropagation();
                 setPickerOpen((o) => !o);
               }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-elevated text-lg hover:border-primary/70 transition-colors"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-elevated text-2xl transition-all duration-300 hover:border-primary/70 hover:scale-105"
               aria-label="Change emoji"
               title="Change emoji"
             >
@@ -189,9 +208,10 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
           </div>
           <SubjectColorPicker value={accent} onChange={(hex) => updateSubject({ color: hex })} />
           <div className="min-w-0 flex-1">
-            <div className="text-xs uppercase tracking-widest" style={{ color: `color-mix(in oklab, ${accent} 80%, white 5%)` }}>
+            <div className="text-[11px] uppercase tracking-[0.2em]" style={{ color: `color-mix(in oklab, ${accent} 80%, white 5%)` }}>
               {year} · Subject {index + 1}
             </div>
+
             {editing ? (
               <div className="flex items-center gap-1 mt-0.5">
                 <input
@@ -206,7 +226,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     }
                   }}
                   placeholder="Subject name"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-2 py-1 text-sm outline-none focus:border-primary"
+                  className="flex-1 rounded-lg border border-border bg-background/60 px-3 py-2 text-base outline-none focus:border-primary"
                 />
                 <button
                   onClick={commitRename}
@@ -217,11 +237,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => setOpen((o) => !o)}
-                className="min-w-0 text-left w-full"
-              >
-                <div className="truncate text-lg font-medium">
+              <div className="min-w-0 text-left w-full">
+                <div className="truncate text-2xl font-semibold tracking-tight">
                   {name.trim() ? (
                     <span className="text-foreground">{label}</span>
                   ) : (
@@ -230,7 +247,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             )}
           </div>
         </div>
@@ -238,49 +255,52 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
           value={subject.tagline ?? ""}
           onChange={(e) => updateSubject({ tagline: e.target.value })}
           placeholder="Add a short note (e.g. Band 6 target)"
-          className="mt-3 w-full rounded-md border border-transparent bg-transparent px-1 py-1 text-xs text-muted-foreground outline-none transition-colors hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
+          className="mt-4 w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors duration-300 hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
         />
-        <div className="mt-2 flex items-center gap-1 justify-end">
+
+        <div className="mt-4 flex items-center gap-2 justify-end">
 
 
           {!editing && (
             <>
               <button
                 onClick={() => updateSubject({ pinned: !subject.pinned })}
-                className={`p-1.5 transition-colors ${
+                className={`rounded-lg p-2.5 transition-all duration-300 hover:bg-white/5 ${
                   subject.pinned ? "text-yellow" : "text-muted-foreground hover:text-yellow"
                 }`}
                 aria-label={subject.pinned ? "Unpin subject" : "Pin subject"}
                 title={subject.pinned ? "Unpin subject" : "Pin to the top"}
               >
-                <Star className={`h-4 w-4 ${subject.pinned ? "fill-current" : ""}`} />
+                <Star className={`h-5 w-5 ${subject.pinned ? "fill-current" : ""}`} />
               </button>
               <button
                 onClick={() => {
                   setNameDraft(name);
                   setEditing(true);
                 }}
-                className="p-1.5 text-muted-foreground hover:text-primary"
+                className="rounded-lg p-2.5 text-muted-foreground transition-all duration-300 hover:bg-white/5 hover:text-primary"
                 aria-label="Rename"
                 title="Rename"
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-5 w-5" />
               </button>
               <button
                 onClick={removeSubject}
-                className="p-1.5 text-muted-foreground hover:text-destructive"
+                className="rounded-lg p-2.5 text-muted-foreground transition-all duration-300 hover:bg-white/5 hover:text-destructive"
                 aria-label="Delete subject"
                 title="Delete subject"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setOpen((o) => !o)}
                 aria-label={open ? "Collapse" : "Expand"}
-                className="p-1"
+                title={open ? "Collapse subject" : "Expand subject"}
+                className="ml-1 flex items-center gap-2 rounded-full border border-[color-mix(in_oklab,var(--acc)_45%,transparent)] bg-[color-mix(in_oklab,var(--acc)_14%,transparent)] px-4 py-2 text-sm text-foreground transition-all duration-300 hover:bg-[color-mix(in_oklab,var(--acc)_24%,transparent)]"
               >
+                <span>{open ? "Close" : "Open"}</span>
                 <ChevronDown
-                  className={`h-5 w-5 text-primary transition-transform duration-300 ${
+                  className={`h-5 w-5 text-primary transition-transform duration-500 ease-out ${
                     open ? "rotate-180" : ""
                   }`}
                 />
@@ -292,12 +312,13 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
       </div>
 
       <div
-        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-border/60 px-6 py-7 space-y-7">
+          <div className={`border-t border-border/60 px-7 py-8 space-y-8 transition-opacity duration-500 ${open ? "opacity-100" : "opacity-0"}`}>
+
 
             {/* Term switcher */}
             <div className="flex flex-wrap items-center gap-2">
@@ -310,7 +331,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                   <button
                     key={t}
                     onClick={() => setTerm(t)}
-                    className={`rounded-full border px-3.5 py-1.5 text-xs transition-all duration-300 ${
+                    className={`rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
                       active
                         ? "border-primary/70 bg-primary/25 text-foreground shadow-[0_0_14px_oklch(0.7_0.22_300/0.35)]"
                         : "border-border/70 bg-surface/50 text-muted-foreground hover:text-foreground hover:border-primary/40"

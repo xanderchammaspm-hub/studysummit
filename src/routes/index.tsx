@@ -56,7 +56,7 @@ function SectionFallback({ height = 240 }: { height?: number }) {
   return (
     <div
       aria-hidden
-      className="mx-auto max-w-6xl px-6"
+      className="mx-auto w-full max-w-[1600px] px-6 sm:px-10"
       style={{ minHeight: height }}
     />
   );
@@ -281,7 +281,7 @@ function Home() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 pt-16 pb-8 text-center fade-in-up">
+      <section className="mx-auto w-full max-w-[1600px] px-6 sm:px-10 pt-16 pb-8 text-center fade-in-up">
         <div className="inline-flex items-center gap-2 rounded-full purple-outline bg-surface/50 px-3 py-1 text-xs text-yellow">
           <Sparkles className="h-3.5 w-3.5 text-yellow" />
           Your personal study space
@@ -291,7 +291,7 @@ function Home() {
           <br />
           <span className="text-foreground">Subject Library</span>
         </h1>
-        <p className="mt-5 max-w-xl mx-auto text-muted-foreground">
+        <p className="mt-5 max-w-2xl mx-auto text-lg text-muted-foreground">
           Study smarter. Track progress. Reach the summit.
         </p>
 
@@ -307,7 +307,7 @@ function Home() {
       </section>
 
       {/* Quick links */}
-      <div className="mx-auto max-w-3xl px-6 mb-6">
+      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 mb-6">
         <div className="glass-panel p-5">
           <div className="flex items-center gap-2 mb-3">
             <Link2 className="h-4 w-4 text-primary" />
@@ -325,7 +325,7 @@ function Home() {
 
       {/* Upcoming assessments */}
       {upcoming.length > 0 && (
-        <div className="mx-auto max-w-3xl px-6 mb-6 fade-in-up">
+        <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 mb-6 fade-in-up">
           <div className="glass-panel p-5 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
             <div className="flex items-center gap-2 mb-3">
@@ -403,7 +403,7 @@ function Home() {
 
 
       {/* Search */}
-      <div className="mx-auto max-w-3xl px-6">
+      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
@@ -430,7 +430,7 @@ function Home() {
 
       {/* Mobile year switch */}
       {!searchResults && (
-        <div className="sm:hidden mx-auto max-w-6xl px-6 mt-6">
+        <div className="sm:hidden mx-auto w-full max-w-[1600px] px-6 sm:px-10 mt-6">
           <div className="flex items-center gap-1 rounded-full purple-outline p-1 bg-surface/60 w-full">
             {YEARS.map((y) => (
               <button
@@ -450,7 +450,7 @@ function Home() {
       )}
 
       {/* Main */}
-      <main className="mx-auto max-w-6xl px-6 py-12">
+      <main className="mx-auto w-full max-w-[1600px] px-6 sm:px-10 py-12">
         {searchResults ? (
           <SearchResults query={query} results={searchResults} />
         ) : (
@@ -488,7 +488,7 @@ function Home() {
             ) : (
               <div
                 key={activeYear}
-                className="grid items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3 stagger-children"
+                className="grid items-start gap-8 lg:grid-cols-2 2xl:grid-cols-3 stagger-children"
               >
                 {current.map((s, i) => (
                   <SubjectCard
@@ -540,7 +540,7 @@ function Home() {
 
 
       <footer className="border-t border-border/60 mt-8">
-        <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <div className="mx-auto w-full max-w-[1600px] px-6 sm:px-10 py-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <SummitLogo size={18} glow={false} />
           <span>Summit · Built for focused revision</span>
         </div>
@@ -874,7 +874,7 @@ function StatsPanel({
   ];
 
   return (
-    <div className="mt-10 mx-auto max-w-3xl purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
+    <div className="mt-10 mx-auto w-full max-w-[1400px] purple-outline rounded-2xl bg-card/60 backdrop-blur-sm p-5 sm:p-6 relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px shimmer-line" />
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <ProgressRing value={stats.progress} />
