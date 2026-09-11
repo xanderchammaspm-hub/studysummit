@@ -203,7 +203,7 @@ export function WeeklyReport() {
               <h2 className="text-lg font-semibold gradient-text">AI Weekly Report</h2>
               <p className="text-xs text-muted-foreground">
                 {cached
-                  ? `${stale ? "Last report" : "This week"} · ${cached.week}`
+                  ? `${stale ? "Last report" : "This week"} · ${cached.week} · updated ${relativeTime(cached.at)}`
                   : "Builds itself every Sunday — or generate one now."}
               </p>
             </div>
