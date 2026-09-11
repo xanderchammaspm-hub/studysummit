@@ -488,7 +488,7 @@ function Home() {
             ) : (
               <div
                 key={activeYear}
-                className="grid items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3 stagger-children"
+                className="grid items-start gap-8 lg:grid-cols-2 2xl:grid-cols-3 stagger-children"
               >
                 {current.map((s, i) => (
                   <SubjectCard
