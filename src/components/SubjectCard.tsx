@@ -237,11 +237,8 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => setOpen((o) => !o)}
-                className="min-w-0 text-left w-full"
-              >
-                <div className="truncate text-lg font-medium">
+              <div className="min-w-0 text-left w-full">
+                <div className="truncate text-2xl font-semibold tracking-tight">
                   {name.trim() ? (
                     <span className="text-foreground">{label}</span>
                   ) : (
@@ -250,7 +247,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             )}
           </div>
         </div>
@@ -258,8 +255,9 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
           value={subject.tagline ?? ""}
           onChange={(e) => updateSubject({ tagline: e.target.value })}
           placeholder="Add a short note (e.g. Band 6 target)"
-          className="mt-3 w-full rounded-md border border-transparent bg-transparent px-1 py-1 text-xs text-muted-foreground outline-none transition-colors hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
+          className="mt-4 w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors duration-300 hover:border-border/60 focus:border-[color-mix(in_oklab,var(--acc)_55%,transparent)] focus:bg-background/40"
         />
+
         <div className="mt-2 flex items-center gap-1 justify-end">
 
 
