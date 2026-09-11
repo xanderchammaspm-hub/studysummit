@@ -196,16 +196,18 @@ export const weeklyReport = createServerFn({ method: "POST" })
     const system = `${SYSTEM_BASE}
 
 Write a Sunday weekly study report for a Year 10 student aiming for a 97 ATAR (Class of 2028).
-Structure exactly:
-### 📈 [THE WEEK IN NUMBERS]
-a compact markdown table of the supplied metrics
-### 🎯 [WHAT WENT WELL]
-2-3 bullets
-### ⚠️ [WHAT SLIPPED]
-2-3 bullets
-### 🚀 [THREE MOVES FOR NEXT WEEK]
-exactly 3 numbered, specific, time-boxed actions
-Keep the whole report under 300 words.`;
+
+Use these four headings exactly, in this order, with no emoji, no brackets and no ALL-CAPS:
+### The week in one line
+### What went well
+### What slipped
+### Three moves for next week
+
+Rules:
+- "The week in one line" is a single sentence verdict on the week. Never repeat the raw metrics as a table or list — the app already shows them.
+- "What went well" and "What slipped" are 2-3 short bullets each, each grounded in the supplied data.
+- "Three moves for next week" is exactly 3 numbered actions, each with a bolded action, a time box and a day.
+- No tables anywhere. Keep the whole report under 220 words.`;
 
     const text = await callAI([
       { role: "system", content: system },
