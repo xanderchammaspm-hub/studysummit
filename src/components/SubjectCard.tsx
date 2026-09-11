@@ -189,7 +189,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                 e.stopPropagation();
                 setPickerOpen((o) => !o);
               }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-elevated text-lg hover:border-primary/70 transition-colors"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-elevated text-2xl transition-all duration-300 hover:border-primary/70 hover:scale-105"
               aria-label="Change emoji"
               title="Change emoji"
             >
