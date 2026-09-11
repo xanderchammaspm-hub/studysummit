@@ -159,9 +159,28 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
         } as React.CSSProperties
       }
     >
-      <div className="subject-card-sheen w-full rounded-t-xl px-6 py-5 text-left group">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={(e) => {
+          const el = e.target as HTMLElement;
+          if (el.closest("button, a, input, [data-no-toggle]")) return;
+          setOpen((o) => !o);
+        }}
+        onKeyDown={(e) => {
+          if (editing) return;
+          if (e.key === "Enter" || e.key === " ") {
+            if ((e.target as HTMLElement).closest("button, a, input")) return;
+            e.preventDefault();
+            setOpen((o) => !o);
+          }
+        }}
+        aria-expanded={open}
+        className="subject-card-sheen w-full cursor-pointer rounded-t-xl px-7 py-6 text-left group select-none"
+      >
 
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-4 min-w-0">
+
 
           <div className="relative">
 
