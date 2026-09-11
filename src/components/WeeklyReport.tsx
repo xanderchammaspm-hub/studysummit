@@ -21,6 +21,43 @@ function weekId(d = new Date()) {
 
 type Cached = { week: string; text: string; at: number };
 
+/** Tidy older reports that used emoji + [BRACKET CAPS] headings and metric tables. */
+function tidyReport(text: string) {
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let skippingTable = false;
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, "");
+    const heading = line.match(/^(#{1,6})\s*(.*)$/);
+    if (heading) {
+      let title = heading[2]
+        .replace(/^[^\p{L}\p{N}[]*/u, "")
+        .replace(/^\[(.*)\]$/, "$1")
+        .trim();
+      if (title === title.toUpperCase()) title = title.charAt(0) + title.slice(1).toLowerCase();
+      skippingTable = /week in numbers/i.test(title);
+      if (skippingTable) continue;
+      out.push(`### ${title}`);
+      continue;
+    }
+    if (skippingTable) {
+      if (line.trim() === "" || line.trim().startsWith("|")) continue;
+      skippingTable = false;
+    }
+    out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function relativeTime(at: number) {
+  const mins = Math.round((Date.now() - at) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.round(hrs / 24)}d ago`;
+}
+
 /** Sunday AI report on the week's study, auto-generated once each week. */
 export function WeeklyReport() {
   const run = useServerFn(weeklyReport);
