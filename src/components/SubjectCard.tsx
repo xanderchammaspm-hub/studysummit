@@ -226,7 +226,7 @@ export function SubjectCard({ index, id, name, year, defaultOpen }: Props) {
                     }
                   }}
                   placeholder="Subject name"
-                  className="flex-1 rounded-md border border-border bg-background/60 px-2 py-1 text-sm outline-none focus:border-primary"
+                  className="flex-1 rounded-lg border border-border bg-background/60 px-3 py-2 text-base outline-none focus:border-primary"
                 />
                 <button
                   onClick={commitRename}
