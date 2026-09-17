@@ -26,6 +26,8 @@ import {
   addSubject,
   useQuickLinks,
   updateQuickLink,
+  addQuickLink,
+  removeQuickLink,
   type YearKey,
 } from "@/hooks/useSubjectStore";
 
