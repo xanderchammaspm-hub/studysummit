@@ -322,6 +322,14 @@ function Home() {
               <QuickLinkTile key={l.id} link={l} />
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => addQuickLink("New link", "")}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border/70 px-3 py-2 text-xs font-medium text-muted-foreground hover:border-primary/70 hover:text-primary transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add a quick link
+          </button>
         </div>
       </div>
 
