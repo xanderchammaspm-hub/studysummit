@@ -2,7 +2,7 @@ import { normalizeUrl } from "@/lib/utils";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
+import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Trash2, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 const AICoach = lazyWithRetry(() => import("@/components/AICoach").then((m) => ({ default: m.AICoach })));
 const MountainProgress = lazyWithRetry(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
