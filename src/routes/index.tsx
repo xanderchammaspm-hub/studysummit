@@ -733,10 +733,19 @@ function QuickLinkTile({
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(link.url);
+  const [labelDraft, setLabelDraft] = useState(link.label);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const startEdit = () => {
+    setDraft(link.url);
+    setLabelDraft(link.label);
+    setEditing(true);
+  };
   const save = () => {
-    updateQuickLink(link.id, { url: draft.trim() });
+    updateQuickLink(link.id, {
+      url: draft.trim(),
+      label: labelDraft.trim() || "Untitled link",
+    });
     setEditing(false);
   };
   const handleFile = (file: File) => {
