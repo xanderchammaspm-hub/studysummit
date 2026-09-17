@@ -2,7 +2,7 @@ import { normalizeUrl } from "@/lib/utils";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, BookOpen, FileText, BellRing } from "lucide-react";
+import { Sparkles, Search, X, Plus, ExternalLink, Link2, Pencil, Check, Trash2, BookOpen, FileText, BellRing } from "lucide-react";
 import { SubjectCard, StatusDot } from "@/components/SubjectCard";
 const AICoach = lazyWithRetry(() => import("@/components/AICoach").then((m) => ({ default: m.AICoach })));
 const MountainProgress = lazyWithRetry(() => import("@/components/MountainProgress").then((m) => ({ default: m.MountainProgress })));
@@ -26,6 +26,8 @@ import {
   addSubject,
   useQuickLinks,
   updateQuickLink,
+  addQuickLink,
+  removeQuickLink,
   type YearKey,
 } from "@/hooks/useSubjectStore";
 
@@ -320,6 +322,14 @@ function Home() {
               <QuickLinkTile key={l.id} link={l} />
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => addQuickLink("New link", "")}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border/70 px-3 py-2 text-xs font-medium text-muted-foreground hover:border-primary/70 hover:text-primary transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add a quick link
+          </button>
         </div>
       </div>
 
@@ -723,10 +733,19 @@ function QuickLinkTile({
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(link.url);
+  const [labelDraft, setLabelDraft] = useState(link.label);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const startEdit = () => {
+    setDraft(link.url);
+    setLabelDraft(link.label);
+    setEditing(true);
+  };
   const save = () => {
-    updateQuickLink(link.id, { url: draft.trim() });
+    updateQuickLink(link.id, {
+      url: draft.trim(),
+      label: labelDraft.trim() || "Untitled link",
+    });
     setEditing(false);
   };
   const handleFile = (file: File) => {
@@ -780,52 +799,70 @@ function QuickLinkTile({
         }}
       />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          {link.url ? (
-            <a
-              href={normalizeUrl(link.url)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
-            >
-              {link.label}
-            </a>
-          ) : (
-            <div className="text-sm font-medium text-foreground truncate">{link.label}</div>
-          )}
-          {link.iconUrl && (
-            <button
-              onClick={() => updateQuickLink(link.id, { iconUrl: undefined })}
-              className="text-[10px] text-muted-foreground hover:text-destructive"
-              title="Reset icon"
-            >
-              reset
-            </button>
-          )}
-        </div>
         {editing ? (
-          <input
-            autoFocus
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && save()}
-            onBlur={save}
-            placeholder="Paste link…"
-            className="w-full bg-transparent text-xs text-muted-foreground outline-none border-b border-primary/40 focus:border-primary"
-          />
-        ) : link.url ? (
-          <a
-            href={normalizeUrl(link.url)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-muted-foreground hover:text-primary truncate block"
-          >
-            {link.url}
-          </a>
-        ) : (
-          <div className="text-xs text-muted-foreground/60 italic">
-            No link yet — click edit to add
+          <div className="space-y-1">
+            <input
+              autoFocus
+              value={labelDraft}
+              onChange={(e) => setLabelDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") save();
+                if (e.key === "Escape") setEditing(false);
+              }}
+              placeholder="Name"
+              className="w-full bg-transparent text-sm font-medium text-foreground outline-none border-b border-primary/40 focus:border-primary"
+            />
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") save();
+                if (e.key === "Escape") setEditing(false);
+              }}
+              placeholder="Paste link…"
+              className="w-full bg-transparent text-xs text-muted-foreground outline-none border-b border-primary/40 focus:border-primary"
+            />
           </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              {link.url ? (
+                <a
+                  href={normalizeUrl(link.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <div className="text-sm font-medium text-foreground truncate">{link.label}</div>
+              )}
+              {link.iconUrl && (
+                <button
+                  onClick={() => updateQuickLink(link.id, { iconUrl: undefined })}
+                  className="text-[10px] text-muted-foreground hover:text-destructive"
+                  title="Reset icon"
+                >
+                  reset
+                </button>
+              )}
+            </div>
+            {link.url ? (
+              <a
+                href={normalizeUrl(link.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-primary truncate block"
+              >
+                {link.url}
+              </a>
+            ) : (
+              <div className="text-xs text-muted-foreground/60 italic">
+                No link yet — click edit to add
+              </div>
+            )}
+          </>
         )}
       </div>
       {link.url && !editing && (
@@ -841,11 +878,21 @@ function QuickLinkTile({
         </a>
       )}
       <button
-        onClick={() => (editing ? save() : setEditing(true))}
+        onClick={() => (editing ? save() : startEdit())}
         className="text-muted-foreground hover:text-primary"
         aria-label={editing ? "Save" : "Edit"}
       >
         {editing ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+      </button>
+      <button
+        onClick={() => {
+          if (confirm(`Remove "${link.label}"?`)) removeQuickLink(link.id);
+        }}
+        className="text-muted-foreground hover:text-destructive"
+        aria-label="Remove link"
+        title="Remove link"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
       </button>
     </div>
   );
