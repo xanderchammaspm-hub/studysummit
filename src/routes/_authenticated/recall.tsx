@@ -90,7 +90,7 @@ function RecallPage() {
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border border-primary/35 bg-card/60 p-1.5 backdrop-blur-md shadow-[0_0_24px_-6px_var(--primary)]">
-              <RecallMascot mood="idle" size={44} />
+              <RecallMascot mood="idle" size={44} still />
             </div>
             <div>
               <h1 className="text-xl font-semibold tracking-tight gradient-text">Quick Recall</h1>

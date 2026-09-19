@@ -36,6 +36,7 @@ export function RecallMascot({
   className = "",
   label,
   interactive = true,
+  still = false,
 }: {
   mood?: MascotMood;
   size?: number;
@@ -44,9 +45,18 @@ export function RecallMascot({
   label?: string;
   /** Set false to disable the click-to-spin easter egg. */
   interactive?: boolean;
+  /** Stationary logo mode: no float, no sparks, no click interaction. */
+  still?: boolean;
 }) {
+  const canInteract = interactive && !still;
   const glow = GLOW[mood];
-  const sparks = mood === "celebrate" || mood === "happy" ? 5 : mood === "thinking" ? 3 : 0;
+  const sparks = still
+    ? 0
+    : mood === "celebrate" || mood === "happy"
+      ? 5
+      : mood === "thinking"
+        ? 3
+        : 0;
 
   const [burst, setBurst] = useState<Burst | null>(null);
   const seq = useRef(0);
@@ -75,14 +85,14 @@ export function RecallMascot({
   return (
     <div className={`relative inline-flex flex-col items-center ${className}`}>
       <div
-        className={`relative ${interactive ? "cursor-pointer select-none" : ""}`}
+        className={`relative ${canInteract ? "cursor-pointer select-none" : ""}`}
         style={{ width: size, height: size * 1.16 }}
-        onClick={poke}
-        role={interactive ? "button" : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        aria-label={interactive ? "Poke Summi" : undefined}
+        onClick={canInteract ? poke : undefined}
+        role={canInteract ? "button" : undefined}
+        tabIndex={canInteract ? 0 : undefined}
+        aria-label={canInteract ? "Poke Summi" : undefined}
         onKeyDown={(e) => {
-          if (interactive && (e.key === "Enter" || e.key === " ")) {
+          if (canInteract && (e.key === "Enter" || e.key === " ")) {
             e.preventDefault();
             poke();
           }
@@ -103,7 +113,7 @@ export function RecallMascot({
             background: `radial-gradient(circle at 50% 55%, color-mix(in oklab, var(--primary) ${Math.round(
               glow * 100,
             )}%, transparent), transparent 70%)`,
-            animation: "mascotGlow 3.4s ease-in-out infinite",
+            animation: still ? undefined : "mascotGlow 3.4s ease-in-out infinite",
           }}
         />
 
@@ -126,7 +136,7 @@ export function RecallMascot({
           className="absolute inset-x-0 top-0"
           style={{
             height: size,
-            animation: burst ? undefined : MOTION[mood],
+            animation: burst || still ? undefined : MOTION[mood],
           }}
           key={burst ? `spin-${burst.id}` : `pose-${mood}`}
         >
@@ -151,7 +161,9 @@ export function RecallMascot({
                 style={{
                   animation: burst
                     ? `mascotJoySquash ${0.62 * burst.spins + 0.48}s ease-in-out both`
-                    : "mascotBreathe 3.2s ease-in-out infinite",
+                    : still
+                      ? undefined
+                      : "mascotBreathe 3.2s ease-in-out infinite",
                 }}
               >
                 {/* (the artwork already has his arms — no extra nubs) */}
@@ -224,7 +236,7 @@ export function RecallMascot({
           className="pointer-events-none absolute inset-x-[22%] bottom-0 h-1.5 rounded-full blur-[3px]"
           style={{
             background: "color-mix(in oklab, var(--primary) 60%, transparent)",
-            animation: "mascotShadow 4.6s ease-in-out infinite",
+            animation: still ? undefined : "mascotShadow 4.6s ease-in-out infinite",
           }}
         />
       </div>
