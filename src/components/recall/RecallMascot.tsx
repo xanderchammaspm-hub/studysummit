@@ -236,7 +236,7 @@ export function RecallMascot({
           className="pointer-events-none absolute inset-x-[22%] bottom-0 h-1.5 rounded-full blur-[3px]"
           style={{
             background: "color-mix(in oklab, var(--primary) 60%, transparent)",
-            animation: "mascotShadow 4.6s ease-in-out infinite",
+            animation: still ? undefined : "mascotShadow 4.6s ease-in-out infinite",
           }}
         />
       </div>
