@@ -50,7 +50,13 @@ export function RecallMascot({
 }) {
   const canInteract = interactive && !still;
   const glow = GLOW[mood];
-  const sparks = mood === "celebrate" || mood === "happy" ? 5 : mood === "thinking" ? 3 : 0;
+  const sparks = still
+    ? 0
+    : mood === "celebrate" || mood === "happy"
+      ? 5
+      : mood === "thinking"
+        ? 3
+        : 0;
 
   const [burst, setBurst] = useState<Burst | null>(null);
   const seq = useRef(0);
