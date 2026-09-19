@@ -1,14 +1,31 @@
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 /**
  * Living background: a slow purple nebula galaxy, a deep multi-layer star
  * field, drifting glow motes and occasional shooting stars.
  * Purely decorative — never interactive, always behind the page content.
  */
+function subscribe() {
+  return () => {};
+}
+
+/** Weak devices (few cores / little memory) get a plain gradient instead. */
+function useLowPower() {
+  return useSyncExternalStore(
+    subscribe,
+    () => {
+      const nav = navigator as Navigator & { deviceMemory?: number };
+      return (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+    },
+    () => false,
+  );
+}
+
 export function AmbientBackground() {
+  const lowPower = useLowPower();
   const motes = useMemo(
     () =>
-      Array.from({ length: 8 }, (_, i) => ({
+      Array.from({ length: 4 }, (_, i) => ({
         id: i,
         left: (i * 37.5) % 100,
         top: (i * 61.7) % 100,
@@ -42,9 +59,9 @@ export function AmbientBackground() {
         };
       });
     return [
-      make(64, 1, 0.9, 0.32, 7),
-      make(40, 211, 1.4, 0.5, 5.5),
-      make(20, 617, 2.3, 0.66, 4.5),
+      make(24, 1, 0.9, 0.32, 7),
+      make(16, 211, 1.4, 0.5, 5.5),
+      make(10, 617, 2.3, 0.66, 4.5),
     ];
   }, []);
 
@@ -53,13 +70,18 @@ export function AmbientBackground() {
       [
         { id: 0, top: 8, left: -10, delay: 3, dur: 2.2, every: 13, angle: 18 },
         { id: 1, top: 26, left: -18, delay: 7, dur: 2.8, every: 17, angle: 26 },
-        { id: 2, top: 52, left: -12, delay: 12, dur: 2.4, every: 21, angle: 12 },
-        { id: 3, top: 70, left: -20, delay: 18, dur: 3, every: 27, angle: 22 },
-        { id: 4, top: 38, left: -14, delay: 24, dur: 2.6, every: 33, angle: 8 },
-        { id: 5, top: 84, left: -16, delay: 31, dur: 2.9, every: 39, angle: 30 },
       ] as const,
     [],
   );
+
+  if (lowPower) {
+    return (
+      <div aria-hidden className="ambient-root">
+        <div className="nebula nebula-a" />
+        <div className="nebula nebula-b" />
+      </div>
+    );
+  }
 
   return (
     <div aria-hidden className="ambient-root">
