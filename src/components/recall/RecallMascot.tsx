@@ -36,6 +36,7 @@ export function RecallMascot({
   className = "",
   label,
   interactive = true,
+  still = false,
 }: {
   mood?: MascotMood;
   size?: number;
@@ -44,7 +45,10 @@ export function RecallMascot({
   label?: string;
   /** Set false to disable the click-to-spin easter egg. */
   interactive?: boolean;
+  /** Stationary logo mode: no float, no sparks, no click interaction. */
+  still?: boolean;
 }) {
+  const canInteract = interactive && !still;
   const glow = GLOW[mood];
   const sparks = mood === "celebrate" || mood === "happy" ? 5 : mood === "thinking" ? 3 : 0;
 
