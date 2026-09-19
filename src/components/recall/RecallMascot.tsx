@@ -136,7 +136,7 @@ export function RecallMascot({
           className="absolute inset-x-0 top-0"
           style={{
             height: size,
-            animation: burst ? undefined : MOTION[mood],
+            animation: burst || still ? undefined : MOTION[mood],
           }}
           key={burst ? `spin-${burst.id}` : `pose-${mood}`}
         >
@@ -161,7 +161,9 @@ export function RecallMascot({
                 style={{
                   animation: burst
                     ? `mascotJoySquash ${0.62 * burst.spins + 0.48}s ease-in-out both`
-                    : "mascotBreathe 3.2s ease-in-out infinite",
+                    : still
+                      ? undefined
+                      : "mascotBreathe 3.2s ease-in-out infinite",
                 }}
               >
                 {/* (the artwork already has his arms — no extra nubs) */}
