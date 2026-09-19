@@ -113,7 +113,7 @@ export function RecallMascot({
             background: `radial-gradient(circle at 50% 55%, color-mix(in oklab, var(--primary) ${Math.round(
               glow * 100,
             )}%, transparent), transparent 70%)`,
-            animation: "mascotGlow 3.4s ease-in-out infinite",
+            animation: still ? undefined : "mascotGlow 3.4s ease-in-out infinite",
           }}
         />
 
