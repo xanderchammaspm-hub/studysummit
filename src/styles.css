@@ -526,7 +526,7 @@ button:disabled,
 @utility glass-panel {
   background:
     linear-gradient(160deg, oklch(0.24 0.045 292 / 0.72) 0%, oklch(0.18 0.035 288 / 0.6) 100%);
-  backdrop-filter: blur(11px) saturate(1.12);
+  backdrop-filter: blur(8px) saturate(1.1);
   border: 1px solid oklch(0.6 0.18 298 / 0.28);
   box-shadow:
     inset 0 1px 0 0 oklch(0.95 0.05 300 / 0.08),
@@ -582,13 +582,12 @@ button:disabled,
   height: 72vh;
   pointer-events: none;
   z-index: 0;
-  filter: blur(96px);
-  opacity: 0.42;
+  filter: blur(64px);
+  opacity: 0.38;
   background:
     radial-gradient(40% 60% at 20% 30%, oklch(0.55 0.22 300 / 0.5), transparent 60%),
     radial-gradient(35% 55% at 80% 20%, oklch(0.5 0.22 320 / 0.38), transparent 60%),
     radial-gradient(30% 50% at 50% 80%, oklch(0.65 0.12 82 / 0.12), transparent 60%);
-  animation: auroraDrift 38s ease-in-out infinite alternate;
 }
 
 /* Global interaction feel */
@@ -642,7 +641,7 @@ select:hover:not(:disabled) {
 
 /* Toasts pick up the theme */
 [data-sonner-toast] {
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(10px);
   border: 1px solid oklch(0.6 0.18 298 / 0.35) !important;
   box-shadow: 0 20px 60px -30px oklch(0.5 0.2 295 / 0.85) !important;
 }
@@ -670,8 +669,7 @@ select:hover:not(:disabled) {
 .nebula {
   position: absolute;
   border-radius: 50%;
-  filter: blur(64px);
-  will-change: transform;
+  filter: blur(44px);
   transform: translateZ(0);
 }
 .nebula-a {
@@ -680,7 +678,6 @@ select:hover:not(:disabled) {
   width: 92vw;
   height: 92vw;
   background: radial-gradient(circle, oklch(0.64 0.3 300 / 0.95) 0%, oklch(0.5 0.26 310 / 0.4) 42%, transparent 70%);
-  animation: nebulaDrift 96s ease-in-out infinite alternate;
 }
 .nebula-b {
   top: 0%;
@@ -688,7 +685,6 @@ select:hover:not(:disabled) {
   width: 84vw;
   height: 84vw;
   background: radial-gradient(circle, oklch(0.58 0.3 328 / 0.85) 0%, oklch(0.45 0.24 330 / 0.35) 44%, transparent 70%);
-  animation: nebulaDrift 122s ease-in-out -20s infinite alternate-reverse;
 }
 .nebula-c {
   bottom: -32%;
@@ -696,7 +692,6 @@ select:hover:not(:disabled) {
   width: 96vw;
   height: 74vw;
   background: radial-gradient(circle, oklch(0.72 0.16 84 / 0.28) 0%, transparent 66%);
-  animation: nebulaDrift 148s ease-in-out -46s infinite alternate;
 }
 .nebula-d {
   top: 26%;
@@ -704,7 +699,6 @@ select:hover:not(:disabled) {
   width: 72vw;
   height: 62vw;
   background: radial-gradient(circle, oklch(0.6 0.28 268 / 0.7) 0%, transparent 68%);
-  animation: nebulaDrift 168s ease-in-out -70s infinite alternate;
 }
 .nebula-e {
   bottom: 6%;
@@ -712,7 +706,6 @@ select:hover:not(:disabled) {
   width: 58vw;
   height: 52vw;
   background: radial-gradient(circle, oklch(0.55 0.26 288 / 0.6) 0%, transparent 68%);
-  animation: nebulaDrift 132s ease-in-out -96s infinite alternate-reverse;
 }
 
 /* Star field */
@@ -721,9 +714,7 @@ select:hover:not(:disabled) {
   inset: -5%;
   will-change: transform;
 }
-.star-layer-0 { animation: starParallax 240s linear infinite; }
-.star-layer-1 { animation: starParallax 170s linear infinite reverse; }
-.star-layer-2 { animation: starParallax 120s linear infinite; }
+.star-layer-1 { animation: starParallax 200s linear infinite; }
 .star {
   position: absolute;
   border-radius: 50%;
@@ -822,7 +813,7 @@ select:hover:not(:disabled) {
   background:
     linear-gradient(160deg, color-mix(in oklab, var(--acc) 13%, transparent) 0%, transparent 42%),
     linear-gradient(160deg, oklch(0.24 0.045 292 / 0.6) 0%, oklch(0.17 0.032 288 / 0.66) 100%);
-  backdrop-filter: blur(11px) saturate(1.12);
+  backdrop-filter: blur(8px) saturate(1.1);
   border: 1px solid color-mix(in oklab, var(--acc) 34%, transparent);
   box-shadow:
     inset 0 1px 0 0 oklch(1 0 0 / 0.07),
@@ -928,21 +919,18 @@ input[type="range"]::-moz-range-thumb {
   position: absolute;
   inset: -10%;
   border-radius: 40%;
-  filter: blur(48px);
-  opacity: 0.45;
-  will-change: transform, opacity;
+  filter: blur(34px);
+  opacity: 0.4;
 }
 .gas-dust-0 {
   background:
     radial-gradient(40% 30% at 20% 30%, oklch(0.7 0.2 300 / 0.35), transparent 70%),
     radial-gradient(30% 26% at 70% 60%, oklch(0.66 0.22 328 / 0.28), transparent 72%);
-  animation: dustDrift 190s ease-in-out infinite alternate;
 }
 .gas-dust-1 {
   background:
     radial-gradient(34% 26% at 60% 20%, oklch(0.62 0.24 268 / 0.3), transparent 70%),
     radial-gradient(28% 22% at 30% 75%, oklch(0.8 0.13 84 / 0.16), transparent 72%);
-  animation: dustDrift 240s ease-in-out -60s infinite alternate-reverse;
 }
 @keyframes dustDrift {
   from { transform: translate3d(-2%, 1%, 0) scale(1); opacity: 0.35; }
