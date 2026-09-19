@@ -85,14 +85,14 @@ export function RecallMascot({
   return (
     <div className={`relative inline-flex flex-col items-center ${className}`}>
       <div
-        className={`relative ${interactive ? "cursor-pointer select-none" : ""}`}
+        className={`relative ${canInteract ? "cursor-pointer select-none" : ""}`}
         style={{ width: size, height: size * 1.16 }}
-        onClick={poke}
-        role={interactive ? "button" : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        aria-label={interactive ? "Poke Summi" : undefined}
+        onClick={canInteract ? poke : undefined}
+        role={canInteract ? "button" : undefined}
+        tabIndex={canInteract ? 0 : undefined}
+        aria-label={canInteract ? "Poke Summi" : undefined}
         onKeyDown={(e) => {
-          if (interactive && (e.key === "Enter" || e.key === " ")) {
+          if (canInteract && (e.key === "Enter" || e.key === " ")) {
             e.preventDefault();
             poke();
           }
